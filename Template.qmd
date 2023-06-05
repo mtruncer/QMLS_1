@@ -1,0 +1,25 @@
+---
+title: "Template Title"
+subtitle: "Subtitle"
+author:
+  - Elizabeth King
+  - Kevin Middleton
+format:
+  revealjs:
+    theme: [default, custom.scss]
+    standalone: true
+    self-contained: true
+    logo: QMLS_Logo.png
+    slide-number: true
+    show-slide-number: all
+code-annotations: hover
+bibliography: QMLS_Bibliography.bib
+csl: evolution.csl
+---
+
+## Slide
+
+## References
+
+::: {#refs}
+:::
