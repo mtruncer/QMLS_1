@@ -1,0 +1,206 @@
+---
+title: "Data Organization"
+subtitle: "Quantitative Methods in Life Sciences"
+author:
+  - Elizabeth King
+  - Kevin Middleton
+format:
+  revealjs:
+    theme: [default, custom.scss]
+    standalone: true
+    self-contained: true
+    logo: QMLS_Logo.png
+    slide-number: true
+    show-slide-number: all
+code-annotations: hover
+bibliography: QMLS_Bibliography.bib
+csl: evolution.csl
+---
+
+
+## Data Organizing - File Structure
+
+For each R project/manuscript, you will want to have a set of folders. Here is a suggestion, but there are many options.
+
+\bigskip
+
+- /ProjectName
+  - /RawData
+  - /ProcessedData
+  - /Analysis
+  - /Plots
+  - ReadMe
+  - ProjectNotes
+
+## Data Organizing - File Structure {.smaller}
+
+  - Raw Data
+    - raw data (read-only, pristine backup, not to be touched)
+  - Processed Data
+    - tidy data (intermediate and final R datasets)
+    - any dataset produced by a script
+  - Analysis
+  - Plots
+  - ReadMe
+    - metadata
+    - instructions for reproducing all analyses and plots
+  - ProjectNotes
+    - list the driving questions and purposes of the project 
+    - entries and notes for each time you work on the analysis
+
+
+*Note: Your code will stay cleaner if you use many smaller scripts, e.g. one for all analyses, one for all figures **OR** one for each analysis and the associated figures*
+
+
+## Data Storing - General Tips 
+
+- Think about how to store your data _before_ you start
+    - Sometimes it is difficult to change things later
+- Keep everything
+    - Disk space is cheap
+    - Dropbox / Box / Google Drive / Sync, etc.
+    - Iterate file names (or -- better -- use version control)
+- Create a data dictionary in your metadata folder (explanations of what your columns represent)
+    - "Body mass in grams, measured to nearest 0.1 g."
+- Be consistent
+    - File names, variable names, file formats, etc.
+
+## Data Storing - Guidelines for Data Files {.smaller}
+
+FIXME ref
+
+1. Store data in rectangular format
+    - **No empty cells**, no merged cells, repeat values if necessary
+1. Use only one header row
+    - Curse software that outputs more than one header row
+1. R is case sensitive so keep column headers in a case structure  (e.g. snake_case, dot.case)
+    - No spaces or units in column names. E.g. `body_mass` or `BodyMass` but not "Body Mass" or "Body Mass (g)"
+1. Use `NA` for missing data
+    - The difference between “0” and “NA” and a blank cell all tells you something
+1. One thing in each cell. Notes get their own column. Use words, not highlighting or color to indicate things.
+1. Use wide format
+    - Each unique observation unit is a row
+1. Store dates as three separate columns (`Year`, `Month`, `Day`)
+    - Excel does weird things with dates
+
+## Data Storing - Relational Data
+
+
+-  Strive for relational data to keep your file size small 
+    - store data as smaller units (hierarchical and by type) and link through code. 
+    - Use shared numeric IDs so that you can match and merge data across files
+    -  For example: store site level data in one file, and plot level data in another. Then link these datasets through code.
+        - This helps avoid confusion and repetition
+        -  Great for large, interconnected datasets, especially those that can change
+    - Data management systems play well with data in this format (e.g. Tidy, SQL)
+
+
+## Data Storing - Relational Data
+
+<center>
+<img src="https://imgur.com/tYmH2yK.png" style="width: 100%"/>
+</center>
+
+## Examples, bad and good
+
+<center>
+<img src="https://i.imgur.com/4kNywhX.png" />
+</center>
+
+
+
+## Examples, bad and good
+
+<center>
+<img src="https://i.imgur.com/2MFXD0C.png" />
+</center>
+
+
+
+## It would be nice to store data in csv files and edit in Excel, but...
+
+<center>
+<img src="https://i.imgur.com/AiwZwdq.png" />
+</center>
+
+
+
+## and
+
+
+
+<center>
+<img src="https://i.imgur.com/YlwLXJN.png" />
+</center>    
+
+Working with csv files in Excel _not_ a viable (i.e., non-aggravating) option.
+
+- If you are entering data, use .xls or .xlsx and trust that translators will be available for as long as you are a scientist
+- If you are outputting data from another program, use csv or tab-delimits (if your data has commas).
+
+## Tidy Data
+
+There are lots of ways to represent the same set of data in tables, but not all are tidy.
+
+<center><img src="https://imgur.com/DrgbZQw.png" width="100%" />
+<br />
+<br />
+</center>  
+
+*This is a dataset of tuberculosis cases in 1999 and 2000 from several countries from the World Health Organization. All examples can be found within the Tidyverse package.  If you load the tidyverse library, and type in table1 for example, the first table will show up.*
+
+
+## Tidy Rules
+
+Three interrelated rules make a dataset tidy:
+
+  1. Each variable must have its own column.
+  1. Each observation must have its own row.
+  1. Each value must have its own cell.
+  
+  
+<center>
+<br />
+<img src="https://imgur.com/qav6ips.png" width="100%" />
+</center>   
+
+
+
+## Which Dataset is Tidy?
+
+<center>
+<br />
+<br />
+<img src="https://imgur.com/DrgbZQw.png" width="100%" />
+<br />
+<br />
+</center>  
+
+
+## Why is Tidy Data Useful?
+
+- It helps to pick a consistent way to store data.
+- R is a vectorized language, so when you put variables in columns, R's at its best.
+
+
+## How to Create Tidy Data
+
+1. Enter data in a tidy format
+    - Usually not ideal for easy collection and entry
+1. Make your data tidy in R during data wrangling steps
+
+## Analysis workflow - Tidy Data
+
+<center>
+<br />
+<br />
+<img src="https://i.imgur.com/fDpfRDA.png" width="85%" />
+</center> 
+
+
+
+
+## References
+
+::: {#refs}
+:::
