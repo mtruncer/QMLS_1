@@ -1,0 +1,131 @@
+---
+title: "Course Mechanics"
+author:
+  - Elizabeth King
+  - Kevin Middleton
+format:
+  revealjs:
+    theme: [default, custom.scss]
+    standalone: true
+    self-contained: true
+    logo: QMLS_Logo.png
+    slide-number: true
+    show-slide-number: all
+code-annotations: hover
+bibliography: QMLS_Bibliography.bib
+csl: evolution.csl
+---
+
+```{r}
+#| label: setup
+#| echo: false
+
+
+```
+
+## About us
+
+
+## About you
+
+- Your preferred name
+- Your pronouns
+- Your home department and home lab
+- Your research area
+
+
+## What you need
+
+- Laptop
+- Can do attitude
+
+
+## Book, etc.
+
+There is no one-size-fits-all statistics textbook.
+
+- Any that we chose would be a compromise.
+- Lots of free material online.
+- Many recommendations on Canvas if you are looking for a book.
+
+
+## Online lectures
+
+- Available Mondays (or sooner)
+- Watch, pause, take notes, rewatch, look up things you don't understand, etc.
+
+
+## Grading
+
+Participation: Your participation grade in the course will be a function of:
+
+- Quiz questions (completion)
+- Problem sets (completion)
+- Peer evaluations (both your own completion of and others' evaluation of you)
+- In class contributions
+
+Don't worry about what numbers are in the gradebook.
+
+
+## Grading
+
+Progress Checks:
+
+- Each 4 week block will end with a Progress Check.
+    - No new material that week
+    - Class time used to answer questions
+    - Like a problem set
+- You may not work with other members of the class or anyone else on this assignment
+- You should use all other available resources (books, notes, lectures, internet, etc.).
+
+
+## Quiz questions
+
+- In between most of the lectures
+    - e.g., Watch a lecture, answer some questions
+- Not graded, but you *do* need to complete them.
+    - Thoughtful reflection about any you get incorrect
+
+
+## Problem sets
+
+- Practical experience
+- Gradually less guidance
+- Experience solving challenges as a team
+- All members of the group should participate
+- Each group member should submit the same set of answers
+
+
+## Groups
+
+
+## Working together
+
+- Many possible successful strategies
+    - Remember you have access to lecture code, the google, etc
+- One unsuccessful strategy
+    - Splitting up the problem set & not learning all the parts
+    - You should only leave class early if your entire group has turned in the problem set
+
+## Peer evaluations
+
+
+## Reviewing your work
+
+- Problem sets not graded
+- You are responsible for checking your group's answers against the answer key
+
+
+## Typical weekly schedule
+
+*Monday*: Lectures, "quizzes", readings (when applicable) posted online to Canvas
+
+*Thursday*: Assignments due at midnight:
+
+- Previous week's problem set submitted through Canvas
+- Peer evaluations
+- Weekly quizzes
+
+*Thursday* or *Friday*: Problem set posted online to Canvas. Download at the beginning of class.
+
+*Friday*: Class meeting, discuss any issues from that week (anonymous or not), work together on next problem set.
