@@ -1,6 +1,5 @@
 ---
 title: "Data Organization"
-subtitle: "Quantitative Methods in Life Sciences"
 author:
   - Elizabeth King
   - Kevin Middleton
