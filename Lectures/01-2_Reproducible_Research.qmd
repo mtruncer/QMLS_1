@@ -89,7 +89,7 @@ Raw data should always be read-only. Treat raw data like an endangered species.
 1. R
 1. Markdown
 1. Version control
-    - Ok = sequential numbers (never call a file "final")
+    - OK = sequential numbers (never call a file "final")
     - Better = Git (See Git & Github resources)
 
 
