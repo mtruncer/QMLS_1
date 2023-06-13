@@ -89,21 +89,6 @@ The tidyverse (via `read_csv()`) reads in files as tibbles instead of data.frame
 #dat <- read_csv("../data/composition_data.csv")
 #dat
 ```
-    
-
-## Tibbles 
-
-Tibbles and data frames are essentially the same thing, but a tibble is more modern and works better with the data structure of the tidyverse.  For more detailed info see `vignette("tibble")`.
-    
-- You can coerce a data.frame into a tibble with `as.tibble(data.frame)`
-- Tibbles never change the type of an input (e.g. no conversion of strings to factors), it never changes the name of a variable, and it never creates row names.
-- You can transpose a tibble with `tribble()`
-
-   
-
-
-
-
 
 ```{r}
 #| echo: true
