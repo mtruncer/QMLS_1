@@ -23,6 +23,7 @@ csl: evolution.csl
 
 ```
 
+
 ## About us
 
 
@@ -52,7 +53,7 @@ There is no one-size-fits-all statistics textbook.
 ## Online lectures
 
 - Available Mondays (or sooner)
-- Watch, pause, take notes, rewatch, look up things you don't understand, etc.
+- Watch, pause, take notes, re-watch, look up topics you don't understand, etc.
 
 
 ## Grading
@@ -61,7 +62,7 @@ Participation: Your participation grade in the course will be a function of:
 
 - Quiz questions (completion)
 - Problem sets (completion)
-- Peer evaluations (both your own completion of and others' evaluation of you)
+- Peer evaluations (both your own completion of and others' evaluations of you)
 - In class contributions
 
 Don't worry about what numbers are in the gradebook.
@@ -102,7 +103,7 @@ Progress Checks:
 ## Working together
 
 - Many possible successful strategies
-    - Remember you have access to lecture code, the google, etc
+    - Remember you have access to lecture code, the google, etc.
 - One unsuccessful strategy
     - Splitting up the problem set & not learning all the parts
     - You should only leave class early if your entire group has turned in the problem set
