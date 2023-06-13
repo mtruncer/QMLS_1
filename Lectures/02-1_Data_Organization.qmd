@@ -127,7 +127,7 @@ There are lots of ways to represent the same set of data in tables, but not all 
 <br />
 <br />
 
-*This is a dataset of tuberculosis cases in 1999 and 2000 from several countries from the World Health Organization. All examples can be found within the Tidyverse package.  If you load the tidyverse library, and type in `table1` for example, the first table will show up.*
+*This is a dataset of tuberculosis cases in 1999 and 2000 from several countries from the World Health Organization. All examples can be found within the `tidyverse` package.*
 
 
 ## Tidy Rules
