@@ -417,3 +417,9 @@ Get help from the R command line with ?: `?sqrt` or `?log10`. Also try `help.sea
 ## Analysis workflow
 
 ![](https://i.imgur.com/fDpfRDA.png){fig-align="center"}
+## How do I find help?
+
+- Resources on Canvas 
+- Links we provide throughout course
+- R Cheatsheets
+- Internet
