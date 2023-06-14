@@ -30,6 +30,7 @@ Datasets:
   composition_data.csv
 -->
 
+
 ## Data Manipulation Goals
 
 - Perform all manipulation in R
@@ -38,18 +39,6 @@ Datasets:
   - Remember Google is your friend!
   
   
- 
-## Tibbles
-
-Two main differences between tibbles and data.frames
-  
-  **1. Printing:**  Tibbles only print 10 rows, and columns display their type (e.g. "chr", "int"), whereas data frames will print the whole thing, and you have to use `str()` to see data types.
-
--   You can specify what parts of the tibble you want printed with `print(tibble, n=x, width=x)` where `n` is the number of rows, and `width` is the width to display.
-    
--   You can look at the start of a tibble with `head(<tibble_name>)`, or the end of a tibble with `tail(<tibble_name>)`.
-
-
 ## Tibbles
 
 Two main differences between tibbles and data.frames
@@ -67,6 +56,7 @@ df <- tibble(
 ```{r, echo=TRUE, eval=TRUE}
 df
 ```
+
 
 ## Subsetting Tibbles
 
