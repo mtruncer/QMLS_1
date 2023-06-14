@@ -84,7 +84,7 @@ You are living in a good time.
 
 ## The tidyverse
 
-A set of packages to load, clean, filter, plot, and generally deal with data in a "tidy" way. Largely the work of [Hadley Wickham](http://hadley.nz/) and colleagues.
+A set of packages to load, clean, filter, plot, and generally deal with data in a "tidy" way. Largely the work of [Hadley Wickham](http://hadley.nz/) and colleagues at Posit (RStudio).
 
 ```{r}
 #| eval: false
@@ -303,8 +303,8 @@ Mixed data types per column
 #| echo: true
 
 MM <- data.frame(x = 1:3,
-                y = c(10, 17, 21),
-                A = c("a", "b", "c"))
+                 y = c(10, 17, 21),
+                 A = c("a", "b", "c"))
 MM
 ```
 
@@ -334,10 +334,11 @@ MM[, 2]
 
 ## Tibbles 
 
-Tibbles and `data.frame`s are essentially identical, but a tibble is more modern and works better with the data structure of the tidyverse.  For more detailed info see `vignette("tibble")`.
+Tibbles and `data.frame`s are essentially identical, but a `tibble` is more modern and works better with the data structure of the tidyverse. See `vignette("tibble")`.
     
 - You can coerce a `data.frame` into a `tibble` with `as_tibble()`
 - Tibbles never change the type of an input, never change the name of a variable, and never create row names.
+- Tibbles only print 10 rows, and columns display their type (e.g., "chr", "int")
 
 
 ## Creating tibbles
@@ -346,21 +347,31 @@ Tibbles and `data.frame`s are essentially identical, but a tibble is more modern
 #| echo: true
 
 MM <- tibble(x = 1:3,
-                 y = x ^ 2,
-                 A = c("a", "b", "c"))
+             y = x ^ 2, # <1>
+             A = c("a", "b", "c"))
 MM
 ```
+
+1. Creation of a column can refer back to previously created columns
 
 
 ## Creating tibbles with `tribble()`
 
+- Row-wise creation
+- Useful for small tibbles
+
 ```{r}
 #| echo: true
-tribble(~x, ~y, ~A,
-        1, 10, "a",
-        2, 11, "b",
-        3, 12, "c")
+tribble(
+  ~x, ~y, ~A, # <1>
+  1, 10, "a", # <2>
+  2, 11, "b",
+  3, 12, "c"
+)
 ```
+
+1. Supply column names with `~`
+2. Each row is passed in sequence by column
 
 
 ## Functions
