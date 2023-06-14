@@ -35,11 +35,12 @@ library(readxl)
 
 ## The Tidyverse
 
-<center><img src="https://i.imgur.com/fHQecxu.png" width="85%" />
+<center><img src="https://i.imgur.com/fHQecxu.png" width="35%" />
 <br />
 <br />
 </center>  
 
+- Extensions for reading, writing, and working with data (selecting, filtering, aggregating, plotting)
 - Core Tidyverse packages: ggplot2, dplyr, tidyr, readr, purr, tibble, stringr, forcats. 
 - `install.packages("tidyverse")`  
   
@@ -51,11 +52,12 @@ You may notice when you load the tidyverse you get a message that says that some
 - For example, dplyr overwrites `filter()` and `lag()`.
     - To use functions from a specific package, you will need to use their full names: `stats::filter()` and `stats::lag()`.
 
-## Should I use base R or Tidyverse?
+## Should I learn/use base R or Tidyverse?
 
 - Both are useful 
     - Learn the basics of both
     - Learn when one tools is better suited 
+    
 
 ## Analysis workflow - Tidy Data
 
@@ -74,27 +76,33 @@ You may notice when you load the tidyverse you get a message that says that some
     - `read_csv()`
     - Like their base R counterparts but with more logical default arguments & behavior
 
-
-## Reading Excel files into R
-
-Preferred package: [readxl](https://cran.r-project.org/web/packages/readxl/index.html)  
-  
-## Tibbles  {.smaller}
+## Tibbles 
 
 The tidyverse (via `read_csv()`) reads in files as tibbles instead of data.frames.
 
 -   Also `read_excel()`, `read_table()`, etc
 
-```{r echo=TRUE, message=FALSE}
-#dat <- read_csv("../data/composition_data.csv")
-#dat
+```{r}
+#| echo: true
+#| message: false
+
+dat <- read_csv("../data/composition_data.csv")
+dat
+
 ```
+
+
+## Reading Excel files into R
+
+Preferred package: [readxl](https://cran.r-project.org/web/packages/readxl/index.html)  
 
 ```{r}
 #| echo: true
 #| eval: false
+
 library(readxl)
-M <- read_excel("MyFile.xlsx")
+MM <- read_excel("MyFile.xlsx")
+
 ```
 
 ## Where do your files live?
@@ -121,21 +129,30 @@ Read file and assign to an object `MM`.
 - Look for it in the `data` directory, which is one level up from the working directory (`../`)
 - Explicitly define "NA" is `NA`
 
-## Important Coding Tips
 
-Use `<-` for assign.
-
-- Don't use `=` (even though you can).
-- "Assign the object on the right to the object on the left."
-
-
-
-
-## Use `str()` to get information
+## Getting basic information: base 
 
 ```{r}
-str(M)
+#| echo: true
+
+str(MM)
+
 ```
+
+## Getting basic information: tidyverse
+
+```{r}
+#| echo: true
+
+glimpse(MM)
+
+```
+
+
+
+
+
+
 
 
 ## Selecting and filtering
@@ -148,7 +165,7 @@ str(M)
 ## Selecting columns: Base R
 
 ```{r eval=FALSE}
-M$WnMass
+MM$WnMass
 ```
 
 `$` returns a single column from a `data.frame`. You'll use this form most often day to day.
@@ -157,8 +174,8 @@ M$WnMass
 ## Selecting columns: Base R
 
 ```{r eval=FALSE}
-M[ , "WnMass"]  # Only the column WnMass
-M[ , 1:3]       # Columns 1-3, all rows
+MM[ , "WnMass"]  # Only the column WnMass
+MM[ , 1:3]       # Columns 1-3, all rows
 ```
 
 `[rows, columns]` returns rows and columns from a `data.frame`.
@@ -171,8 +188,8 @@ If either is empty, all are returned.
 ## Filtering rows: Base R
 
 ```{r eval=FALSE}
-M[1, ]     # Row 1, all columns
-M[1:5, ]   # Rows 1-5, all columns
+MM[1, ]     # Row 1, all columns
+MM[1:5, ]   # Rows 1-5, all columns
 ```
 
 - The space after `,` is empty, so all columns are returned.
@@ -181,7 +198,7 @@ M[1:5, ]   # Rows 1-5, all columns
 ## Filtering rows: Base R
 
 ```{r eval=FALSE}
-M[M$BYear == 2008, ]
+MM[MM$BYear == 2008, ]
 ```
 
 
@@ -190,7 +207,7 @@ M[M$BYear == 2008, ]
 Use `head()` to get a peek at the first few rows. A second argument to `head()` specifies the number of rows to show.
 
 ```{r}
-head(M[, c("MouseID", "Sex")], n = 10)
+head(MM[, c("MouseID", "Sex")], n = 10)
 ```
 
 
@@ -199,7 +216,7 @@ head(M[, c("MouseID", "Sex")], n = 10)
 `subset()` or `[ , ]`
 
 ```{r}
-subset(M, WnMass < 6)
+subset(MM, WnMass < 6)
 ```
 
 
@@ -208,7 +225,7 @@ subset(M, WnMass < 6)
 `subset()` or `[ , ]`
 
 ```{r eval=FALSE}
-subset(M, Sex == 1 & DamID == 1932, select = "WnMass")
+subset(MM, Sex == 1 & DamID == 1932, select = "WnMass")
 ```
 
 Use `&` for "and", and `|` for "or."
@@ -228,8 +245,8 @@ Use `&` for "and", and `|` for "or."
 Data transformations:
 
 ```{r eval=FALSE}
-M$log10_WnMass <- log10(M$WnMass)
-M$sqrt_WnMass <- sqrt(M$WnMass)
+MM$log10_WnMass <- log10(MM$WnMass)
+MM$sqrt_WnMass <- sqrt(MM$WnMass)
 ```
 
 _Note_:
@@ -244,7 +261,7 @@ _Note_:
 - Replace `mean` with `sd` to get standard deviation.
 
 ```{r warning=FALSE}
-M_agr <- aggregate(M, by = list(M$DamID), FUN = "mean")
+M_agr <- aggregate(MM, by = list(MM$DamID), FUN = "mean")
 M_agr
 ```
 

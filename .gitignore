@@ -1,3 +1,7 @@
+
+#temporary
+*.html
+
 # History files
 .Rhistory
 .Rapp.history
