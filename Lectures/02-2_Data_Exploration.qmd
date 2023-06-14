@@ -148,11 +148,85 @@ glimpse(MM)
 
 ```
 
+## Analysis workflow - Tidy Data
+
+<center>
+<br />
+<br />
+<img src="https://i.imgur.com/fDpfRDA.png" width="85%" />
+</center>  
+
+## Moving between wide and long (tidy data)
+
+Two important functions to learn:  
+
+1.  **`pivot_longer()`** - when some of the column names are not the names of variables but the *values* of the variables
+    
+1.  **`pivot_wider()`** - when an observation for a single ID is scattered across multiple rows
+
+## `pivot_longer()`
+
+Column names are not the names of variables but the *values* of the variables.
 
 
+```{r}
+table4a
+```
+
+- Here for example, 1999 and 2000 are both values of the variable year
+  
+  
+## `pivot_longer()`  
+  
+```{r}
+#| echo: true
+#| eval: true
+
+table4a 
+
+pivot_longer(table4a, c("1999", "2000"), names_to = "year", values_to = "cases")
+
+```
+
+## `pivot_longer()` 
+
+<center>
+<br />
+<img src="https://imgur.com/157Odvw.png" width="100%" />
+<br />
+<br />
+</center>  
 
 
+## `pivot_wider()`
 
+Observation is scattered across multiple rows. 
+
+- Here for example, data from Afghanistan in 1999 is in multiple rows
+
+
+```{r}
+print(table2, n = 8, width = Inf)
+```
+
+## `pivot_wider()`
+
+```{r}
+#| echo: true
+
+table2 %>%
+  pivot_wider(names_from = type, values_from = count) %>% 
+  print(n = 4)
+```
+
+## `pivot_wider()` 
+
+<center>
+<br />
+<img src="https://imgur.com/bWvSwUw.png" width="100%" />
+<br />
+<br />
+</center>  
 
 
 ## Selecting and filtering

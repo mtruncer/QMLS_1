@@ -89,33 +89,6 @@ df %>% .[["x"]]
 
 \bigskip
 
-Two important functions to learn:  
-
-1.  **`pivot_longer()`** - when some of the column names are not the names of variables but the *values* of the variables. 
-    
-    - Wide to Long data
-  
-1.  **`pivot_wider()`** - when an observation is scattered across multiple rows.
-    
-    - Long to Wide data
-
-
-## `pivot_longer()`
-
-Column names are not the names of variables but the *values* of the variables. \textcolor{red}{*Here for example, 1999 and 2000 are both values of the variable year*}
-
-
-```{r, echo=TRUE}
-table4a
-```
-  
-  
-## `pivot_longer()`  
-  
-```{r, echo=TRUE, eval=FALSE}
-table4a %>%
-  pivot_longer(c("1999", "2000"), names_to = "year", values_to = "cases")
-```
 
 
 In the tidyverse, you can combine multiple operations with the "pipe", or `%>%`.
@@ -124,65 +97,6 @@ In the tidyverse, you can combine multiple operations with the "pipe", or `%>%`.
     
     -   The code above would read, "take `table4a`, then pivot the columns `1999` and `2000` into one longer column named `year`, and its values should be called `cases`."  
 
-
-## `pivot_longer()`  {.smaller}
-
-```{r, eval=TRUE, echo=FALSE}
-table4a 
-```
-
-```{r, eval=TRUE, echo=TRUE}
-table4a %>%
-  pivot_longer(c("1999", "2000"), names_to = "year", values_to = "cases")
-```
-
-
-## `pivot_longer()` 
-
-This is what just happened. Wide to long data.
-
-<center>
-<br />
-<img src="https://imgur.com/157Odvw.png" width="100%" />
-<br />
-<br />
-</center>  
-
-
-## `pivot_wider()`
-
-Observation is scattered across multiple rows. 
-
-- Here for example, data from Afghanistan in 1999 is in multiple rows
-
-
-```{r, echo=TRUE}
-print(table2, n = 8, width = Inf)
-```
-
-
-## `pivot_wider()` {.smaller}
-
-```{r, eval=TRUE, echo=FALSE}
-print(table2, n = 8)
-```
-
-```{r,  echo=TRUE}
-table2 %>%
-  pivot_wider(names_from = type, values_from = count) %>% 
-  print(n = 4)
-```
-
-## `pivot_wider()` 
-
-This is what just happened. Long to wide data
-
-<center>
-<br />
-<img src="https://imgur.com/bWvSwUw.png" width="100%" />
-<br />
-<br />
-</center>  
 
 
 
