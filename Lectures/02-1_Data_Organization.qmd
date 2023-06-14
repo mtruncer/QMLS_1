@@ -17,7 +17,7 @@ csl: evolution.csl
 ---
 
 
-## Data Organizing - File Structure
+## Data Organization: File Structure
 
 For each R project/manuscript, create a set of folders. There are many options:
 
@@ -26,11 +26,11 @@ For each R project/manuscript, create a set of folders. There are many options:
   - /ProcessedData
   - /Analysis
   - /Plots
-  - ReadMe
-  - ProjectNotes
+  - `README.txt`
+  - `Project_Notes.qmd`
 
 
-## Data Organizing - File Structure {.smaller}
+## Data Organization: File Structure {.smaller}
 
   - Raw Data
     - raw data (read-only, pristine backup, not to be touched)
@@ -46,9 +46,9 @@ For each R project/manuscript, create a set of folders. There are many options:
 Note: Your code will stay cleaner if you use many smaller scripts, e.g., one for analyses, one for  figures *or* one for each analysis and the associated figures
 
 
-## Data Storing - General Tips {.smaller}
+## Data Storage: General Tips {.smaller}
 
-- Think about how to store your data _before_ you start
+- Think about how to store your data *before* you start
     - Sometimes it is difficult to change things later
 - Keep everything
     - Disk space is cheap
@@ -60,7 +60,7 @@ Note: Your code will stay cleaner if you use many smaller scripts, e.g., one for
     - File names, variable names, file formats, etc.
 
 
-## Data Storing: Data Files {.smaller}
+## Data Storage: Data Files {.smaller}
 
 See [Broman and Woo: Data Organization in Spreadsheets](https://kbroman.org/dataorg/)
 
@@ -76,30 +76,14 @@ See [Broman and Woo: Data Organization in Spreadsheets](https://kbroman.org/data
     - Excel does weird things with dates
 
 
-## Data Storing - Relational Data {.smaller}
+## Examples: Bad and good
 
--  Strive for relational data to keep your file sizes small 
-    - Store data as smaller units (hierarchical and by type) and link through code
-    - Use shared IDs so that you can match and merge data across files
-- Use code to link by shared IDs
-    - This helps avoid confusion and repetition
-    - Great for large, interconnected datasets, especially those that can change
-    - Data management systems play well with data in this format (e.g., Tidy, SQL)
+![](../images/Excel_1.png){fig-align="center"}
 
 
-## Data Storing - Relational Data
+## Examples: Bad and good
 
-![](https://imgur.com/tYmH2yK.png){fig-align="center"}
-
-
-## Examples, bad and good
-
-![](https://i.imgur.com/4kNywhX.png){fig-align="center"}
-
-
-## Examples, bad and good
-
-![](https://i.imgur.com/2MFXD0C.png){fig-align="center"}
+![](../images/Excel_2.png){fig-align="center"}
 
 
 ## It would be nice to store data in csv files and edit in Excel, but... {.nostretch}
@@ -109,24 +93,24 @@ See [Broman and Woo: Data Organization in Spreadsheets](https://kbroman.org/data
 
 ## and {.nostretch}
 
-![](https://i.imgur.com/YlwLXJN.png){fig-align="center" width=40%}
+![](https://i.imgur.com/YlwLXJN.png){fig-align="center" width=60%}
 
-Working with csv files in Excel _not_ a viable (i.e., non-aggravating) option.
+Working with csv files in Excel *not* a viable (i.e., non-aggravating) option.
 
-- If you are entering data, use .xls or .xlsx
-- If you are outputting data from another program, use csv or tab-delimits (if your data has commas).
+- If you are entering data, use `.xlsx`
+- If you are outputting data from another program, use `.csv` or tab-delimited `.txt`/`.tbd`
 
 
 ## Tidy Data {.smaller}
 
-There are lots of ways to represent the same set of data in tables, but not all are tidy.
+Many ways to represent the same set of data in tables, but not all are tidy.
 
 ![](https://i.imgur.com/DrgbZQw.png){fig-align="center"}
 
 <br />
 <br />
 
-*This is a dataset of tuberculosis cases in 1999 and 2000 from several countries from the World Health Organization. All examples can be found within the `tidyverse` package.*
+*This is a dataset of tuberculosis cases in 1999 and 2000 from several countries from the World Health Organization. All are in the `tidyverse` package (`table1`, `table2`, and `table3`).*
 
 
 ## Tidy Rules
@@ -145,21 +129,51 @@ Three interrelated rules make a dataset tidy:
 
 ![](https://i.imgur.com/DrgbZQw.png){fig-align="center"}
 
+. . .
 
-## Why is Tidy Data Useful?
-
-- It helps to pick a consistent way to store data.
-- R is a vectorized language, so when you put variables in columns, R's at its best.
+`table2` because only one column has values.
 
 
 ## How to Create Tidy Data
 
 1. Enter data in a tidy format
-    - Usually not ideal for easy collection and entry
+    - Usually not ideal for easy collection and entry (use wide format)
 1. Make your data tidy in R during data wrangling steps
     - `pivot_longer()`
     - `pivot_wider()`
-    
+
+Learn to go back and forth between long (tidy) and wide.
+
+
+## Data Storage and Relational Data {.smaller}
+
+-  Strive for relational data to keep your file sizes small 
+    - Store data as smaller units (hierarchical and by type) and link through code
+    - Use shared IDs so that you can match and merge data across files
+- Use code to link by shared IDs
+    - This helps avoid confusion and repetition
+    - Great for large, interconnected datasets, especially those that can change
+    - Data management systems play well with data in this format (e.g., Tidy, SQL)
+
+
+## Data Storage and Relational Data
+
+- Avoid "monolithic" files with redundant data
+- Relate smaller data files to each other by *keys*
+- Join files together for analysis
+
+:::: {.columns}
+
+::: {.column width="50%"}
+![](../images/Excel_1.png){fig-align="center"}
+:::
+
+::: {.column width="50%"}
+![](../images/Excel_3.png){fig-align="center"}
+:::
+
+::::
+
 
 ## Analysis workflow - Tidy Data {.nostretch}
 
