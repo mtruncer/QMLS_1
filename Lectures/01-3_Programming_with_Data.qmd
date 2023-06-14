@@ -79,7 +79,7 @@ You are living in a good time.
 - The R Renaissance (2012-present)
 - The Dark Ages (1993-2011)
 
-![](http://s3.crackedcdn.com/phpimages/article/0/2/5/208025_v1.jpg)
+![](http://s3.crackedcdn.com/phpimages/article/0/2/5/208025_v1.jpg){fig-align="center"}
 
 
 ## The tidyverse

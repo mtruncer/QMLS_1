@@ -29,7 +29,7 @@ library(readxl)
 
 ## Base R {.nostretch}
 
-- Base R refers to the set of code and functions that is automatically included when you install R
+Base R refers to the set of code and functions that is automatically included when you install R and loaded when you launch R
 
 ![](../images/Base_ex.png){width=60% fig-align="center"}
 
@@ -38,7 +38,7 @@ library(readxl)
 ![](https://i.imgur.com/fHQecxu.png){fig-align="center" width=40%}
 
 - Extensions for reading, writing, and working with data (selecting, filtering, aggregating, plotting)
-- Core Tidyverse packages: ggplot2, dplyr, tidyr, readr, purr, tibble, stringr, forcats. 
+- Core Tidyverse packages: `ggplot2`, `dplyr`, `tidyr`, `readr`, `purrr`, `tibble`, `stringr`, `forcats` 
 - `install.packages("tidyverse")`  
   
 
@@ -46,23 +46,26 @@ library(readxl)
 
 You may notice when you load the tidyverse you get a message that says that some libraries overwrite functions in base R. 
   
-- For example, dplyr overwrites `filter()` and `lag()`.
+- For example, `dplyr` overwrites `filter()` and `lag()`.
     - To use functions from a specific package, you will need to use their full names: `stats::filter()` and `stats::lag()`.
+
 
 ## Should I learn/use base R or Tidyverse?
 
 - Both are useful 
     - Learn the basics of both
-    - Learn when one tools is better suited 
-    
+    - Learn when one tool is better suited for your task
+
 
 ## Analysis workflow - Tidy Data {.nostretch}
 
 ![](https://i.imgur.com/fDpfRDA.png){fig-align="center" width=50%} 
 
 Perform all manipulation via code (in R)
-- preserves data integrity
-- the "hard" way now is the easy way in the long run
+
+- Preserves data integrity
+- The "hard" way now is the easy way in the long run
+  
   
 ## Reading delimited files into R
 
@@ -71,13 +74,11 @@ Perform all manipulation via code (in R)
 - [readr](https://cran.r-project.org/web/packages/readr/index.html), loaded with `tidyverse`
     - `read_delim()`
     - `read_csv()`
-    - Like their base R counterparts but with more logical default arguments & behavior
+    - Like their base R counterparts but with more logical default arguments and behavior
+    - Return `tibble`s
 
-## Tibbles 
 
-The tidyverse (via `read_csv()`) reads in files as tibbles instead of data.frames.
-
--   Also `read_excel()`, `read_table()`, etc
+## Reading a delimited file
 
 ```{r}
 #| echo: true
@@ -102,24 +103,25 @@ MM <- read_excel("MyFile.xlsx")
 
 ```
 
+
 ## Where do your files live?
 
 - To load data into R, you need to tell it where the file is on your computer. 
 - R will look relative to the "working directory"
-- ALWAYS set this to the "Source File Location" (this is where the script is)
-    - Quarto will ALWAYS render this way
-    - Do not use `setwd()`
+- **Always** set this to the "Source File Location" (this is where the script is)
+    - Quarto will **always** render this way
+    - Do not use `setwd()` (even though you will see it done elsewhere)
 
-## Telling R where to look
+
+## Telling R where to look for files
 
 ```{r}
 #| echo: true
 #| message: false
 #| warning: false
 
-
 MM <- read_excel("../data/Mouse_Weaning_Data.xlsx",
-                na = "NA")
+                 na = "NA")
 ```
 
 Read file and assign to an object `MM`.
@@ -146,9 +148,11 @@ glimpse(MM)
 
 ```
 
+
 ## Analysis workflow - Tidy Data {.nostretch}
 
 ![](https://i.imgur.com/fDpfRDA.png){fig-align="center"}
+
 
 ## Moving between wide and long (tidy data)
 
@@ -158,16 +162,17 @@ Two important functions to learn:
     
 1.  **`pivot_wider()`** - when an observation for a single ID is scattered across multiple rows
 
+
 ## `pivot_longer()`
 
 Column names are not the names of variables but the *values* of the variables.
-
 
 ```{r}
 table4a
 ```
 
-- Here for example, 1999 and 2000 are both values of the variable year
+- Here for example, 1999 and 2000 are both values of the variable `year`
+- Note the backticks around 1999 and 2000
   
   
 ## `pivot_longer()` {.nostretch} 
@@ -176,45 +181,51 @@ table4a
 #| echo: true
 #| eval: true
 
-table4a 
+table4a
 
-pivot_longer(table4a, c("1999", "2000"), names_to = "year", values_to = "cases")
+pivot_longer(table4a,
+             cols = c("1999", "2000"),
+             names_to = "year",
+             values_to = "cases")
 
 ```
+
 
 ## `pivot_longer()` 
 
 ![](https://imgur.com/157Odvw.png){fig-align="center"}
 
+
 ## `pivot_wider()`
 
-Observation is scattered across multiple rows. 
+Observations are across multiple rows. 
 
-- Here for example, data from Afghanistan in 1999 is in multiple rows
-
+- Here data from Afghanistan in 1999 is in multiple rows
 
 ```{r}
 print(table2, n = 8, width = Inf)
 ```
+
 
 ## `pivot_wider()`
 
 ```{r}
 #| echo: true
 
-table2 %>%
-  pivot_wider(names_from = type, values_from = count) %>% 
-  print(n = 4)
+pivot_wider(table2, names_from = type, values_from = count)
 ```
+
 
 ## `pivot_wider()` {.nostretch}
 
 ![](https://imgur.com/bWvSwUw.png){fig-align="center"}
 
+
 ## Selecting and filtering
 
 - Selecting columns
 - Filtering a subset of rows
+
 
 ## Selecting columns: Base R
 
@@ -235,7 +246,7 @@ MM$WnMass
 #| echo: true
 #| eval: false
 
-MM[ , "WnMass"]  # Only the column WnMass
+MM[ , "WnMass"]  # Only the column WnMass, all rows
 MM[ , 1:3]       # Columns 1-3, all rows
 
 ```
@@ -245,6 +256,7 @@ MM[ , 1:3]       # Columns 1-3, all rows
 If either is empty, all are returned.
 
 - All rows are returned here. The space before `,` is empty.
+
 
 ## Selecting columns: tidyverse
 
@@ -259,7 +271,8 @@ MM |>
 
 ```
 
-## Filtering rows: Base R
+
+## Selecting rows: Base R
 
 ```{r}
 #| echo: true
@@ -272,16 +285,36 @@ MM[1:5, ]   # Rows 1-5, all columns
 
 - The space after `,` is empty, so all columns are returned.
 
-## KEVIN 
+## Selecting rows: tidyverse
 
-- Teach slice here?
+Variations of `slice()`:
+
+```{r}
+#| echo: true
+#| eval: false
+
+MM |> slice(1)
+MM |> slice(1:5)
+
+MM |> slice_head(n = 10)
+MM |> slice_tail(n = 10)
+
+MM |> slice_max(order_by = WnMass, n = 10)
+MM |> slice_min(order_by = WnMass, n = 10)
+
+MM |> slice_sample(n = 10)
+MM |> slice_sample(prop = 0.25)
+```
+
 
 ## Logical Operators 
 
 You can filter with logical or Boolean operators to select various sets. 
 
-- `==` is equal to
-- `&` is "and", `|` is "or", `!` is "not"
+- `==` is "equal"
+- `&` is "and"
+- `|` is "or"
+= `!` is "not"
 
 
 ## Logical Operators {.nostretch}
@@ -320,7 +353,7 @@ head(MM[, c("MouseID", "Sex")], n = 10)
 
 `filter()`: The first argument is the object to filter, and the following arguments are the expressions for how you want to filter. 
 
-So say we only want to look at female mice.
+So say we only want to keep female mice.
 
 ```{r}
 #| echo: true
@@ -333,7 +366,7 @@ filter(MM, Sex == 1)
 
 ## Filtering
 
-Or we only want to look at female mice with a weaning mass above 15g.
+Or we only want to keep female mice with a weaning mass above 15 g.
 
 ```{r}
 #| echo: true
@@ -353,7 +386,7 @@ MM[MM$Sex == 1 & MM$WnMass > 15, ]
 
 ## Filtering
 
-Remember, if we want to use the `|>` we don't have to specify the dataframe.
+Remember, if we use the `|>` we don't have to specify the object.
 
 ```{r}
 #| echo: true
@@ -363,7 +396,6 @@ MM |>
   filter(Sex == 1, WnMass > 15)
 
 ```
-
 
 
 ## Filtering
@@ -380,10 +412,9 @@ MM |>
 ```
 
 
-
 ## Filtering
 
-Or you want the set of mice from either sire 231x or sire 220x
+Or you want the set of mice from *either* sire 231x or sire 220x
 
 ```{r}
 #| echo: true
@@ -398,7 +429,7 @@ MM |>
 ## Writing Files: tidyverse
 
 - When you have a processed data file you want to save, use `write_csv()`, or `write_txt()`.
-- It will save to your working directory.
+- It will save to your working directory (or specify a specific path).
 
 ```{r}
 #| echo: true
@@ -412,15 +443,20 @@ write_csv(M_sub_sires, "M_sires_231_220.csv")
 
 _Note_ it will always rewrite your old file if you re-run your code. This is a good thing.
 
+
 ## Writing Files: base R
 
 - The functions `write.csv` and `write.txt` are in base R.
 - When using these, specify `row.names = FALSE` to prevent the row numbers from saving to the file
 - We recommend using the tidyverse versions instead
 
-## KEVIN
 
-write_excel? no, right? comment on it?
+## Writing Excel file
+
+- Writing Excel files is possible
+- `writexl::write_xlsx(object, "path", use_zip64 = FALSE)`
+- Ask yourself if you need to do this?
+    - `csv` almost always preferred
 
 
 ## References
