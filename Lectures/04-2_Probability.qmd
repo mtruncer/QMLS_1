@@ -352,7 +352,8 @@ sum(dbinom(1:3, 3, prob = 0.75))
 
 ## Fixed probability in experimental design
 
-- How many [mice/rats/fruit flies] should I pair assuming all won't reproduce?
+- How many [mice/rats/fruit flies] should I pair assuming all won't successfully reproduce?
+- How many replicates should I set up, knowing that some might fail?
 - How many patients should I enroll in a study, assuming some will drop out?
 
 
