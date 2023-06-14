@@ -111,6 +111,7 @@ MM <- read_excel("MyFile.xlsx")
 - R will look relative to the "working directory"
 - ALWAYS set this to the "Source File Location" (this is where the script is)
     - Quarto will ALWAYS render this way
+    - Do not use `setwd()`
 
 ## Telling R where to look
 
@@ -229,6 +230,8 @@ table2 %>%
 </center>  
 
 
+## Just basics here - move else to unit 3. 
+
 ## Selecting and filtering
 
 - Selecting columns
@@ -329,15 +332,6 @@ _Note_:
 - `log10()` performs base-10 log.
 
 
-## Aggregating: Base R
-
-- Mean per `DamID` of every column that is not `DamID`.
-- Replace `mean` with `sd` to get standard deviation.
-
-```{r warning=FALSE}
-M_agr <- aggregate(MM, by = list(MM$DamID), FUN = "mean")
-M_agr
-```
 
 
 ## Writing Files
