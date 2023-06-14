@@ -203,6 +203,52 @@ frogs %>%
 ```
 
 
+## Select and filter simultaneously: Base R
+
+`subset()` or `[ , ]`
+
+```{r}
+subset(MM, WnMass < 6)
+```
+
+
+## Select and filter simultaneously: Base R
+
+`subset()` or `[ , ]`
+
+```{r eval=FALSE}
+subset(MM, Sex == 1 & DamID == 1932, select = "WnMass")
+```
+
+Use `&` for "and", and `|` for "or."
+
+
+## Making new columns
+
+- Calculate new variables
+    - Transformation, etc.
+- Combine existing variables into a new variable
+    - e.g., year, months, day columns into a date
+- Splitting existing variables into >1 new variables
+
+
+## Calculate new variables: Base R
+
+Data transformations:
+
+```{r eval=FALSE}
+MM$log10_WnMass <- log10(MM$WnMass)
+MM$sqrt_WnMass <- sqrt(MM$WnMass)
+```
+
+_Note_:
+
+- `log()` performs natural log.
+- `log10()` performs base-10 log.
+
+
+
+
 ## References
 
 ::: {#refs}

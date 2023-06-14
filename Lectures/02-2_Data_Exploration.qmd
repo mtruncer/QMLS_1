@@ -27,18 +27,15 @@ library(readxl)
 ```
 
 
-## Base R
+## Base R {.nostretch}
 
 - Base R refers to the set of code and functions that is automatically included when you install R
 
-![](../images/Base_ex.png){width=100% fig-align="center"}
+![](../images/Base_ex.png){width=60% fig-align="center"}
 
-## The Tidyverse
+## The Tidyverse {.nostretch}
 
-<center><img src="https://i.imgur.com/fHQecxu.png" width="35%" />
-<br />
-<br />
-</center>  
+![](https://i.imgur.com/fHQecxu.png){fig-align="center" width=40%}
 
 - Extensions for reading, writing, and working with data (selecting, filtering, aggregating, plotting)
 - Core Tidyverse packages: ggplot2, dplyr, tidyr, readr, purr, tibble, stringr, forcats. 
@@ -59,13 +56,13 @@ You may notice when you load the tidyverse you get a message that says that some
     - Learn when one tools is better suited 
     
 
-## Analysis workflow - Tidy Data
+## Analysis workflow - Tidy Data {.nostretch}
 
-<center>
-<br />
-<br />
-<img src="https://i.imgur.com/fDpfRDA.png" width="85%" />
-</center>  
+![](https://i.imgur.com/fDpfRDA.png){fig-align="center" width=50%} 
+
+Perform all manipulation via code (in R)
+- preserves data integrity
+- the "hard" way now is the easy way in the long run
   
 ## Reading delimited files into R
 
@@ -149,13 +146,9 @@ glimpse(MM)
 
 ```
 
-## Analysis workflow - Tidy Data
+## Analysis workflow - Tidy Data {.nostretch}
 
-<center>
-<br />
-<br />
-<img src="https://i.imgur.com/fDpfRDA.png" width="85%" />
-</center>  
+![](https://i.imgur.com/fDpfRDA.png){fig-align="center"}
 
 ## Moving between wide and long (tidy data)
 
@@ -177,7 +170,7 @@ table4a
 - Here for example, 1999 and 2000 are both values of the variable year
   
   
-## `pivot_longer()`  
+## `pivot_longer()` {.nostretch} 
   
 ```{r}
 #| echo: true
@@ -191,13 +184,7 @@ pivot_longer(table4a, c("1999", "2000"), names_to = "year", values_to = "cases")
 
 ## `pivot_longer()` 
 
-<center>
-<br />
-<img src="https://imgur.com/157Odvw.png" width="100%" />
-<br />
-<br />
-</center>  
-
+![](https://imgur.com/157Odvw.png){fig-align="center"}
 
 ## `pivot_wider()`
 
@@ -220,29 +207,23 @@ table2 %>%
   print(n = 4)
 ```
 
-## `pivot_wider()` 
+## `pivot_wider()` {.nostretch}
 
-<center>
-<br />
-<img src="https://imgur.com/bWvSwUw.png" width="100%" />
-<br />
-<br />
-</center>  
-
-
-## Just basics here - move else to unit 3. 
+![](https://imgur.com/bWvSwUw.png){fig-align="center"}
 
 ## Selecting and filtering
 
 - Selecting columns
 - Filtering a subset of rows
-- Aggregating summary statistics
-
 
 ## Selecting columns: Base R
 
-```{r eval=FALSE}
+```{r}
+#| echo: true
+#| eval: false
+
 MM$WnMass
+
 ```
 
 `$` returns a single column from a `data.frame`. You'll use this form most often day to day.
@@ -250,9 +231,13 @@ MM$WnMass
 
 ## Selecting columns: Base R
 
-```{r eval=FALSE}
+```{r}
+#| echo: true
+#| eval: false
+
 MM[ , "WnMass"]  # Only the column WnMass
 MM[ , 1:3]       # Columns 1-3, all rows
+
 ```
 
 `[rows, columns]` returns rows and columns from a `data.frame`.
@@ -261,21 +246,60 @@ If either is empty, all are returned.
 
 - All rows are returned here. The space before `,` is empty.
 
+## Selecting columns: tidyverse
+
+If you want to select certain columns, use `select()`. For example, select the column `WnMass`.
+
+```{r}
+#| echo: true
+#| eval: false
+
+MM |> 
+  select(WnMass)
+
+```
 
 ## Filtering rows: Base R
 
-```{r eval=FALSE}
+```{r}
+#| echo: true
+#| eval: false
+
 MM[1, ]     # Row 1, all columns
 MM[1:5, ]   # Rows 1-5, all columns
+
 ```
 
 - The space after `,` is empty, so all columns are returned.
 
+## KEVIN 
+
+- Teach slice here?
+
+## Logical Operators 
+
+You can filter with logical or Boolean operators to select various sets. 
+
+- `==` is equal to
+- `&` is "and", `|` is "or", `!` is "not"
+
+
+## Logical Operators {.nostretch}
+
+![](https://imgur.com/MiHIo1n.png){width=80% fig-align="center"}
+
+
+*Boolean operators. The left circle is x, the right circle is y, and the shaded region indicates the given subset selected.*
+
 
 ## Filtering rows: Base R
 
-```{r eval=FALSE}
+```{r}
+#| echo: true
+#| eval: false
+
 MM[MM$BYear == 2008, ]
+
 ```
 
 
@@ -284,69 +308,120 @@ MM[MM$BYear == 2008, ]
 Use `head()` to get a peek at the first few rows. A second argument to `head()` specifies the number of rows to show.
 
 ```{r}
+#| echo: true
+#| eval: false
+
 head(MM[, c("MouseID", "Sex")], n = 10)
+
 ```
 
 
-## Select and filter simultaneously: Base R
+## Filtering rows: tidyverse
 
-`subset()` or `[ , ]`
+`filter()`: The first argument is the object to filter, and the following arguments are the expressions for how you want to filter. 
+
+So say we only want to look at female mice.
 
 ```{r}
-subset(MM, WnMass < 6)
+#| echo: true
+#| eval: false
+
+filter(MM, Sex == 1)
+
 ```
 
 
-## Select and filter simultaneously: Base R
+## Filtering
 
-`subset()` or `[ , ]`
+Or we only want to look at female mice with a weaning mass above 15g.
 
-```{r eval=FALSE}
-subset(MM, Sex == 1 & DamID == 1932, select = "WnMass")
+```{r}
+#| echo: true
+#| eval: false
+
+# tidyverse version 1
+filter(MM, Sex == 1, WnMass > 15)
+
+# tidyverse version 2
+filter(MM, Sex == 1 & WnMass > 15)
+
+# base
+MM[MM$Sex == 1 & MM$WnMass > 15, ]
+
 ```
 
-Use `&` for "and", and `|` for "or."
 
+## Filtering
 
-## Making new columns
+Remember, if we want to use the `|>` we don't have to specify the dataframe.
 
-- Calculate new variables
-    - Transformation, etc.
-- Combine existing variables into a new variable
-    - e.g., year, months, day columns into a date
-- Splitting existing variables into >1 new variables
+```{r}
+#| echo: true
+#| eval: false
 
+MM |>
+  filter(Sex == 1, WnMass > 15)
 
-## Calculate new variables: Base R
-
-Data transformations:
-
-```{r eval=FALSE}
-MM$log10_WnMass <- log10(MM$WnMass)
-MM$sqrt_WnMass <- sqrt(MM$WnMass)
 ```
 
-_Note_:
-
-- `log()` performs natural log.
-- `log10()` performs base-10 log.
 
 
+## Filtering
+
+Or you could get the same result by asking for mice that are not (`!=`) male.
+
+```{r}
+#| echo: true
+#| eval: false
+
+MM |>
+  filter(Sex != 0, WnMass > 15)
+
+```
 
 
-## Writing Files
 
-- When you have a file you want to save, use `write.csv()`, or `write_csv()`, or `write.txt()`, or `write_txt()`.
+## Filtering
 
-    - With the Base R writing functions, you want to add "row.names = FALSE" to avoid an extra column for row names.
+Or you want the set of mice from either sire 231x or sire 220x
 
+```{r}
+#| echo: true
+#| eval: false
+
+MM |>
+  filter(SireID == "231x" | SireID == "220x")
+
+```
+
+
+## Writing Files: tidyverse
+
+- When you have a processed data file you want to save, use `write_csv()`, or `write_txt()`.
 - It will save to your working directory.
 
-```{r eval = FALSE, warning=FALSE}
-write_csv(M_agr, "M_aggregate.csv")
+```{r}
+#| echo: true
+#| eval: false
+
+M_sub_sires <- MM |>
+  filter(SireID == "231x" | SireID == "220x")
+
+write_csv(M_sub_sires, "M_sires_231_220.csv")
 ```
 
-_Note_ it will always rewrite your old file if you re-run your code.
+_Note_ it will always rewrite your old file if you re-run your code. This is a good thing.
+
+## Writing Files: base R
+
+- The functions `write.csv` and `write.txt` are in base R.
+- When using these, specify `row.names = FALSE` to prevent the row numbers from saving to the file
+- We recommend using the tidyverse versions instead
+
+## KEVIN
+
+write_excel? no, right? comment on it?
+
 
 ## References
 
