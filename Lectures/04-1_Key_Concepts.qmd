@@ -1,0 +1,173 @@
+---
+title: "Key Concepts"
+author:
+  - Elizabeth King
+  - Kevin Middleton
+format:
+  revealjs:
+    theme: [default, custom.scss]
+    standalone: true
+    self-contained: true
+    logo: QMLS_Logo.png
+    slide-number: true
+    show-slide-number: all
+code-annotations: hover
+bibliography: QMLS_Bibliography.bib
+csl: evolution.csl
+---
+
+
+```{r}
+#| echo: false
+#| message: false
+
+```
+
+
+## Assumptions of science as a way of knowing
+
+- All ways of knowing involve a set of assumptions
+- Our knowledge is conditional on these assumptions being met
+
+
+## Definitions of statistics
+
+"a collection of procedures and principles for gaining **information** in order to make decisions when faced with **uncertainty**" [@Utts2005-mg]
+
+"a way of taming **uncertainty**, of turning raw **data** into arguments that can resolve profound questions" [@Amabile1989-pf]
+
+"the science of drawing conclusions from **data** with the aid of the mathematics of **probability**" [@Garfunkel1986-vv]
+
+"the **explanation** of **variation** in the context of what remains **unexplained**" [@Kaplan2009-zu]
+
+
+## Key concepts in statistics
+
+**Data**: The raw material for doing statistics are data, which come in a variety of forms.
+
+**Information**: The goal of statistics is to gain information, make a decision, or explain.
+
+**Uncertainty**: The context for statistics is that there is always some level of uncertainty
+
+**Probability**: The tool that we will use to assess our uncertainty and gain information is probability.
+
+
+## Statistics in the context of life sciences
+
+- Describe, measure, and compare aspects of nature from **samples**
+- Quantify the **uncertainty** of those measures
+- **Estimation** of an unknown quantity from a **sample** of a **population**
+    - *Differences* between groups
+    - *Relationships* between variables or traits
+
+
+## Samples and populations
+
+A **population** includes all the members/individuals/units of a group of interest.
+
+- A parameter is a quantity that describes a population without error (e.g., means, standard deviations, proportions).
+- Requires measuring *every* member of that group.
+
+
+## Samples and populations
+
+A **sample** is a representative subset of a population, ideally randomly chosen. A sample can be an individual subject or a group of subjects.
+
+- An estimate is the inferred value of a parameter based on a sample from a population.
+
+*You will (usually) deal with samples.*
+
+
+## Deviations resulting from sampling
+
+**Sampling error** is the deviation from the population parameter resulting from chance alone.
+
+- **Precision** is the amount of spread among the observations around the true population parameter resulting from sampling error.
+
+**Bias/Inaccuracy** is the *systematic departure* of an estimate from the population parameter being estimated.
+
+
+## Goals of data collection: Low sampling error and low bias {#myImagePage}
+
+![](https://i.imgur.com/eP5dSny.png){fig-align="center"}
+
+
+## Thinking about sampling error and bias
+
+Consider the scale in a physician's office. The same patient is weighed 3 times in succession:
+
+1. 72.0 kg
+2. 73.8 kg
+3. 70.1 kg
+
+True mass is 72.1 kg. Sampling error or bias?
+
+
+## Thinking about sampling error and bias
+
+Consider the same physician's thermometer. The same patient's temperature 3 times in succession:
+
+1. 98.2°
+2. 98.3°
+3. 98.2°
+
+True temperature is 99.3°. Sampling error or bias?
+
+*What is the real challenge here?*
+
+
+## Testing for bias
+- Standard curves
+- Calibration
+- Simulation
+
+
+## Randomness
+
+A repeatable process is random if its outcome is
+
+- Unpredictable in the short run
+- Predictable in the long run
+
+e.g., coin flipping (fair coin)
+
+- We don't know what the result of a single flip will be
+- We do know what the long run probability of heads will be
+
+
+## Random sampling
+
+Assumptions of most statistical analyses
+
+1. **Equal chance**: Each member of a population has an equal chance of being included in the sample
+2. **Independence**: No member that is chosen influences the others that are chosen *or* their outcomes (e.g., trait values)
+
+*Goals*:
+
+- Minimize bias
+- Allow an estimation of sampling error (important)
+
+
+## Independent and identically distributed (IID)
+
+- All observations are independent of one another
+- All observations come from the same underlying probability distribution (normal, binomial, etc.)
+
+Standard assumption of most statistical tests.
+
+
+## Random sampling {.nostretch}
+
+Randomly select 20 trees (left) or randomly select 20 square quadrats with 0 or more trees (right).
+
+![](https://i.imgur.com/KcKmZYi.png){fig-align="center" width=80%}
+
+<center>
+How realistic is this?
+</center>
+
+
+## References
+
+::: {#refs}
+:::

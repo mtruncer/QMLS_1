@@ -1,0 +1,361 @@
+---
+title: "Probability"
+author:
+  - Elizabeth King
+  - Kevin Middleton
+format:
+  revealjs:
+    theme: [default, custom.scss]
+    standalone: true
+    self-contained: true
+    logo: QMLS_Logo.png
+    slide-number: true
+    show-slide-number: all
+code-annotations: hover
+bibliography: QMLS_Bibliography.bib
+csl: evolution.csl
+---
+
+
+```{r}
+#| echo: false
+#| message: false
+
+library(tidyverse)
+library(readxl)
+library(cowplot)
+theme_set(theme_cowplot())
+```
+
+
+## Uncertainty & Science
+
+> Scientific knowledge is a body of statements of varying degrees of certainty—some most unsure, some nearly sure, none absolutely certain (Feynman)
+
+Probability is a way to quantify uncertainty.
+
+
+## Why learn probability?
+
+Basis of logical deduction
+
+- Should you fly or drive?
+- Should you not eat raw cookie dough?
+
+Basis of inference systems
+
+- Frequentist, likelihood and Bayesian
+
+
+## Basics of probability
+
+The probability of an event is the proportion of times the event would occur if a random trial is repeated infinitely under constant conditions.
+
+
+## Basics of probability
+
+The probability of an event is the **proportion** of times the event **would** occur **if** a **random** trial is repeated **infinitely** under **constant conditions**.
+
+- proportion
+- would occur
+- if
+- random trial
+- infinitely
+- constant conditions
+
+
+## Basics of probability
+
+The probability of an event is the **proportion** of times the event **would** occur **if** a **random** trial is repeated **infinitely** under **constant conditions**.
+
+![](https://i.imgur.com/WFKHq4N.png)
+
+
+## Basics of probability
+
+Probabilities are proportions.
+
+Pr[event] is the abbreviation for “the probability of
+event A occurring.”
+
+- $Pr[heads] = 0.50$: Heads
+- $Pr[heads'] = 0.50$: *Not* heads
+
+The range of probabilities for an event is 0 $\rightarrow$ 1
+(including 0 and 1).
+
+
+## Addition rule: Mutually exclusive
+
+*Mutually exclusive* events are events that are not simultaneously possible due to constraints of physics, biology, development, evolution, etc.
+
+- $Pr[A~and~B] = Pr[A, B] = 0$
+- Probability of A and B occurring simultaneously.
+- e.g., You can't flip a coin heads and tails in one trial
+    - $Pr[H, T] = 0$
+- $Pr[A~or~B] = Pr[A] + Pr[B]$
+
+
+## Addition rule: Mutually exclusive
+
+On a single die roll, what is the probability of rolling *either* a 1 *or* a 2?
+
+On a single die roll, what is the probability of rolling *either* a 1, a 2, *or* a 3?
+
+
+## Multiplication rule: Independent events
+
+If events are *independent*, then their individual probabilities do not influence each other. 
+
+- The occurrence of one does not alter the probability of the other.
+- Successive coin flips / die rolls / roulette wheel spins
+- Offspring sex
+- Seed germinating
+
+
+## Multiplication rule: Independent events
+
+$$Pr[A, B] = Pr[A] \times Pr[B]$$
+In two successive die rolls, what is the probability of rolling  a 1 *followed by* a 2?
+
+In three successive die rolls, what is the probability of rolling  a 1 *followed by* a 2, *followed by* a 6?
+
+
+## How much corn should I plant?
+
+![](https://hips.hearstapps.com/hmg-prod/images/is-corn-grain-1544222258.jpg){fig-align="center"}
+
+
+## Multiplication rule: Independent events
+
+$$Pr[Kernel~1, Kernel~2] = Pr[Kernel~1] \times Pr[Kernel~2]$$
+
+![](../images/Probability_Constant.drawio.png){fig-align="center"}
+
+
+## Binomial probabilities
+
+You plant 10 kernels:
+
+- What is the probability of 0 germinating?
+- What is the probability of 10 germinating?
+- What is the probability of any 5 germinating?
+
+![](../images/Probability_Constant.drawio.png){fig-align="center"}
+
+
+## Binomial Distribution
+
+- Probability distributions are basically like counting the ways things can happen
+- In R, you can "flip a coin" using the binomial distribution.
+- The function is `rbinom()`. Try one flip: `rbinom(1, 1, 0.5)`
+
+
+## Binomial Distribution
+
+If we flip a coin once, possible outcomes are H or T. How many ways are there to get one H? One T?
+
+```{r echo=FALSE, fig.height=4}
+flip1 <- tibble(
+  Ways = c(1, 1),
+  Flips = c("1 Head", "1 Tail")
+)
+
+flip1 |> ggplot(aes(x = Flips, y = Ways)) +
+  geom_bar(stat = "Identity")
+```
+
+
+## Binomial Distribution
+
+If we flip a coin twice, what are the possible outcomes?
+
+1. HH
+1. HT, TH
+1. TT
+
+```{r}
+#| echo: false
+#| fig-height: 3
+#| fig-align: center
+
+flip2 <- tibble(
+  Ways = c(1, 2, 1),
+  Flips = c("2 Head", "1 Head, 1 Tail", "2 Tail")) |> 
+  mutate(Flips = fct_inorder(Flips))
+
+flip2 |> ggplot(aes(x = Flips, y = Ways)) +
+  geom_bar(stat = "Identity")
+```
+
+
+## Binomial Distribution
+
+If we flip a coin 3 times, what are the possible outcomes?
+
+1. HHH
+1. HHT, HTH, THH
+1. TTH, THT, HTT
+1. TTT
+
+```{r}
+#| echo: false
+#| fig-height: 3
+#| fig-align: center
+
+flip3 <- tibble(
+  Ways = c(1, 3, 3, 1),
+  Flips = c("3 Head", "2 Head, 1 Tail", "1 Head, 2 Tail",
+            "3 Tail")) |> 
+  mutate(Flips = fct_inorder(Flips))
+
+flip3 |> ggplot(aes(x = Flips, y = Ways)) +
+  geom_bar(stat = "Identity")
+```
+
+
+## Binomial Distribution
+
+If we flip a coin 4 times, what are the possible outcomes?
+
+1. HHH
+1. HHHT, HHTH, HTHH, THHH
+1. HHTT, TTHH, HTHT, THTH, HTTH, THHT
+1. TTTH, TTHT, THTT, HTTT
+1. TTTT
+
+```{r}
+#| echo: false
+#| fig-height: 3
+#| fig-align: center
+
+flip4 <- tibble(
+  Ways = c(1, 4, 6, 4, 1),
+  Flips = c("4 Head", "3 Head, 1 Tail", "2 Head, 2 Tail",
+            "1 Head, 3 Tail", "4 Tail")) |> 
+  mutate(Flips = fct_inorder(Flips))
+
+flip4 |> ggplot(aes(x = Flips, y = Ways)) +
+  geom_bar(stat = "Identity")
+```
+
+
+## Binomial Distribution
+
+If we flip a coin 6 times, what are the possible outcomes?
+
+```{r}
+#| echo: false
+#| fig-align: center
+
+flip6 <- tibble(
+  Ways = c(1, 6, 15, 20, 15, 6, 1),
+  Flips = c("6 H", "5 H, 1 T", "4 H, 2 T",
+            "3 H, 3 T", "2 H, 4 T", 
+            "1 H, 5 T", "6 T")) |> 
+  mutate(Flips = fct_inorder(Flips))
+
+flip6 |> ggplot(aes(x = Flips, y = Ways)) +
+  geom_bar(stat = "Identity")
+```
+
+
+## Binomial probabilities
+
+You plant 10 kernels:
+
+- What is the probability of 0 germinating?
+- What is the probability of 10 germinating?
+- What is the probability of *exactly* 5 germinating?
+
+![](../images/Probability_Constant.drawio.png){fig-align="center"}
+
+
+## Binomial probabilities
+
+What is the probability of 0 germinating?
+
+```{r}
+#| echo: true
+
+0.25 ^ 10
+dbinom(x = 0, size = 10, prob = 0.75)
+```
+
+![](../images/Probability_Constant.drawio.png){fig-align="center"}
+
+---
+
+What is the probability of 10 germinating?
+
+```{r}
+#| echo: true
+
+0.75 ^ 10
+dbinom(x = 10, size = 10, prob = 0.75)
+```
+
+![](../images/Probability_Constant.drawio.png){fig-align="center"}
+
+---
+
+What is the probability of *exactly* 5 germinating?
+
+```{r}
+#| echo: true
+
+dbinom(x = 5, size = 10, prob = 0.75)
+```
+
+![](../images/Probability_Constant.drawio.png){fig-align="center"}
+
+
+## What is the probability of 5 *or more* germinating?
+
+Binomial probability for 5 to 10 successes from 10 trials ($Pr = 0.75$)
+
+```{r}
+#| echo: true
+
+dbinom(x = 5:10, size = 10, prob = 0.75)
+```
+
+. . .
+
+Sum the probabilities:
+
+```{r}
+#| echo: true
+
+sum(dbinom(x = 5:10, size = 10, prob = 0.75))
+```
+
+
+## Fixed probability questions
+
+How many kernels should I plant overall?
+
+- For a desired harvest size
+
+How many kernels should I plant per seed hill?
+
+- To get at least 1 successful germination
+
+. . .
+
+```{r}
+#| echo: true
+
+sum(dbinom(1:3, 3, prob = 0.75))
+```
+
+
+## Fixed probability in experimental design
+
+- How many [mice/rats/fruit flies] should I pair assuming all won't reproduce?
+- How many patients should I enroll in a study, assuming some will drop out?
+
+
+## Questions in science
+
+FIXME
