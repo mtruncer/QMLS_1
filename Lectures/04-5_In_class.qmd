@@ -134,7 +134,7 @@ ggplot(M, aes(Lefties, log_Prob)) +
 ```
 
 
-## Powerball
+## Powerball {.smaller}
 
 1. 69 balls in one pool: Choose 5
 1. 26 in the other pool: Choose 1
