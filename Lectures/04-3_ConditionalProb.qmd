@@ -1,0 +1,227 @@
+---
+title: "Conditional Probability"
+author:
+  - Elizabeth King
+  - Kevin Middleton
+format:
+  revealjs:
+    theme: [default, custom.scss]
+    standalone: true
+    self-contained: true
+    logo: QMLS_Logo.png
+    slide-number: true
+    show-slide-number: all
+code-annotations: hover
+bibliography: QMLS_Bibliography.bib
+csl: evolution.csl
+---
+
+```{r}
+#| echo: false
+#| message: false
+
+```
+
+## Conditional probability
+
+Probabilities of many events change given the presence (success) of some other event
+
+::: {.incremental}
+
+- If it is raining the probability that I will carry an umbrella is 100%
+    - If it is not, the probability is 5%
+- If it is January, the probability of snow is 20%
+    - If it is May, the probability of snow is <1%
+- If the soil temperature is above 24C, corn germination rate is 75%
+    - If the soil temperature is below 24C, the rate is 30%
+
+:::
+
+
+## Conditional probability {.nostretch}
+
+The **conditional probability** of a dependent event is the probability of that event occurring given that another condition or conditions is met.
+
+. . .
+
+![](http://scitechdaily.com/images/Leptopilina_boulardi.jpg){fig-align="center" width="50%"}
+
+<center>
+*Leptopilina boulardi*
+</center>
+
+
+## Conditional probability
+
+![](https://i.imgur.com/S56RM5u.png){fig-align="center"}
+
+
+## Conditional probability {.nostretch}
+
+![](../images/Probability_Conditional.drawio.png){fig-align="center"}
+
+
+## Conditional probability {.nostretch}
+
+- What proportion of all eggs are Male?
+- What proportion of all eggs are Female?
+
+![](../images/Probability_Conditional.drawio.png){fig-align="center"}
+
+
+## Conditional probability 
+
+$$Pr[A|B] \times Pr[B] = Pr[B|A] \times Pr[A]$$
+
+The probability of A given B times the probability of B equals the probability of B given A times the probability of A.
+
+. . .
+
+\begin{align*}
+Pr[P|M] \times Pr[M] &= Pr[M|P] \times Pr[P]\\
+\frac{0.18}{0.18 + 0.04} \times 0.22 &= 0.90 \times 0.20\\
+0.18 &= 0.18
+\end{align*}
+
+
+## Bayes' Rule {.smaller}
+
+> "All decisions should be based on evidence, but the best decisions should also be based on previous experience." Stone (2012)
+
+$$Pr[A|B] = \frac{Pr[B|A] \times Pr[A]}{Pr[B]}$$
+
+The conditional probability of $A$ given $B$ relies not only on the probability of $A$, but also of $B$ and of $B$ given $A$.
+
+- Predicting events given prior knowledge of the probability of those events.
+- The human brain (usually) works this way in predicting events.
+
+
+## Bayes' Rule {.nostretch}
+
+Suppose that you wake up one day with spots all over your face. The doctor tells you that 90% of people who have smallpox and 80% of people with chickenpox have these symptoms.
+
+![](https://i.imgur.com/l0XzqV5.jpg){fig-align="center" width="60%"}
+
+
+## Bayes' Rule {.nostretch}
+
+![](https://i.imgur.com/VCRHJoG.jpg){fig-align="center" width="80%"}
+
+
+## Bayes' Rule {.nostretch}
+
+You collect a male wasp larva. What is the probability that it was laid in a parisitized host?
+
+$$Pr[M|P] = \frac{\mathbf{Pr[P|M]} \times Pr[M]}{Pr[P]}$$
+
+![](../images/Probability_Conditional.drawio.png){fig-align="center" width="50%"}
+
+
+## Bayes' Rule
+
+\begin{align*}
+Pr[M|P] &= \frac{\mathbf{Pr[P|M]} \times Pr[M]}{Pr[P]}\\
+0.9 &= \frac{\mathbf{Pr[P|M]} \times (0.18 + 0.04)}{0.2}\\
+\frac{0.18}{0.22} &= \mathbf{Pr[P|M]}\\
+0.82 &= \mathbf{Pr[P|M]}
+\end{align*}
+
+There is an 82% chance that the egg was laid in a parisitized host.
+
+
+## Bayes' Rule
+
+Choose a random person off the street and test them for HIV. The test is positive. What is the probability that they actually are HIV+?
+
+1. 95-100%
+2. 90-94%
+3. 80-89%
+4. 65-79%
+5. <65%
+
+
+## HIV Testing
+
+If a person is HIV+, the probability that the test is positive is 99.9% (sensitivity)
+
+  - $Pr[T|H] = 0.999$
+
+If a person *does not have* HIV, the probability that the test is negative is 99.99% (specificity)
+
+  - $Pr[T'|H'] = 0.9999$
+
+Only about 13/100000 people are positive for HIV.
+
+  - $P[H] = 13/100000 = 1.3 \times 10^{-4}$
+
+
+## Solving with natural numbers {.smaller}
+
+For 100,000 hypothetical people:
+
+- 13 have HIV
+- 100000 – 13 = 99987 do not
+
+Of the 13 with HIV:
+
+- 13 * 0.999 = 12.987 test positive
+- 13 * 0.001 = 0.013 do not
+
+Of the 99987 who do not:
+
+- 99987 * .0001 = 9.9987 test positive
+- 99987 * .9999 = 99977.0013 do not
+
+
+## Solving with natural numbers
+
+So if:
+
+$Pr(H|T) = \frac{Pr(T|H) \times Pr(H)}{Pr(T)}$
+
+Then:
+
+$Pr(H|T) = \frac{0.999 \times (13/100000)}{(12.987 + 9.9987) / 100000} = 0.565$
+
+Or just $12.987 / (12.987 + 9.9987)$ which is the number of true positives over the total positives.
+
+
+## Solving with probabilities
+
+$$Pr[H|T] = \frac{Pr[T|H] \times Pr[H]}{Pr[T]}$$
+
+- Find $P[H|T]$
+
+$Pr[T]$ is the challenge.
+
+- Independent probabilities of positive test given HIV and positive test given *not* HIV
+
+$$\left(Pr[T|H] \times P[H]\right) + \left(Pr[T'|H'] \times 1 - P[H]\right)$$
+
+
+## Solving with probabilities {.smaller}
+
+
+\begin{align*}
+Pr[H|T] &= \frac{Pr[T|H] \times Pr[H]}{Pr[T]} \\
+&= \frac{Pr[T|H] \times Pr[H]}{\left(Pr[T|H] \times P[H]\right) + \left(Pr[T'|H'] \times 1 - P[H]\right)} \\
+&= \frac{0.999 \times 0.00013}{\left(0.999 \times 0.00013\right) + \left((1 - 0.9999) \times (1 - 0.00013)\right)}
+\end{align*}
+
+```{r}
+#| echo: true
+#| eval: true
+((0.999) * 1.3e-4) /
+  ((0.999 * 1.3e-4) + ((1 - 0.9999) * (1 - 1.3e-4)))
+```
+
+
+## Uncertainty
+
+> "In scientific research, measurements are replete with randomness. Extraneous influences contaminate the measurements despite tremendous efforts to limit their intrusion." [@Kruschke2015-rp]
+
+
+## References
+
+::: {#refs}
+:::
