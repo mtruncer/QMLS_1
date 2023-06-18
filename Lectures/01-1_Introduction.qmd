@@ -67,14 +67,14 @@ out best to provide tools to make it safer." - *Wickham (2015)*
     - More important: an understanding of what goes into the math
 
 
-## What you should already know
+## What you might have heard of
 
 - General familiarity with some topics:
     - Kinds of variables and their distributions
     - Univariate (means, standard deviations, etc.) and bivariate (correlation, regression, one-way ANOVA) approaches
 
 
-## What you do not need to know
+## What you do *not* need to know
 
 Programming
 
@@ -92,7 +92,13 @@ Programming
 
 ## What you can expect from us
 
-- 
+- Full commitment and engagement in your growth 
+    - We will challenge you
+    - We will always answer questions and provide help when asked
+- Clear expectations and directions
+- We will meet you where you are
+- We will provide a classroom environment where everyone can succeed
+
 
 
 ## What we expect from you {.smaller}
@@ -108,15 +114,8 @@ Programming
     - Ask questions
 - Know when to ask for help, and then ask for it
     - Exhaust your own options first (work with your group)
-    - "What will I do when I'm on my own?" (Can Google help me?)
+    - "What will I do when I'm on my own?"
 
-
-## Asking questions
-
-- Start with what you know
-- Think about what you want to know
-
-"I understand 
 
 ## Resources
 
