@@ -417,7 +417,7 @@ Get help from the R command line with ?: `?sqrt` or `?log10`. Also try `help.sea
 1. Make tables and figures for publication
 
 
-## Analysis workflow
+## Analysis workflow {.nostretch}
 
-![](../images/Workflow.drawio.png){fig-align="center"}
+![](../images/Workflow.drawio.png){fig-align="center" width="80%"}
 
