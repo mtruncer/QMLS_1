@@ -131,9 +131,18 @@ Progress Checks:
 
 *Friday*: Class meeting, discuss any issues from that week (anonymous or not), work together on next problem set.
 
+## How do I find help?
+
+- Resources on Canvas 
+- Links we provide throughout course
+- R Cheatsheets
+- Internet (but exercise caution)
+
+
 ## Asking questions
 
 - Start with what you know
 - Think about what you want to know
 
 "I understand 
+

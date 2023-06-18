@@ -21,6 +21,9 @@ csl: evolution.csl
 #| echo: false
 
 library(tidyverse)
+library(cowplot)
+
+theme_set(theme_cowplot())
 ```
 
 ---
@@ -416,10 +419,5 @@ Get help from the R command line with ?: `?sqrt` or `?log10`. Also try `help.sea
 
 ## Analysis workflow
 
-![](https://i.imgur.com/fDpfRDA.png){fig-align="center"}
-## How do I find help?
+![](../images/Workflow.drawio.png){fig-align="center"}
 
-- Resources on Canvas 
-- Links we provide throughout course
-- R Cheatsheets
-- Internet
