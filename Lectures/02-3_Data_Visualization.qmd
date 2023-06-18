@@ -34,7 +34,7 @@ library(viridis)
 1. Base R graphics (e.g., `plot()`, `hist()`)
     - Easy to do easy things (bivariate scatterplot, histogram)
     - Difficult to do complex plots
-2. ggplot
+2. `ggplot2` ("ggplot")
     - Harder to learn, easier to make complex plots
     - Much better graphics and logic
 
@@ -51,6 +51,7 @@ ggplot graphics
 glimpse(iris)
 ```
 
+
 ## Basics of ggplot
 
 ```{r echo=TRUE, eval=FALSE}
@@ -61,7 +62,8 @@ ggplot(iris, aes(x = Petal.Length, y = Petal.Width)) +
 
 - `ggplot()` sets up the plot using `iris` data.frame.
 - `aes()` sets `x` and `y` variables
-- `geom_point()` adds `(x, y)` points corresponding to `Petal.Length` and `Petal.Width`
+- `+ geom_point()` adds `(x, y)` points corresponding to `Petal.Length` and `Petal.Width`
+
 
 ## Logic of ggplot
 
@@ -73,55 +75,61 @@ ggplot(iris, aes(x = Petal.Length, y = Petal.Width)) +
     - colors
     - regression lines, etc.
 - Change the theme (shading, colors, line widths, etc.)
-- You might see examples with `qplot()`. Ignore them. Learn ggplot the hard way. Shortcuts will limit you in the long run.
+
 
 ## Logic of ggplot
 
-```{r eval=FALSE}
+```{r}
+#| echo: true
+#| eval: false
+#| output-location: slide
+
 library(tidyverse)
 library(cowplot)  # Our preferred ggplot theme
 ggplot(iris, aes(x = Petal.Length, y = Petal.Width)) +
   geom_point() 
 ```
 
-## Basics of ggplot
-
-```{r echo=FALSE}
-library(ggplot2)
-ggplot(iris, aes(x = Petal.Length, y = Petal.Width)) +
-  geom_point() 
-```
 
 ## What would setting only 1 variable do?
 
-```{r eval=FALSE}
+```{r}
+#| echo: true
+#| eval: false
+
 ggplot(iris, aes(x = Petal.Length)) +
 ```
 
 ## What would setting only 1 variable do?
 
-```{r warning=FALSE, message=FALSE, fig.height=3.5}
+```{r}
+#| echo: true
+#| warning: false
+#| message: false
+#| fig-height: 3.5
+
 ggplot(iris, aes(x = Petal.Length)) + 
   geom_histogram() 
 ```
 
-## Building plots
+## Building plots: Point color
 
-```{r pt_color, echo=TRUE, eval=FALSE}
+```{r}
+#| echo: true
+#| output-location: slide
+
 ggplot(iris, aes(x = Petal.Length, y = Petal.Width, color = Species)) + 
   geom_point()
 ```
 
 - `color = Species` colors points by the _Species_ column (a factor)
 
-## Building plots
+## Building plots: Point shape
 
-```{r pt_color, echo=FALSE}
-```
+```{r}
+#| echo: true
+#| output-location: slide
 
-## Building plots
-
-```{r pt_shape, eval=FALSE}
 ggplot(iris, aes(x = Petal.Length,
                  y = Petal.Width,
                  shape = Species)) + 
@@ -130,29 +138,26 @@ ggplot(iris, aes(x = Petal.Length,
 
 - `shape = Species` encodes _Species_ by the point shape
 
-## Building plots
 
-```{r pt_shape, echo=FALSE}
-```
+## Building plots: Point size
 
-## Building plots
+```{r}
+#| echo: true
+#| output-location: slide
 
-```{r pt_size, echo=TRUE, eval=FALSE}
-ggplot(iris, aes(x = Petal.Length, y = Petal.Width,
-                 color = Species)) + 
+ggplot(iris, aes(x = Petal.Length, y = Petal.Width, color = Species)) + 
   geom_point(size = 3)
 ```
 
 - Change point size
 
-## Building plots
 
-```{r pt_size, echo=FALSE}
-```
+## Building plots: Custom color palette
 
-## Building plots
+```{r}
+#| echo: true
+#| output-location: slide
 
-```{r plot_colors, echo=TRUE, eval=FALSE}
 library(wesanderson)
 ggplot(iris, aes(x = Petal.Length, y = Petal.Width,
                  color = Species)) + 
@@ -162,15 +167,13 @@ ggplot(iris, aes(x = Petal.Length, y = Petal.Width,
 
 - Add an interesting color palette
 
-## Building plots
 
-```{r plot_colors, echo=FALSE}
-```
+## Building plots: Custom color palette
 
+```{r}
+#| echo: true
+#| output-location: slide
 
-## Building plots
-
-```{r plot_colors_colorblind, echo=TRUE, eval=FALSE}
 library(viridis)
 ggplot(iris, aes(x = Petal.Length, y = Petal.Width,
                  color = Species)) + 
@@ -181,14 +184,12 @@ ggplot(iris, aes(x = Petal.Length, y = Petal.Width,
 - `library(viridis)` works for colorblind and grayscale friendly images.
 
 
-## Building plots
-```{r plot_colors_colorblind, echo=FALSE, message = FALSE}
-```
+## Building plots: Axis labels
 
+```{r}
+#| echo: true
+#| output-location: slide
 
-## Building plots
-
-```{r better_axis_labels, echo=TRUE, eval=FALSE}
 ggplot(iris, aes(x = Petal.Length,
                  y = Petal.Width,
                  color = Species)) + 
@@ -201,14 +202,13 @@ ggplot(iris, aes(x = Petal.Length,
 
 - Add some better axis labels
 
-## Building plots
 
-```{r better_axis_labels, echo=FALSE}
-```
+## Building plots: Regression lines
 
-## Adding lines
+```{r}
+#| echo: true
+#| output-location: slide
 
-```{r add_lm, echo=TRUE, eval=FALSE}
 ggplot(iris, aes(x = Petal.Length, y = Petal.Width)) + 
   geom_point() +
   geom_smooth(formula = y ~ x, method = "lm")
@@ -216,16 +216,15 @@ ggplot(iris, aes(x = Petal.Length, y = Petal.Width)) +
 
 - `geom_line()` add a "smooth" line (but in this case linear [`lm`])
 
-## Adding lines
-
-```{r add_lm, echo=FALSE}
-```
 
 ## Adding lines
 
 What if you add a color aesthetic?
 
-```{r lm_color, echo=TRUE, eval=FALSE}
+```{r}
+#| echo: true
+#| output-location: slide
+
 ggplot(iris, aes(x = Petal.Length,
                  y = Petal.Width,
                  color = Species)) + 
@@ -233,14 +232,13 @@ ggplot(iris, aes(x = Petal.Length,
   geom_smooth(formula = y ~ x, method = "lm")
 ```
 
-## Adding lines
-
-```{r lm_color, echo=FALSE}
-```
 
 ## Log-log axes
 
-```{r loglog, eval=FALSE}
+```{r}
+#| echo: true
+#| output-location: slide
+
 ggplot(iris, aes(x = Petal.Length, 
                  y = Petal.Width,
                  color = Species)) + 
@@ -250,14 +248,13 @@ ggplot(iris, aes(x = Petal.Length,
   scale_y_log10()
 ```
 
-## Log-log axes
-
-```{r loglog, echo=FALSE}
-```
 
 ## Facetting
 
-```{r facets, eval=FALSE}
+```{r}
+#| echo: true
+#| output-location: slide
+
 ggplot(iris, aes(x = Petal.Length)) + 
   geom_histogram() +
   facet_grid(Species ~ .)
@@ -266,10 +263,6 @@ ggplot(iris, aes(x = Petal.Length)) +
 - Plots separate histograms for the 3 species in 3 rows
 - `facet_grid(. ~ Species)` makes 3 columns
 
-## Facetting
-
-```{r facets, echo=FALSE, message=FALSE}
-```
 
 ## `_geoms` we will use
 
@@ -280,7 +273,6 @@ ggplot(iris, aes(x = Petal.Length)) +
 - `geom_density()`
 - `geom_boxplot()`
 - `geom_dotplot()`
-
 
 
 ## References

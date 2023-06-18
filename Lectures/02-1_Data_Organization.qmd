@@ -23,7 +23,7 @@ For each R project/manuscript, create a set of folders. There are many options:
 
 - /ProjectName
   - /RawData
-  - /ProcessedData
+  - /Data
   - /Analysis
   - /Plots
   - `README.txt`
