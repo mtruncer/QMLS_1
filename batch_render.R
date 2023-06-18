@@ -1,4 +1,4 @@
-qmds <- list.files(pattern = "^[0-4]*.*qmd$",
+qmds <- list.files(pattern = "^01-[1-4].*qmd$",
                    path = "Lectures/",
                    full.names = TRUE)
 
