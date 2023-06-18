@@ -1,0 +1,51 @@
+---
+title: "Reproducible Analysis"
+author: "King/Middleton"
+output: html_document
+---
+
+```{r}
+#| label: setup
+#| include: false
+
+library(tidyverse)
+library(readxl)
+library(cowplot)
+
+theme_set(theme_cowplot())
+```
+
+```{r}
+# Read in data
+
+myDat <- read_excel("01-2Ex.xlsx")
+```
+
+```{r}
+# Plot data
+
+ggplot(myDat, aes(x = Length, y = Width)) +
+  geom_point()
+```
+
+```{r}
+# Filter out low temp outlier
+myDat <- myDat |>
+  filter(Notes != 'LowTemp')
+
+# Calculate Area
+myDat <- myDat |> 
+  mutate(Area = Length * Width,
+         Group = factor(Group))
+```
+
+```{r}
+# Make a plot
+
+ggplot(myDat, aes(x = Group,
+                  y = Width,
+                  fill = Group)) +
+  geom_boxplot(alpha = 0.2) +
+  geom_point()
+```
+
