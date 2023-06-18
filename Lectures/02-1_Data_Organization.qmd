@@ -175,12 +175,6 @@ Learn to go back and forth between long (tidy) and wide.
 ::::
 
 
-## Analysis workflow - Tidy Data {.nostretch}
+## Analysis workflow {.nostretch}
 
-![](https://i.imgur.com/fDpfRDA.png){fig-align="center" width=85%}
-
-
-## References
-
-::: {#refs}
-:::
+![](../images/Workflow.drawio.png){fig-align="center" width="80%"}

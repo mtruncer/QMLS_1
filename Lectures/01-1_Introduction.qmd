@@ -54,7 +54,7 @@ csl: evolution.csl
 ## Safe statistics {.smaller}
 
 > "[Statisticians] are at grave risk of becoming irrelevant, not because we are useless, but because we have focussed too much on doing the right thing, rather than doing something that works. As a field, statistics tends to lean towards abstinence based outreach: you should only do statistics if you're in a committed long-term relationship with a professional statistician. If you experiment on your own (or with friends), you will hurt yourself and others. Abstinence based approaches don't work because people will take the risk anyway, and most of the time they will safely enjoy themselves. ... Rather than stigmatizing amateur statistics, we should be doing
-out best to provide tools to make it safer." - *Wickham (2015)*
+our best to provide tools to make it safer." - *Wickham (2015)*
 
 
 ## Why are we teaching this class?
