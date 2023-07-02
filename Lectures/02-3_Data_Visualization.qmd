@@ -29,6 +29,92 @@ library(viridis)
 
 ```
 
+## Why Visualize Data? {.nostretch}
+
+![](../images/Workflow.drawio.png){fig-align="center" width="80%"}
+
+
+## Immediately learn a lot about your data
+
+`PlantGrowth` dataset included in base R
+
+```{r}
+#| echo: false
+
+PlantGrowth |>
+  ggplot(aes(group, weight)) +
+  geom_point(position = position_jitter(width = 0.2), size = 3, alpha = 1/2) +
+  stat_summary(fun = mean, geom = "point", size = 5, color = "steelblue") +
+  stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.1,
+               color = "steelblue", linewidth = 1.5)
+
+```
+
+## Visualization is an important part of analysis
+
+- Plant growth data in two groups: control & treatment
+- Collected over multiple years
+
+```{r}
+#| echo: false
+
+set.seed(38479238)
+
+DD <- tibble(weight = c(rnorm(50, 5, 1), rnorm(40, 5.5, 1), rnorm(10,15,2)),
+             group = rep(c("ctrl","treatment"), each = 50),
+             year = rep(paste0("year", c(1,2,3,5,4)),each = 10, times = 2))
+```
+
+```{r}
+#| echo: true
+
+glimpse(DD)
+
+DD |> group_by(group) |>
+  summarize(mean = mean(weight))
+
+```
+
+## Visualization is an important part of analysis
+
+
+```{r}
+#| echo: true
+
+t.test(weight ~ group, data = DD)
+
+```
+
+## Visualization is an important part of analysis
+
+```{r}
+#| echo: false
+
+DD |>
+  ggplot(aes(group, weight)) +
+  geom_point(position = position_jitter(width = 0.2), size = 3, alpha = 1/2) +
+  stat_summary(fun = mean, geom = "point", size = 5, color = "steelblue") +
+  stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.1,
+               color = "steelblue", linewidth = 1.5) 
+
+```
+
+
+## Visualization is an important part of analysis
+
+```{r}
+#| echo: false
+
+DD |>
+  ggplot(aes(group, weight, color = year)) +
+  geom_point(position = position_jitter(width = 0.2), size = 3, alpha = 1/2) +
+  stat_summary(fun = mean, geom = "point", size = 5, color = "black") +
+  stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.1,
+               color = "black", linewidth = 1.5) 
+
+```
+
+
 ## R plotting systems
 
 1. Base R graphics (e.g., `plot()`, `hist()`)
@@ -81,11 +167,13 @@ ggplot(iris, aes(x = Petal.Length, y = Petal.Width)) +
 
 ```{r}
 #| echo: true
-#| eval: false
+#| eval: true
 #| output-location: slide
 
 library(tidyverse)
-library(cowplot)  # Our preferred ggplot theme
+library(cowplot)  
+theme_set(theme_cowplot()) # Our preferred ggplot theme
+
 ggplot(iris, aes(x = Petal.Length, y = Petal.Width)) +
   geom_point() 
 ```
@@ -95,21 +183,14 @@ ggplot(iris, aes(x = Petal.Length, y = Petal.Width)) +
 
 ```{r}
 #| echo: true
-#| eval: false
-
-ggplot(iris, aes(x = Petal.Length)) +
-```
-
-## What would setting only 1 variable do?
-
-```{r}
-#| echo: true
 #| warning: false
 #| message: false
-#| fig-height: 3.5
+#| output-location: slide
+
 
 ggplot(iris, aes(x = Petal.Length)) + 
   geom_histogram() 
+
 ```
 
 ## Building plots: Point color
@@ -119,7 +200,8 @@ ggplot(iris, aes(x = Petal.Length)) +
 #| output-location: slide
 
 ggplot(iris, aes(x = Petal.Length, y = Petal.Width, color = Species)) + 
-  geom_point()
+  geom_point(size = 3)
+
 ```
 
 - `color = Species` colors points by the _Species_ column (a factor)
@@ -133,7 +215,8 @@ ggplot(iris, aes(x = Petal.Length, y = Petal.Width, color = Species)) +
 ggplot(iris, aes(x = Petal.Length,
                  y = Petal.Width,
                  shape = Species)) + 
-  geom_point()
+  geom_point(size = 3)
+
 ```
 
 - `shape = Species` encodes _Species_ by the point shape
@@ -145,8 +228,9 @@ ggplot(iris, aes(x = Petal.Length,
 #| echo: true
 #| output-location: slide
 
-ggplot(iris, aes(x = Petal.Length, y = Petal.Width, color = Species)) + 
-  geom_point(size = 3)
+ggplot(iris, aes(x = Petal.Length, y = Petal.Width, shape = Species)) + 
+  geom_point(size = 5)
+
 ```
 
 - Change point size
@@ -210,8 +294,10 @@ ggplot(iris, aes(x = Petal.Length,
 #| output-location: slide
 
 ggplot(iris, aes(x = Petal.Length, y = Petal.Width)) + 
-  geom_point() +
-  geom_smooth(formula = y ~ x, method = "lm")
+  geom_point(size = 3) +
+  geom_smooth(formula = y ~ x, method = "lm") +
+  labs(x = "Petal Length (cm)",
+       y = "Petal Width (cm)")
 ```
 
 - `geom_line()` add a "smooth" line (but in this case linear [`lm`])
@@ -228,8 +314,10 @@ What if you add a color aesthetic?
 ggplot(iris, aes(x = Petal.Length,
                  y = Petal.Width,
                  color = Species)) + 
-  geom_point() +
-  geom_smooth(formula = y ~ x, method = "lm")
+  geom_point(size = 3) +
+  geom_smooth(formula = y ~ x, method = "lm") +
+  labs(x = "Petal Length (cm)",
+       y = "Petal Width (cm)")
 ```
 
 
@@ -242,10 +330,13 @@ ggplot(iris, aes(x = Petal.Length,
 ggplot(iris, aes(x = Petal.Length, 
                  y = Petal.Width,
                  color = Species)) + 
-  geom_point() +
+  geom_point(size = 3) +
   geom_smooth(formula = y ~ x, method = "lm") +
   scale_x_log10() +
-  scale_y_log10()
+  scale_y_log10() +
+  labs(x = "Petal Length (log10 cm)",
+       y = "Petal Width (log10 cm)")
+
 ```
 
 
@@ -275,7 +366,3 @@ ggplot(iris, aes(x = Petal.Length)) +
 - `geom_dotplot()`
 
 
-## References
-
-::: {#refs}
-:::
