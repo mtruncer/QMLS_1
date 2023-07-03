@@ -31,64 +31,6 @@ Datasets:
 -->
 
 
-## Data Manipulation Goals
-
-- Perform all manipulation in R
-  - Preserves data integrity
-  - This will take a lot of time at first but is worth the effort
-  - Remember Google is your friend!
-  
-  
-## Tibbles
-
-Two main differences between tibbles and data.frames
-  
-  **2. Subsetting:** is done by name with `$`, or by name or position with `[[]]`.
-
-
-```{r, echo=FALSE, eval=TRUE}
-df <- tibble(
-  x = runif(5),
-  y = rnorm(5)
-)
-```
-
-```{r, echo=TRUE, eval=TRUE}
-df
-```
-
-
-## Subsetting Tibbles
-
-Extract by name
-```{r, echo=TRUE, eval=TRUE}
-df$x
-df[["x"]]
-```
-
-Extract by position
-```{r, echo=TRUE, eval=TRUE}
-
-df[[1]]
-```
-
-
-## Subsetting Tibbles
-
-When using the pipe `%>%`, you need to use a special placeholder `.` when subsetting:
-
-Here the `.` stands in for the tibble named "df"
-```{r, echo=TRUE, eval=TRUE}
-
-df %>% .$x
-
-df %>% .[["x"]]
-```
-
-## Placehold from cut
-
-\bigskip
-
 
 
 In the tidyverse, you can combine multiple operations with the "pipe", or `%>%`.
@@ -98,50 +40,6 @@ In the tidyverse, you can combine multiple operations with the "pipe", or `%>%`.
     -   The code above would read, "take `table4a`, then pivot the columns `1999` and `2000` into one longer column named `year`, and its values should be called `cases`."  
 
 
-
-
-## `separate()`  {.smaller}
-
-Pulls apart one column into multiple columns wherever a separator appears.
-
-\scriptsize
-```{r, eval=TRUE, echo=FALSE}
-print(table3, n = 4, width = Inf)
-```
-
-```{r,  echo=TRUE}
-table3 %>% 
-  separate(rate, into = c("cases", "population"), sep = "/")
-```
-
-
-## `separate()` {.smaller}
-
-If you look carefully, the resulting tibble from the previous set of operations resulted in two new columns that were both *characters* because the original column was a character before the separation. Therefore you should have the function convert to a better type of data using `convert = TRUE`.
-<br />
-<br />
-
-```{r,  echo=TRUE}
-table3 %>% 
-  separate(rate, into = c("cases", "population"), sep = "/",
-                    convert = TRUE)
-```
-
-
-
-## `unite()` {.smaller}
-
-Turns two columns into one. The default for `sep` is an underscore (_), so if you want something different you must specify.
-
-
-```{r, eval=TRUE, echo=FALSE}
-table5
-```
-
-```{r,  echo=TRUE}
-table5 %>% 
-  unite(year_4digit, century, year, sep = "")
-```
 
 
 ## Missing Values
@@ -220,36 +118,5 @@ subset(MM, WnMass < 6)
 subset(MM, Sex == 1 & DamID == 1932, select = "WnMass")
 ```
 
-Use `&` for "and", and `|` for "or."
 
 
-## Making new columns
-
-- Calculate new variables
-    - Transformation, etc.
-- Combine existing variables into a new variable
-    - e.g., year, months, day columns into a date
-- Splitting existing variables into >1 new variables
-
-
-## Calculate new variables: Base R
-
-Data transformations:
-
-```{r eval=FALSE}
-MM$log10_WnMass <- log10(MM$WnMass)
-MM$sqrt_WnMass <- sqrt(MM$WnMass)
-```
-
-_Note_:
-
-- `log()` performs natural log.
-- `log10()` performs base-10 log.
-
-
-
-
-## References
-
-::: {#refs}
-:::

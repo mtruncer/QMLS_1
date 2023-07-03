@@ -1,6 +1,6 @@
 ---
-title: "Template Title"
-subtitle: "Subtitle"
+title: "Data Transformation"
+subtitle: "The biggest time investment during data analysis"
 author:
   - Elizabeth King
   - Kevin Middleton
@@ -16,6 +16,7 @@ code-annotations: hover
 bibliography: QMLS_Bibliography.bib
 csl: evolution.csl
 ---
+## Analysis workflow - Tidy Data {.nostretch}
 
 ```{r}
 #| label: setup
@@ -29,39 +30,28 @@ theme_set(theme_cowplot())
 
 ```
 
-
 <!--
 Datasets
   bats.csv
 -->
 
-## Data Manipulation Goals -- Reminder
 
-Once we have tidy data, we may need to update its format, create new variables, filter out other variables, etc.
+![](../images/Workflow.drawio.png){fig-align="center" width="40%"}
 
+Perform all manipulation via code (in R)
 
-- Perform all manipulation in R
-    
-    - Preserves data integrity
-    - This will take a lot of time at first but is worth the effort
-    - Remember Google is your friend!
+- Preserves data integrity
+- The "hard" way now is the easy way in the long run
 
-
-## Data Transformation with dplyr
-
-<center>
-<br />
-<br />
-<img src="https://i.imgur.com/fDpfRDA.png" width="85%" />
-</center>  
-  
   
 ## Useful transformation functions
 
+- `separate()`
+- `unite()`
 - `filter()`
-- `arrange()`
 - `select()`
 - `mutate()` and `transmute()`
+- `arrange()`
 - `summarize()`
 
 
@@ -78,12 +68,43 @@ Once we have tidy data, we may need to update its format, create new variables, 
 
 ## Eastern Red Bat morphology data
 
-```{r,  echo=TRUE, warning=FALSE, message=FALSE}
+```{r}
+#| echo: true
+#| message: false
+#| warning: false
+
 bats <- read_csv("../data/bats.csv")
 bats[1:10,]
 ```
 
 
+## `unite()` {.smaller}
+
+Turns two columns into one. The default for `sep` is an underscore (_), so if you want something different you must specify.
+
+```{r}
+#| echo: true
+
+bats <- 
+  bats |>
+  unite("age_sex", age:sex)
+
+```
+
+
+## `separate()`  {.smaller}
+
+Pulls apart one column into multiple columns wherever a separator appears.
+
+
+```{r}
+#| echo: true
+
+bats <- 
+  bats |>
+  separate(age_sex, into = c("age","sex"), sep = "_")
+
+```
 
 
 ## `arrange()` {.smaller}
@@ -92,12 +113,13 @@ The function `arrange()` sorts by both ascending numerical and alphabetical orde
   
   - `arrange()` always puts `NA`'s at the end, no matter if your sort in ascending or descending order.
 
-```{r,  echo=TRUE, message=FALSE}
-bats %>% 
+```{r}
+#| echo: true
+#| message: false
+
+bats |>
   arrange(desc(avg_temp), desc(condition), desc(RFA))
 ```
-
-
 
 
 ## `mutate()` and `transmute()` {.smaller}
@@ -105,20 +127,48 @@ bats %>%
 Mutate always adds a new column at the end of the data. So say you want to know the ratio of each bat's right forearm length (RFA) to its bodymass (mass).
 
 
-```{r,  echo=TRUE, message=FALSE}
-bats %>% 
+```{r}
+#| echo: true
+#| message: false
+
+bats |>
   mutate(ratio = RFA / mass)
 ```
-
--   Reminder: `bats$ratio <- bats$RFA / bats$mass` is equivalent
-
 
 ## `mutate()` and `transmute()` {.smaller}
 
 If all you care about is the new variable, use `transmute()`
 
-```{r,  echo=TRUE, message=FALSE}
-bats %>% transmute(ratio = RFA / mass)
+```{r}
+#| echo: true
+#| message: false
+
+bats |> 
+  transmute(ratio = RFA / mass)
+
+```
+
+## Create new variables with base R
+
+- Same result as mutate:
+
+```{r}
+#| echo: true
+#| message: false
+
+bats$ratio <- bats$RFA / bats$mass
+bats[1:5,]
+```
+
+- Same result as transmutate:
+
+```{r}
+#| echo: true
+#| message: false
+
+ratio <- bats$RFA / bats$mass
+ratio[1:5]
+
 ```
 
 
@@ -137,25 +187,34 @@ There are a lot of useful functions for creating new variables out there.  Examp
 
 This is a very useful function. And allows you to collapse parts of tibbles into a single row (i.e. summarize your data based on specifications). So say we want to get an average mass of bats  
 
-```{r,  echo=TRUE, message=FALSE}
-bats %>% 
+```{r}
+#| echo: true
+#| message: false
+
+bats |> 
   summarize(avg_mass = mean(mass))
 ```
 
 
 ## `summarize()` and `group_by()` {.smaller}
 
-If you want to summarize by multiple groups, use `group_by()` and `%>%`
+If you want to summarize by multiple groups, use `group_by()` and `|>`
 
 ```{r,  echo=TRUE, message=FALSE}
-bats %>% 
-  group_by(sex) %>%
+#| echo: true
+#| message: false
+
+bats |> 
+  group_by(sex) |>
   summarize(avg_mass = mean(mass))
 ```
 
 ```{r,  echo=TRUE, message=FALSE}
-bats %>% 
-  group_by(sex, age) %>%
+#| echo: true
+#| message: false
+
+bats |>
+  group_by(sex, age) |>
   summarize(avg_mass = mean(mass))
 ```
 
@@ -163,7 +222,6 @@ bats %>%
 ## `summarize()`
 
 Here are some of the many functions that can be useful with `summarize()`
-
 
 - **Exploratory statistics:** `mean(x)`, `median(x)`, `sd(x)`, `IQR(x)`
 - **Measures of rank or position:** `min(x)`, `quantile(x, c(0.05, 0.95))`, `max(x)`, `first(x)`, `nth(x, 2)`, `last(x)`

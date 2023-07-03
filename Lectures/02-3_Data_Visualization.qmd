@@ -140,7 +140,10 @@ glimpse(iris)
 
 ## Basics of ggplot
 
-```{r echo=TRUE, eval=FALSE}
+```{r}
+#| echo: true
+#| eval: false
+
 library(tidyverse)
 ggplot(iris, aes(x = Petal.Length, y = Petal.Width)) + 
   geom_point() 
