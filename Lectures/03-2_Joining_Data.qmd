@@ -1,5 +1,5 @@
 ---
-title: "Relational Data"
+title: "Joining Data"
 author:
   - Elizabeth King
   - Kevin Middleton
