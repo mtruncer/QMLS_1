@@ -57,14 +57,11 @@ Perform all manipulation via code (in R)
 
 ## Eastern Red Bat morphology data
 
-<center><img src="https://imgur.com/vG2psDp.png" width="100%" /></center>  
-
+![](https://imgur.com/vG2psDp.png){fig-align="center" width="70%"}
 
 ## Eastern Red Bat morphology data
 
-<center><img src="https://imgur.com/RHmGsV8.png" width="100%" /></center>  
-
-
+![](https://imgur.com/RHmGsV8.png){fig-align="center"}
 
 ## Eastern Red Bat morphology data
 
@@ -200,7 +197,7 @@ bats |>
 
 If you want to summarize by multiple groups, use `group_by()` and `|>`
 
-```{r,  echo=TRUE, message=FALSE}
+```{r}
 #| echo: true
 #| message: false
 
@@ -209,7 +206,7 @@ bats |>
   summarize(avg_mass = mean(mass))
 ```
 
-```{r,  echo=TRUE, message=FALSE}
+```{r}
 #| echo: true
 #| message: false
 
@@ -230,21 +227,29 @@ Here are some of the many functions that can be useful with `summarize()`
 
 ## Combine functions to explore data! {.smaller}
 
-Summarize by group and arrange by mass
+- You can combine multiple operations with the "pipe", or `|>`.
+-   This makes your code clean and more human-readable if you translate `|>` to "then".
 
 ```{r,  echo=TRUE, message=FALSE}
+#| echo: true
+#| message: false
+
 bats %>% 
-  group_by(sex, age, condition) %>%
-  summarize(avg_mass = mean(mass)) %>%
+  group_by(sex, age, condition) |>
+  summarize(avg_mass = mean(mass)) |>
   arrange(desc(avg_mass))
 ```
 
+> Read the code above as take the bats tibble, then group by sex, age, and condition and get the average mean for each combination. Finally, arrange the data in decending order by mass. 
 
 ## Combine functions to explore data!  {.smaller}
 
 Find all groups bigger than a threshold
 
-```{r,  echo=TRUE, message=FALSE}
+```{r}
+#| echo: true
+#| message: false
+
 bats %>% 
   group_by(sex, age) %>%
   filter(mass > 15)

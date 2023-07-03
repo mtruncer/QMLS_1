@@ -222,3 +222,62 @@ WR |> filter(ID == "574717-YOO")
 ## Summary of joins
 
 ![](https://data-lessons.github.io/gapminder-R/fig/dplyr-joins.png){fig-align="center"}
+
+## Missing Values
+
+Manipulating your data brings up the importance of missing values. These can either be...
+
+1. **Explicit** - flagged with an `NA`
+2. **Implicit** - not present in the data
+
+
+## Missing Values
+
+```{r,  echo=TRUE}
+frogs <- tibble(
+  year     = c(2019, 2019, 2019, 2019, 2018, 2018, 2018),
+  individual  = c(1,    2,    3,    4,    2,    3,    4),
+  mass     = c(2.88, 3.51, 1.95,   NA, 2.72, 2.17, 3.32))
+```
+
+
+```{r, eval=TRUE, echo=FALSE}
+frogs
+```
+
+
+
+## Missing Values
+
+In our case here, you can make implicit missing values become **explicit** by using `pivot_wider()` to turn the years into columns
+
+
+```{r, eval=TRUE, echo=TRUE}
+frogs %>% 
+  pivot_wider(names_from = year, values_from = mass)
+```
+
+
+## Missing Values
+
+If missing values are not important, you can turn these explicit values into **implicit** ones by using `values_drop_na = TRUE`.
+
+\footnotesize
+```{r, eval=TRUE, echo=TRUE}
+frogs %>%
+  pivot_wider(names_from = year, values_from = mass) %>%
+  pivot_longer(c('2018','2019'), names_to = "year", values_to = "mass", 
+               values_drop_na = TRUE)
+
+```
+
+
+## Missing Values
+
+You can also make missing values explicit with `complete()`
+
+
+```{r, eval=TRUE, echo=TRUE}
+frogs %>%
+  complete(year, individual)
+```
