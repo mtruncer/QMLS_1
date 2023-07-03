@@ -1,0 +1,224 @@
+---
+title: "Relational Data"
+author:
+  - Elizabeth King
+  - Kevin Middleton
+format:
+  revealjs:
+    theme: [default, custom.scss]
+    standalone: true
+    self-contained: true
+    logo: QMLS_Logo.png
+    slide-number: true
+    show-slide-number: all
+code-annotations: hover
+bibliography: QMLS_Bibliography.bib
+csl: evolution.csl
+---
+
+## Motivation
+
+```{r}
+#| label: setup
+#| echo: false
+#| message: false
+
+library(tidyverse)
+library(readxl)
+library(cowplot)
+library(gt)
+
+theme_set(theme_cowplot())
+
+```
+
+<!--
+Datasets
+
+-->
+
+![](https://www.scientificlib.com/en/Biology/Animalia/Chordata/Aves/images/MalurusCyaneus1.jpg){fig-align="center"}
+
+- ~30 years of breeding data for ~1900 female Superb Fairywrens (*Malurus cyaneus*)
+- Individuals tracked for many years (number of fledged offspring, reproductive senescence, etc.)
+- Similar data for males
+
+
+## Relational Data
+
+- Try not to store data redundantly (same data in multiple files)
+- Compartmentalize datasets and then join them together via one or more shared *keys*
+
+Relations are always built between pairs of tables. 
+
+- What uniquely defines these relationships?
+
+
+## Datasets
+
+```{r}
+#| echo: false
+wren_surv <- read_csv("../data/wren_female_surv.csv", show_col_types = FALSE,
+                      col_types = "-cn-nc") |> 
+  rename(longevity = long_years) |> 
+  arrange(ID, longevity) |> 
+  group_by(ID) |> 
+  summarise(final_obs_year = max(year),
+            longevity = max(longevity),
+            sex = sex[1])
+
+wren_repro <- read_csv("../data/wren_female_repro.csv", show_col_types = FALSE,
+                       col_types = "-cnnn-n-") |> 
+  rename(n_offspring = offspring_inde,
+         senescent = final_breed) |> 
+  mutate(mass = rnorm(n(), mean = 10.5, sd = 1) |> round(digits = 1))
+```
+
+```{r}
+#| echo: false
+
+wren_surv |> 
+  slice_head(n = 5) |> 
+  gt() |> 
+  tab_header("Survival")
+
+wren_repro |> 
+  slice_head(n = 5) |> 
+  gt() |> 
+  tab_header("Reproductive Success")
+
+```
+
+
+## Column names
+
+```{r}
+#| echo: true
+
+names(wren_surv)
+names(wren_repro)
+```
+
+- `join_`s will use column names to merge data frames (tibbles). 
+- Can join on non-matching names -- easier to rename columns
+
+
+## Set Operations 
+
+```{r}
+#| echo: true
+
+intersect(names(wren_surv), names(wren_repro))
+
+union(names(wren_surv), names(wren_repro))
+
+```
+
+- Join will use `ID` by default
+
+
+## Kinds of joins in `dplyr`
+
+::: {.incremental}
+
+- `left_join(df1, df2)` and `right_join(df1, df2)`
+    - Merge one into the other by a subject of rows
+    - `left_join(df1, df2)` equals `right_join(df2, df1)`
+- `full_join()`: all rows, regardless
+- `inner_join()`: only matching rows in both
+- `anti_join()`: one but not in the other
+
+:::
+
+
+## Thinking about what you want to keep
+
+- Keep only rows in `df2` than match `df1`, duplicating information?
+- Keep all the rows in `df2`, adding `NA`s for missing data?
+- Keep only rows that match?
+
+
+## Fairywren data
+
+```{r}
+#| echo: false
+
+wren_surv |> 
+  slice_head(n = 5) |> 
+  gt() |> 
+  tab_header("Survival")
+
+wren_repro |> 
+  slice_head(n = 5) |> 
+  gt() |> 
+  tab_header("Reproductive Success")
+
+```
+
+
+## Table dimensions
+
+```{r}
+#| echo: true
+
+dim(wren_surv)
+dim(wren_repro)
+```
+
+- We should have 1,372 rows in the joined data
+
+
+## Checking matches
+
+```{r}
+#| echo: true
+
+# Reproduction not in survival
+setdiff(unique(wren_repro$ID), unique(wren_surv$ID))
+
+# Survival not in reproduction
+setdiff(unique(wren_surv$ID), unique(wren_repro$ID))
+```
+
+
+## Join survival to reproduction
+
+```{r}
+#| echo: true
+#| message: true
+
+WR <- left_join(wren_repro, wren_surv)
+```
+
+```{r}
+WR
+```
+
+
+## Join survival to reproduction
+
+```{r}
+#| echo: true
+#| message: true
+
+WR <- left_join(wren_repro, wren_surv, by = join_by(ID))
+WR
+```
+
+
+## Full join survival to reproduction
+
+- `ID`s in survival data but not in reproduction data are added with `NA`s filled
+
+```{r}
+#| echo: true
+#| message: true
+
+WR <- full_join(wren_repro, wren_surv, by = join_by(ID))
+WR |> filter(ID == "574717-YOO")
+```
+
+
+## Summary of joins
+
+![](https://data-lessons.github.io/gapminder-R/fig/dplyr-joins.png){fig-align="center"}
