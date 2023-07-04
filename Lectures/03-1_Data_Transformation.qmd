@@ -245,7 +245,7 @@ Here are some of the many functions that can be useful with `summarize()`
 #| echo: true
 #| message: false
 
-bats %>% 
+bats |> 
   group_by(sex, age, condition) |>
   summarize(avg_mass = mean(mass)) |>
   arrange(desc(avg_mass))

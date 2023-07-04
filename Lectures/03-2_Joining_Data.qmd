@@ -122,7 +122,7 @@ union(names(wren_surv), names(wren_repro))
 ::: {.incremental}
 
 - `left_join(df1, df2)` and `right_join(df1, df2)`
-    - Merge one into the other by a subject of rows
+    - Merge one into the other by a subset of rows
     - `left_join(df1, df2)` equals `right_join(df2, df1)`
 - `full_join()`: all rows, regardless
 - `inner_join()`: only matching rows in both
