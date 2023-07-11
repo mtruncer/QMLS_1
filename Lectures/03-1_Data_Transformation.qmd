@@ -1,6 +1,6 @@
 ---
 title: "Data Transformation"
-subtitle: "The biggest time investment during data analysis"
+subtitle: "One of the most important data analysis skill sets"
 author:
   - Elizabeth King
   - Kevin Middleton
@@ -57,14 +57,11 @@ Perform all manipulation via code (in R)
 
 ## Eastern Red Bat morphology data
 
-<center><img src="https://imgur.com/vG2psDp.png" width="100%" /></center>  
-
+![](https://imgur.com/vG2psDp.png){fig-align="center" width="70%"}
 
 ## Eastern Red Bat morphology data
 
-<center><img src="https://imgur.com/RHmGsV8.png" width="100%" /></center>  
-
-
+![](https://imgur.com/RHmGsV8.png){fig-align="center"}
 
 ## Eastern Red Bat morphology data
 
@@ -85,9 +82,22 @@ Turns two columns into one. The default for `sep` is an underscore (_), so if yo
 ```{r}
 #| echo: true
 
-bats <- 
-  bats |>
+bats |>
   unite("age_sex", age:sex)
+
+```
+
+## `paste()` and `paste0()`
+
+In base R, the `paste` functions are a flexible way to put multiple objects together.
+
+```{r}
+#| echo: true
+
+bats$age_sex <- paste(bats$age, "_", bats$sex, sep = "")
+bats$age_sex <- paste0(bats$age, "_", bats$sex)
+
+bats
 
 ```
 
@@ -103,6 +113,27 @@ Pulls apart one column into multiple columns wherever a separator appears.
 bats <- 
   bats |>
   separate(age_sex, into = c("age","sex"), sep = "_")
+bats
+
+```
+
+## The `stringr` package & base functions
+
+- Many flexible functions for manipulating strings in the `stringr` function
+- Base R has equivalent functions but they are typically harder to use
+
+Example:
+
+```{r}
+#| echo: false
+
+bats$age_sex <- paste0(bats$age, "_", bats$sex)
+```
+
+```{r}
+#| echo: true
+
+str_split(bats$age_sex, "_", simplify=TRUE)
 
 ```
 
@@ -122,7 +153,7 @@ bats |>
 ```
 
 
-## `mutate()` and `transmute()` {.smaller}
+## `mutate()` {.smaller}
 
 Mutate always adds a new column at the end of the data. So say you want to know the ratio of each bat's right forearm length (RFA) to its bodymass (mass).
 
@@ -135,18 +166,6 @@ bats |>
   mutate(ratio = RFA / mass)
 ```
 
-## `mutate()` and `transmute()` {.smaller}
-
-If all you care about is the new variable, use `transmute()`
-
-```{r}
-#| echo: true
-#| message: false
-
-bats |> 
-  transmute(ratio = RFA / mass)
-
-```
 
 ## Create new variables with base R
 
@@ -158,17 +177,6 @@ bats |>
 
 bats$ratio <- bats$RFA / bats$mass
 bats[1:5,]
-```
-
-- Same result as transmutate:
-
-```{r}
-#| echo: true
-#| message: false
-
-ratio <- bats$RFA / bats$mass
-ratio[1:5]
-
 ```
 
 
@@ -185,7 +193,7 @@ There are a lot of useful functions for creating new variables out there.  Examp
 
 ## `summarize()`
 
-This is a very useful function. And allows you to collapse parts of tibbles into a single row (i.e. summarize your data based on specifications). So say we want to get an average mass of bats  
+- Allows you to collapse parts of tibbles into a single row (i.e. summarize your data based on specifications)
 
 ```{r}
 #| echo: true
@@ -200,7 +208,7 @@ bats |>
 
 If you want to summarize by multiple groups, use `group_by()` and `|>`
 
-```{r,  echo=TRUE, message=FALSE}
+```{r}
 #| echo: true
 #| message: false
 
@@ -209,7 +217,7 @@ bats |>
   summarize(avg_mass = mean(mass))
 ```
 
-```{r,  echo=TRUE, message=FALSE}
+```{r}
 #| echo: true
 #| message: false
 
@@ -230,28 +238,18 @@ Here are some of the many functions that can be useful with `summarize()`
 
 ## Combine functions to explore data! {.smaller}
 
-Summarize by group and arrange by mass
+- You can combine multiple operations with the "pipe", or `|>`.
+- This makes your code clean and more human-readable if you translate `|>` to "then".
 
 ```{r,  echo=TRUE, message=FALSE}
-bats %>% 
-  group_by(sex, age, condition) %>%
-  summarize(avg_mass = mean(mass)) %>%
+#| echo: true
+#| message: false
+
+bats |> 
+  group_by(sex, age, condition) |>
+  summarize(avg_mass = mean(mass)) |>
   arrange(desc(avg_mass))
 ```
 
+> Read the code above as take the bats tibble, then group by sex, age, and condition and get the average mean for each combination. Finally, arrange the data in decending order by mass. 
 
-## Combine functions to explore data!  {.smaller}
-
-Find all groups bigger than a threshold
-
-```{r,  echo=TRUE, message=FALSE}
-bats %>% 
-  group_by(sex, age) %>%
-  filter(mass > 15)
-```
-
-
-## References
-
-::: {#refs}
-:::

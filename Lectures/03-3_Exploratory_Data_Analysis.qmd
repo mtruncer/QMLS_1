@@ -1,0 +1,351 @@
+---
+title: "Exploratory Data Analysis"
+author:
+  - Elizabeth King
+  - Kevin Middleton
+format:
+  revealjs:
+    theme: [default, custom.scss]
+    standalone: true
+    self-contained: true
+    logo: QMLS_Logo.png
+    slide-number: true
+    show-slide-number: all
+code-annotations: hover
+bibliography: QMLS_Bibliography.bib
+csl: evolution.csl
+---
+
+## Exploratory Data Analysis
+
+```{r}
+#| label: setup
+#| echo: false
+library(tidyverse)
+library(readxl)
+library(cowplot)
+theme_set(theme_cowplot())
+
+```
+
+
+<!--
+Datasets
+  bats.csv
+-->
+
+Visually exploring your data is often called Exploratory Data Analysis (EDA)
+
+- Helps you figure out what is going on
+- Can identify errors or problems with your data 
+- An imperative first step to data analysis
+- Allows you to feel confident with analyses
+- Not a formal process, simply whatever you like to do to examine your data
+
+
+## EDA with ggplot2
+
+![](../images/Workflow.drawio.png){fig-align="center" width="40%"}
+
+
+## Let's do some EDA on our Bats Data
+
+```{r}
+#| echo: true
+#| warning: false
+#| message: false
+
+bats <- read_csv("../data/bats.csv")
+bats[1:10,]
+```
+
+
+## Summary Tables
+
+```{r}
+#| echo: true
+#| warning: false
+#| message: false
+
+summary(bats)
+```
+
+
+## Look at Your Data - Boxplots
+
+Different variations, but the most standard recipe is:
+
+1. Median = center line
+1. Box = IQR (25th to 75th percentiles)
+1. Whiskers at 1.5 x 25th and 75th percentiles
+1. Dots for anything outside 1.5 x 25th and 75th percentiles
+
+
+## Look at Your Data - Boxplots
+
+```{r}
+#| echo: true
+#| warning: false
+#| message: false
+
+ggplot(data = bats, aes(x = sex, y = mass))+
+  geom_boxplot()
+  
+```
+
+## Raw data as an alternative to boxplots
+
+```{r}
+#| echo: true
+#| warning: false
+#| message: false
+
+ggplot(bats, aes(x = sex, y = mass))+
+  geom_point(size = 3)
+  
+```
+
+
+## Raw data as an alternative to boxplots
+
+Add a little jitter and transparency on the x axis to keep from overplotting.
+
+```{r}
+#| echo: true
+#| output-location: slide
+
+ggplot(bats, aes(x = sex, y = mass))+
+  geom_point(position = position_jitter(width = 0.3),
+             alpha = 0.5,
+             size = 3)
+
+```
+
+
+## Boxplots and raw data
+
+```{r}
+#| echo: true
+#| output-location: slide
+
+ggplot(bats, aes(x = sex, y = mass)) +
+  geom_boxplot(outlier.shape = NA) +
+  geom_point(position = position_jitter(width = 0.3),
+             alpha = 0.5, 
+             color = "blue",
+             size = 3)
+
+```
+
+Note `outlier.shape = NA` to suppress plotting outliers with the boxplot.
+
+
+## Boxplots and raw data
+
+You can "bring the boxplot to the front" by switching the order of `geom_point()` and `geom_boxplot()`.
+
+```{r}
+#| echo: true
+#| output-location: slide
+
+ggplot(bats, aes(x = sex, y = mass))+
+  geom_point(position = position_jitter(width = 0.3),
+             alpha = 0.5, 
+             color = "blue",
+             size = 3) +
+  geom_boxplot(alpha = 2/3,
+               outlier.shape = NA)
+
+```
+
+
+## Boxplots and coord flips
+
+You can also pick a different variable to group by and flip your axes.
+
+```{r}
+#| echo: true
+#| output-location: slide
+
+ggplot(bats, aes(x = condition, y = RFA))+
+  geom_boxplot(outlier.shape = NA)+
+  geom_point(position = position_jitter(width = 0.3),
+             alpha = 0.5, 
+             color = "blue",
+             size = 3) +
+  coord_flip()
+
+```
+
+
+
+## Boxplots Re-ordered
+
+Sometimes you want your groups in a specific order, not alphabetical
+
+```{r}
+#| echo: true
+#| output-location: slide
+
+bats$condition <- factor(bats$condition,
+                         levels = c("L", "P","PL", "TD", "NR"))
+
+ggplot(bats, aes(x = condition, y = RFA))+
+  geom_boxplot(outlier.shape = NA) +
+  geom_point(position = position_jitter(width = 0.3),
+             alpha = 0.5, 
+             color = "blue",
+             size = 3) +
+  coord_flip()
+
+```
+
+
+## Look at Your Data - Distributions {.smaller}
+
+`geom_histogram()` - allows you to see the distribution of your data
+
+```{r}
+#| echo: true
+
+ggplot(bats)+
+  geom_histogram(aes(x = mass),
+                 binwidth = 0.5)+
+  theme(text = element_text(size = 18))
+  
+```
+
+
+## Look at Your Data - Distributions {.smaller}
+
+`geom_density()` - normalizes your data instead of counts.
+
+```{r}
+#| echo: true
+
+ggplot(bats)+
+  geom_density(aes(x = mass, fill = sex))+
+  theme(text = element_text(size = 18))
+  
+```
+
+
+## Look at Your Data - Distributions {.smaller}
+
+Let's check the moonlight data
+
+```{r}
+#| echo: true
+
+ggplot(bats)+
+  geom_histogram(aes(x = moonlight), alpha = 0.5)+
+  theme(text = element_text(size=18))
+  
+```
+
+
+## Finding suspect observations
+
+```{r}
+#| echo: true
+
+bats |> 
+  select(bat_ID, age, mass, moonlight) |> 
+  arrange(moonlight)
+
+```
+
+
+## Finding suspect observations
+
+```{r}
+#| echo: true
+
+bats |> 
+  select(bat_ID, age, mass, moonlight) |> 
+  arrange(desc(moonlight))
+
+```
+
+
+## What to do?
+
+1. Are the observations really incorrect?
+    - Malfunction
+1. Was there a data entry error?
+    - Check the original data sheets
+1. Make any alterations via code and a new file
+    - Leave raw data untouched
+
+## Filter
+
+```{r}
+#| echo: true
+
+bats_filt <- bats |>
+  filter(moonlight < 100)
+
+max(bats_filt$moonlight)
+```
+
+
+## Replace values
+
+```{r}
+#| echo: true
+
+bats$moonlight[bats$moonlight == 1000] <- 100
+
+bats$moonlight[bats$moonlight == 990 &
+                  bats$bat_ID == 155] <- 99
+
+bats$moonlight[bats$moonlight == 990 &
+                  bats$bat_ID == 1] <- 0
+```
+
+
+## Doublecheck your fixes
+
+```{r}
+#| echo: true
+
+bats |> 
+  select(bat_ID, age, mass, moonlight) |> 
+  arrange(moonlight)
+```
+
+
+## Doublecheck your fixes
+
+```{r}
+#| echo: true
+
+bats |> 
+  select(bat_ID, age, mass, moonlight) |> 
+  arrange(desc(moonlight)) |>
+  print(n = 11)
+```
+
+
+## Doublecheck your fixes {.smaller}
+
+Let's re-check the moonlight data
+
+```{r}
+#| echo: true
+
+ggplot(bats) +
+  geom_histogram(aes(x = moonlight), alpha = 0.5) +
+  theme(text = element_text(size = 18))
+  
+```
+
+## Write out the new dataset
+
+```{r}
+#| echo: true
+#| eval: false
+
+write_csv(bats, file = "bats_corrected.csv")
+  
+```

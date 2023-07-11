@@ -341,7 +341,7 @@ You can filter with logical or Boolean operators to select various sets.
 
 ## Filtering rows: Base R
 
-- Note that you must include the name of the `data.frame` you you subsetting inside `[ ]`: `MM$BYear`
+- Note that you must include the name of the `data.frame` you are subsetting inside `[ ]`: `MM$BYear`
 
 ```{r}
 #| echo: true
