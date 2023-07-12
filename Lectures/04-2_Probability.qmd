@@ -357,7 +357,7 @@ sum(dbinom(1:3, 3, prob = 0.75))
 - How many patients should I enroll in a study, assuming some will drop out?
 
 
-## Questions in science
+## Think about your own questions
 
 
 ## References
