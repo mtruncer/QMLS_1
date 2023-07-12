@@ -359,8 +359,6 @@ sum(dbinom(1:3, 3, prob = 0.75))
 
 ## Questions in science
 
-FIXME
-
 
 ## References
 
