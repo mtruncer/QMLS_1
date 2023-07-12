@@ -86,7 +86,7 @@ Pr[P|M] \times Pr[M] &= Pr[M|P] \times Pr[P]\\
 
 ## Bayes' Rule {.smaller}
 
-> "All decisions should be based on evidence, but the best decisions should also be based on previous experience." Stone (2012)
+> "All decisions should be based on evidence, but the best decisions should also be based on previous experience." [@Stone2013-xa]
 
 $$Pr[A|B] = \frac{Pr[B|A] \times Pr[A]}{Pr[B]}$$
 
