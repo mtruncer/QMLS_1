@@ -218,7 +218,7 @@ flip3 |> ggplot(aes(x = Flips, y = Ways)) +
 
 If we flip a coin 4 times, what are the possible outcomes?
 
-1. HHH
+1. HHHH
 1. HHHT, HHTH, HTHH, THHH
 1. HHTT, TTHH, HTHT, THTH, HTTH, THHT
 1. TTTH, TTHT, THTT, HTTT
