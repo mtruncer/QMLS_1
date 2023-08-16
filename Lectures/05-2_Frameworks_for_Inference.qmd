@@ -1,0 +1,96 @@
+---
+title: "Frameworks for Inference"
+author:
+  - Elizabeth King
+  - Kevin Middleton
+format:
+  revealjs:
+    theme: [default, custom.scss]
+    standalone: true
+    self-contained: true
+    logo: QMLS_Logo.png
+    slide-number: true
+    show-slide-number: all
+code-annotations: hover
+bibliography: QMLS_Bibliography.bib
+csl: evolution.csl
+---
+
+```{r}
+#| label: setup
+#| echo: false
+
+library(tidyverse)
+library(cowplot)
+
+```
+
+## Models and Inference
+
+- You want to use data to answer questions.
+- Make *inferences* using *models* with data.
+
+The method you use for inference is part of the model.
+
+- Different sets of assumptions
+- Many will give very similar answers
+
+
+
+Notes: what do we assume when we use a method? how do we know what "the answer" is? how do we know how certain we are about the answer?
+
+## Frameworks for Inference
+
+1. Maximum likelihood/Frequentist
+2. Bayesian 
+
+Each is a different way to approach the question with different costs and benefits. One is not inherently better than the other.
+
+## Maximum likelihood
+
+For a given mean, how likely is observing my data?
+
+- Maximum likelihood searches for the value of the mean (or other parameter of interest) that maximizes this likelihood.
+
+Analytical solutions are generally equal to the maximum likelihood solutions (for set of assumptions).
+
+<center>
+<img src="https://i.imgur.com/L0oa58u.png" width="50%" />
+</center>
+
+## Analytical
+
+Algebraic (closed form) solutions for estimating parameters
+
+$$\bar{Y} = \frac{\sum_{i=1}^{n}Y_i}{n}$$
+
+- Historically, calculations had to be made by hand
+- We made and continue to make a lot of strong inference from these calculations
+    - The first ~75-100 years of experimental life sciences
+
+## Analytical
+
+Like the slope in bivariate regression, many are based of sums of squares (summed squared deviations).
+
+$$b = \frac{\sum\left(X_{i}-\bar{X}\right)\left(Y_{i}-\bar{Y}\right)}{\sum\left(X_{i}-\bar{X}\right)^{2}}$$
+
+## Formulas can get unwieldy
+
+<center>
+<img src="https://i.imgur.com/g6AzywG.png" width="100%" />
+</center>
+
+
+## Bayesian
+
+What is the probability of these parameter estimates given the data and my prior knowledge?
+
+- Inferences from data conditioned on prior knowledge
+- Prior knowledge may be strong or weak
+
+$$Pr[\theta | Data] = \frac{Pr[Data | \theta] \times Pr[\theta]}{Pr[Data]}$$
+
+## References
+
+::: {#refs}
+:::
