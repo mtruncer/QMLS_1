@@ -1,0 +1,376 @@
+---
+title: "From Probability to Likelihood"
+author:
+  - Elizabeth King
+  - Kevin Middleton
+format:
+  revealjs:
+    theme: [default, custom.scss]
+    standalone: true
+    self-contained: true
+    logo: QMLS_Logo.png
+    slide-number: true
+    show-slide-number: all
+code-annotations: hover
+bibliography: QMLS_Bibliography.bib
+csl: evolution.csl
+---
+
+```{r}
+#| label: setup
+#| echo: false
+#| message: false
+#| warning: false
+
+library(tidyverse)
+library(cowplot)
+library(forcats)
+library(latex2exp)
+theme_set(theme_cowplot())
+```
+
+
+## Frequency Distribution of Heads | 6 Flips
+
+```{r}
+#| fig.height: 4.5
+
+flips <- tibble(
+  Ways = c(1, 6, 15, 20, 15, 6, 1),
+  Flips = c("0 H", "1 H", "2 H",
+            "3 H", "4 H", 
+            "5 H", "6 H")) |> 
+  mutate(Flips = fct_inorder(Flips))
+
+flips |> ggplot(aes(x = Flips, y = Ways)) +
+  geom_bar(stat = "Identity")
+```
+
+
+## Probability Distribution of Heads | 6 Flips
+
+```{r}
+#| echo: true
+
+flips$Ways
+flips$Ways / sum(flips$Ways)
+```
+
+
+## Probability Distribution of Heads | 6 Flips
+
+```{r}
+#| fig.height: 3.5
+
+flip6 <- tibble(
+  Ways = c(1, 6, 15, 20, 15, 6, 1),
+  Flips = c("0 H", "1 H", "2 H",
+            "3 H", "4 H", 
+            "5 H", "6 H"),
+  Prob = Ways / sum(Ways)) |> 
+  mutate(Flips = fct_inorder(Flips))
+
+flip6 |> 
+  ggplot(aes(x = Flips, y = Prob)) +
+  geom_bar(stat = "Identity") +
+  labs(y = "Probability")
+```
+
+How can we go from a set of probabilities to likelihoods?
+
+
+## Model Likelihood ($\mathcal{L}$)
+
+Given data ($Y$) and *hypothesized* parameter values ($\Theta$):
+
+$$\mathcal{L}\left(Y;\Theta\right) = \prod Pr\left[Y; \Theta\right]$$
+
+- Where $Y$ is a set of observations ($Y_1$, $Y_2$, ..., $Y_n$)
+- The model likelihood is the product ($\Pi$) of the observations' individual probabilities.
+
+
+## Model Likelihood ($\mathcal{L}$)
+
+$$\mathcal{L}\left(Y;\Theta\right) = \prod Pr\left[Y; \Theta\right]$$
+
+- Evaluate the likelihood for different values of $\Theta$.
+- Maximize $\mathcal{L}$ and you will have the maximum likelihood set of parameter estimates.
+
+
+## Large and small numbers
+
+The product of a *large* number of probabilities can result in some very *small* probabilities
+
+- Computers don't handle really small numbers very well
+- Lower limit to the smallest number a computer can keep track of: $`r .Machine$double.xmin`$ in R.
+
+Think about computing the model likelihood with thousands or millions of observations.
+
+```{r}
+#| echo: true
+
+0.09^150
+```
+
+
+## Maximize the natural log of $\mathcal{L}$
+
+The log-likelihood is easier to deal with mathematically.
+
+$$\mathcal{L}\left(Y;\Theta\right) = \prod Pr\left[Y; \Theta\right]$$
+
+Log both sides of the equation:
+
+$$\log \left( \mathcal{L}\left(Y;\Theta\right) \right) = \log \left( \prod Pr\left[Y; \Theta\right] \right)$$
+
+
+## Mathematics of logarithms
+
+$$\log \left( \mathcal{L}\left(Y;\Theta\right) \right) = \log \left( \prod Pr\left[Y; \Theta\right] \right)$$
+
+The log of the products equals the sum of the logs:
+
+$$\log \left( \mathcal{L}\left(Y;\Theta\right) \right) = \sum \log \left(Pr\left[Y; \Theta\right] \right)$$
+
+Sum the log-likelihoods of the observations to get the model likelihood. 
+
+_Note_: `log()` is _natural_ log.
+
+
+## Likelihood of coin flips
+
+You have 2 heads from 6 coin flips (i.e., 1 observation)
+
+- What is the maximum likelihood estimate of the probability of heads $(\theta)$?
+- $\theta$ can be any value from 0 to 1 (but we won't include 0 or 1).
+
+
+## log-Likelihood for one value of $\theta$
+
+Hypothesize that $\theta = 0.2$, observe 2 heads from 6 flips. What is the likelihood?
+
+```{r}
+#| echo: true
+
+theta <- 0.2
+pr <- dbinom(2, 6, prob = theta)
+pr
+log(pr)
+```
+
+
+## log-Likelihood for one value of $\theta$
+
+Hypothesize that $\theta = 0.2$, observe 2 heads from 6 flips. What is the likelihood? 
+
+\begin{align*}
+\log \left( \mathcal{L}\left(Y;\Theta\right) \right) &= \sum \log \left(Pr\left[Y; \Theta\right] \right)\\
+
+\log\left(\mathcal{L}\left( Y; 0.2 \right)\right) &=  \log\left( 0.24576 \right)
+\end{align*}
+
+Where $Y$ is 2 heads from 6 flips (2/6).
+
+
+## Likelihood across the range of 0 to 1
+
+Generate a range of possible values for $\theta$:
+
+```{r}
+#| echo: true
+
+theta <- seq(0.001, 0.999, length = 200)
+```
+
+Calculate the probability for 2 heads for each value of $\theta$:
+
+```{r}
+#| echo: true
+
+pr <- dbinom(2, 6, prob = theta)
+```
+
+Convert to log-likelihoods:
+
+```{r}
+#| echo: true
+#| output-location: slide
+log_lik <- log(pr)
+log_liks <- tibble(theta, log_lik)
+
+log_liks
+```
+
+```{r}
+log_liks_comb <- log_liks |> 
+  rename(log_lik_6 = log_lik)
+```
+
+
+## Likelihood across the range of 0 to 1
+
+```{r}
+log_liks |> 
+  ggplot(aes(theta, log_lik)) +
+  geom_line(size = 1.5) +
+  labs(x = TeX("$\\theta$"), y = "log-Likelihood")
+```
+
+
+## Maximum likelihood
+
+`which.max()` returns the index of the maximum value.
+
+```{r}
+#| echo: true
+
+max(log_lik)
+theta[which.max(log_lik)]
+```
+
+- 1/3 was not among the tested values for $\theta$.
+
+
+## Maximum likelihood
+
+```{r}
+log_liks |> 
+  ggplot(aes(theta, log_lik)) +
+  geom_line(size = 1.5) +
+  geom_point(aes(x = theta[which.max(log_lik)], y = max(log_lik)),
+             color = "red", size = 3) +
+  labs(x = TeX("$\\theta$"), y = "log-Likelihood")
+```
+
+
+## Likelihood of coin flips
+
+You have 20 heads from 60 coin flips.
+
+- What is the maximum likelihood estimate of the probability of heads ($\theta$)?
+- $\theta$ can be any value from 0 to 1.
+
+
+## Likelihood across the range of 0 to 1
+
+```{r}
+#| echo: true
+
+theta <- seq(0.001, 0.999, length = 200)
+pr <- dbinom(20, 60, prob = theta)
+log_lik <- log(pr)
+log_liks <- tibble(theta, log_lik)
+log_liks
+```
+
+```{r}
+log_liks_comb$log_lik_60 <- log_lik
+```
+
+
+## Likelihood across the range of 0 to 1
+
+```{r}
+log_liks |> 
+  ggplot(aes(theta, log_lik)) +
+  geom_line(size = 1.5) +
+  labs(x = TeX("$\\theta$"), y = "log-Likelihood")
+```
+
+
+## Maximum likelihood
+
+```{r}
+#| echo: true
+
+max(log_lik)
+theta[which.max(log_lik)]
+```
+
+
+## Maximum likelihood
+
+```{r}
+log_liks |> 
+  ggplot(aes(theta, log_lik)) +
+  geom_line(size = 1.5) +
+  geom_point(aes(x = theta[which.max(log_lik)], y = max(log_lik)),
+             color = "red", size = 3) +
+  labs(x = TeX("$\\theta$"), y = "log-Likelihood")
+```
+
+
+## Likelihood of coin flips
+
+You have 20000 heads from 60000 coin flips.
+
+- What is the maximum likelihood estimate of the probability of heads ($\theta$)?
+- $\theta$ can be any value from 0 to 1.
+
+
+## Likelihood across the range of 0 to 1
+
+```{r}
+#| echo: true
+
+theta <- seq(0.001, 0.999, length = 200)
+log_lik <- dbinom(20000, 60000, prob = theta, log = TRUE)
+log_liks <- tibble(theta, log_lik)
+```
+
+*Note*: Use `log = TRUE` to return the log-probability directly from `dbinom()` to avoid problems with `log(`*very small number*`)`.
+
+```{r}
+log_liks_comb$log_lik_60000 <- log_lik
+```
+
+
+## Maximum likelihood
+
+```{r}
+log_liks |> 
+  ggplot(aes(theta, log_lik)) +
+  geom_line(size = 1.5) +
+  geom_point(aes(x = theta[which.max(log_lik)], y = max(log_lik)),
+             color = "red", size = 3) +
+  labs(x = TeX("$\\theta$"), y = "log-Likelihood")
+```
+
+
+## Comparing likelihoods as sample size increases
+
+```{r}
+#| echo: true
+
+head(log_liks_comb)
+```
+
+
+## Comparing likelihoods as sample size increases
+
+```{r}
+#| warning: false
+
+log_liks_comb |> 
+  pivot_longer(cols = -theta, names_to = "n", values_to = "log-Likelihood") |> 
+  mutate(n = str_remove(n, "log_lik_") |> as.numeric() |> factor()) |> 
+  ggplot(aes(x = theta, y = `log-Likelihood`, color = n)) +
+  geom_line(size = 1.5) +
+  labs(x = TeX("$\\theta$"), y = "log-Likelihood")
+```
+
+
+## Comparing likelihoods as sample size increases
+
+```{r}
+#| warning: false
+
+log_liks_comb |> 
+  pivot_longer(cols = -theta, names_to = "n", values_to = "log-Likelihood") |> 
+  mutate(n = str_remove(n, "log_lik_") |> as.numeric() |> factor()) |> 
+  ggplot(aes(x = theta, y = `log-Likelihood`, color = n)) +
+  geom_line(size = 1.5) +
+  labs(x = TeX("$\\theta$"), y = "log-Likelihood") +
+  ylim(c(-200, 0))
+```
+
