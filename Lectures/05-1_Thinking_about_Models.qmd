@@ -1,5 +1,6 @@
 ---
 title: "Thinking about Statistical Models"
+subtitle: "Frameworks for Inference"
 author:
   - Elizabeth King
   - Kevin Middleton
@@ -21,6 +22,9 @@ csl: evolution.csl
 #| echo: false
 
 library(tidyverse)
+library(cowplot)
+theme_set(theme_cowplot())
+library(readxl)
 
 ```
 
@@ -174,6 +178,272 @@ $Length\left(Age\right) = \theta_1 + \theta_2 Age + \theta_3 Age^2$
 :::
 
 ::::
+
+
+## Models and Inference
+
+- You want to use data to answer questions.
+- Make *inferences* using *models* with data.
+
+The method you use for inference is part of the model.
+
+- Different sets of assumptions
+- Many will give very similar answers
+
+
+
+Notes: what do we assume when we use a method? how do we know what "the answer" is? how do we know how certain we are about the answer?
+
+
+## Example: Wing Dimorphic Crickets
+
+> Do long-winged crickets have a higher resting metabolic rate than short-winged crickets?
+
+:::: {.columns}
+
+::: {.column width="40%"}
+![](https://i.imgur.com/kgPmw0b.jpg){fig-align="center"}
+:::
+
+::: {.column width="60%"}
+Controlling for body mass,
+
+- Metabolic rates do not differ
+- Average metabolic rate of long-wings is higher
+- Average  metabolic rate of long-wings is lower
+:::
+
+::::
+
+## Observe some data
+
+```{r}
+#| echo: true
+#| eval: true
+
+CD <- read_csv("../data/Cricket_Metabolic_MassCor.csv")
+
+CD |>
+  group_by(Wing_Morph) |>
+  summarise(Mean = mean(CO2_resid))
+  
+```
+
+## Observe some data
+
+```{r}
+#| echo: false
+#| eval: true
+
+CD |>
+  ggplot(aes(Wing_Morph, CO2_resid)) +
+  geom_point(position = position_jitter(width = 0.3), alpha = 0.5) +
+  stat_summary(fun = mean, geom = "point", size = 3, color = "red") 
+  
+```
+
+## Do long-winged crickets have a higher resting metabolic rate than short-winged crickets?
+
+- What is the probability the two groups have the same mean?
+- What is the probability of observing a difference like this from sampling error only?
+- What is the probability these are two samples from the same distribution?
+- How well can you predict metabolic rate from wing morph?
+
+## Frameworks for Inference
+
+1. Frequentist/Likelihood
+2. Bayesian 
+
+-  Each is a different way to approach the question with different costs and benefits. 
+-  One is not inherently better than the other.
+-  Both use similar concepts (e.g. likelihood and probability) and ideas.
+
+## Frequentist/Likelihood Framework
+
+-  A framework for inference based on the expected set of possible outcomes
+    - Can simulate these expectations given assumptions
+    - Often closed-form answers based on modeling the data with distributions with known behavior
+    
+-  For a given situation (e.g. parameter & distribution), how likely is observing my data?
+
+## Could this observed difference just be sampling error?
+
+```{r}
+#| echo: false
+#| eval: true
+
+CD |>
+  ggplot(aes(Wing_Morph, CO2_resid)) +
+  geom_point(position = position_jitter(width = 0.3), alpha = 0.5) +
+  stat_summary(fun = mean, geom = "point", size = 3, color = "red") 
+  
+```
+
+## How big of a difference do you get from sampling error?
+
+1. Assume LW and SW share a distribution
+2. Put all values from both morphs in one group
+3. Randomly assign SW and LW labels to values
+4. Repeat over and over
+
+## How big of a difference do you get from sampling error?
+
+```{r}
+#| echo: false
+#| eval: true
+
+CD$Group <- "ALL"
+
+CD |>
+  ggplot(aes(Group, CO2_resid)) +
+  geom_point(position = position_jitter(width = 0.3), alpha = 0.5) +
+  stat_summary(fun = mean, geom = "point", size = 3, color = "red") 
+  
+```
+
+## How big of a difference do you get from sampling error?
+
+```{r}
+#| echo: false
+#| eval: true
+
+CD$WM_Shuffle <- sample(CD$Wing_Morph)
+
+CD |>
+  group_by(WM_Shuffle) |>
+  summarise(Mean = mean(CO2_resid))
+
+
+CD |>
+  ggplot(aes(WM_Shuffle, CO2_resid)) +
+  geom_point(position = position_jitter(width = 0.3), alpha = 0.5) +
+  stat_summary(fun = mean, geom = "point", size = 3, color = "red") 
+  
+```
+
+## How big of a difference do you get from sampling error?
+
+```{r}
+#| echo: false
+#| eval: true
+
+CD$WM_Shuffle <- sample(CD$Wing_Morph)
+
+CD |>
+  group_by(WM_Shuffle) |>
+  summarise(Mean = mean(CO2_resid))
+
+
+CD |>
+  ggplot(aes(WM_Shuffle, CO2_resid)) +
+  geom_point(position = position_jitter(width = 0.3), alpha = 0.5) +
+  stat_summary(fun = mean, geom = "point", size = 3, color = "red") 
+  
+```
+
+## What do we expect to see when there is a meaningful difference between wing morphs?
+
+```{r}
+#| echo: false
+#| eval: true
+
+CD |>
+  ggplot(aes(Wing_Morph, CO2_resid)) +
+  geom_point(position = position_jitter(width = 0.3), alpha = 0.5) +
+  stat_summary(fun = mean, geom = "point", size = 3, color = "red") 
+  
+```
+
+## What do we expect to see when there is a meaningful difference between wing morphs? 
+
+1.  Assume corrected metabolic rate is normally distributed
+2.  Pull random values for long wings from a normal distribution with a higher mean
+3. Pull random values for short wings from a normal distribution with a lower mean
+4. Repeat over and over
+
+## Simulate a difference using distributions
+
+```{r}
+#| echo: true
+#| eval: true
+
+n.sw <- sum(CD$Wing_Morph=="SW")
+n.lw <- sum(CD$Wing_Morph=="LW")
+
+mean.sw <- -1
+mean.lw <- 2
+
+SS <- tibble(Wing_Morph = c(rep("SW", n.sw), rep("LW", n.lw)),
+             Sim_CO2 = c(rnorm(n.sw, mean.sw), rnorm(n.lw, mean.lw))
+             
+)
+
+SS |> group_by(Wing_Morph) |>
+  summarise(Mean = mean(Sim_CO2))
+
+```
+
+## Simulate a difference using distributions
+
+```{r}
+#| echo: false
+#| eval: true
+
+SS |> group_by(Wing_Morph) |>
+  summarise(Mean = mean(Sim_CO2))
+
+SS |>
+  ggplot(aes(Wing_Morph, Sim_CO2)) +
+  geom_point(position = position_jitter(width = 0.3), alpha = 0.5) +
+  stat_summary(fun = mean, geom = "point", size = 3, color = "red")
+  
+```
+
+## Simulate a difference using distributions
+
+```{r}
+#| echo: false
+#| eval: true
+
+n.sw <- sum(CD$Wing_Morph=="SW")
+n.lw <- sum(CD$Wing_Morph=="LW")
+
+mean.sw <- -1
+mean.lw <- 2
+
+SS <- tibble(Wing_Morph = c(rep("SW", n.sw), rep("LW", n.lw)),
+             Sim_CO2 = c(rnorm(n.sw, mean.sw), rnorm(n.lw, mean.lw))
+             
+)
+
+SS |> group_by(Wing_Morph) |>
+  summarise(Mean = mean(Sim_CO2))
+
+SS |>
+  ggplot(aes(Wing_Morph, Sim_CO2)) +
+  geom_point(position = position_jitter(width = 0.3), alpha = 0.5) +
+  stat_summary(fun = mean, geom = "point", size = 3, color = "red")
+  
+```
+
+## Frequentist/Likelihood Framework
+
+-  A framework for inference based on the expected set of possible outcomes
+    - Can simulate these expectations given assumptions
+    - Often closed-form answers based on modeling the data with distributions with known behavior
+    
+-  For a given situation (e.g. parameter & distribution), how likely is observing my data?
+
+## Bayesian Framework
+
+- A framework for inference based on 
+- Inferences from data conditioned on prior knowledge
+- Prior knowledge may be strong or weak
+
+$$Pr[\theta | Data] = \frac{Pr[Data | \theta] \times Pr[\theta]}{Pr[Data]}$$
+
+    
+-  For a given dataset and my prior knowledge, how likely is a situation (e.g. parameter)?
 
 
 ## References
