@@ -1,5 +1,5 @@
 ---
-title: "Thinking about Models"
+title: "Thinking about Statistical Models"
 author:
   - Elizabeth King
   - Kevin Middleton
@@ -32,178 +32,149 @@ library(tidyverse)
 - The statistical analyses that you carry out are *models*.
 - Inference depends on evaluating the relative support for different models.
 
+
 ## Example: Wing Dimorphic Crickets
 
 > Do long-winged crickets have a higher resting metabolic rate than short-winged crickets?
 
-<div class="columns-2">
+:::: {.columns}
 
-<center>
-<img src="https://i.imgur.com/kgPmw0b.jpg" width="100%" />
-<br />
-<br />
-<br />
-</center>
+::: {.column width="40%"}
+![](https://i.imgur.com/kgPmw0b.jpg){fig-align="center"}
+:::
 
+::: {.column width="60%"}
 Controlling for body mass,
 
 - Metabolic rates do not differ
 - Average metabolic rate of long-wings is higher
 - Average  metabolic rate of long-wings is lower
+:::
 
-</div>
+::::
+
 
 ## Example: Genetics of Corn Oil Content
 
 > Which set of loci best predicts oil content in corn kernels?
 
-<div class="columns-2">
+:::: {.columns}
 
-<center>
-<br />
-<img src="https://i.imgur.com/w6z5m2e.jpg" width="100%" />
-<br />
-<br />
-<br />
-</center>
+::: {.column width="40%"}
+![](https://i.imgur.com/w6z5m2e.jpg){fig-align="center"}
+:::
 
+::: {.column width="60%"}
 - Heritability of corn oil content is 0
 - Different possible combinations of SNPs
 - All additive
 - Dominance
 - Epistasis
 - Structural variants
+:::
 
-</div>
+::::
+
+
+## Example: Species richness in Missouri lakes
+
+> Does the number of phytoplankton species change with agricultural intensity around lakes?
+
+:::: {.columns}
+
+::: {.column width="40%"}
+![](https://i.imgur.com/GoOM9bb.png){fig-align="center"}
+:::
+
+::: {.column width="60%"}
+- There is no relationship between species richness and agricultural intensity
+- There is a positive relationship
+- There is a negative relationship
+:::
+
+::::
+
 
 ## Example: Canid relationships
 
 > What are the phylogenetic relationships between dog breeds & other canids?
 
-<div class="columns-2">
+:::: {.columns}
 
-<center>
-<img src="https://i.imgur.com/spdaSkP.jpg" width="100%" />
-<br />
-<br />
+::: {.column width="60%"}
+![](https://i.imgur.com/spdaSkP.jpg){fig-align="center"}
+:::
 
-</center>
-
+::: {.column width="40%"}
 - Star phylogeny
 - Single origin of dogs
 - Ancient breeds are monophyletic
 - Every possible tree....
-  
-</div>
+:::
+
+::::
+
 
 ## Example: Predict the species of a fossil
 
 > Is this bone more like a chimpanzee, australopith, Neandertal, or modern human?
 
-<div class="columns-2">
+:::: {.columns}
 
-<center>
-<br />
-<img src="https://i.imgur.com/cQ1Kl1v.png" width="90%" />
-<br />
-<br />
-<br />
-</center>
+::: {.column width="40%"}
+![](https://i.imgur.com/cQ1Kl1v.png){fig-align="center"}
+:::
 
-- What are the relative probabilities of new fossil being in one of four taxonomic groups?
+::: {.column width="60%"}
 - What is the percent correct classification of known fossils?
+- What are the relative probabilities of new fossil being in one of four taxonomic groups?
+:::
 
-</div>
-
-
-## Example: Species Richness in Lakes
-
-> Does the number of phytoplankton species change with agricultural intensity around lakes?
-
-
-<div class="columns-2">
-
-<center>
-<br />
-<img src="https://imgur.com/GoOM9bb.png" width="90%" />
-<br />
-<br />
-<br />
-</center>
-
-- There is no relationship between species richness and agricultural intensity
-- There is a positive relationship
-- There is a negative relationship
-
-</div>
+::::
 
 
 ## Example: Alligator growth
 
-> Do alligators exhibit determinate or indeterminate growth and does growth depend of atmospheric oxygen levels?
+> Do alligators exhibit determinate or indeterminate growth?
 
-<div class="columns-2">
+:::: {.columns}
 
-<center>
-<br />
-<img src="https://i.imgur.com/yvphu7u.png" width="100%" />
-<br />
-<br />
-<br />
-</center>
+::: {.column width="50%"}
+![](https://i.imgur.com/scZSjNE.png){fig-align="center"}
+:::
 
+::: {.column width="50%"}
 Determinate:
 
-- von Bertalanffy
-- Logistic
+$Length\left(Age\right) = \frac{\theta_1}{1 + \exp((\theta_2 - Age) / \theta_3)}$
 
 Indeterminate:
 
-- Polynomial
+$Length\left(Age\right) = \theta_1 + \theta_2 Age + \theta_3 Age^2$
+:::
 
-</div>
-
-
-## Example: Alligator growth
-
-von Bertalanffy:
-
-$$Femoral~Length\left(Age\right) = \theta_1 \left(1 - e^{-\theta_2 \left(Age - \theta_3\right)}\right)$$
-
-Logistic:
-
-$$Femoral~Length\left(Age\right) = \frac{\theta_1}{1 + e^{\frac{\theta_2 - Age}{\theta_3}}}$$
-
-Polynomial:
-
-$$Femoral~Length\left(Age\right) = \theta_1 + \theta_2 \cdot Age + \theta_3 \cdot Age^2$$
-
-## Example: Alligator growth
-
-<center>
-<img src="https://i.imgur.com/scZSjNE.png" width="100%" />
-</center>
-
-## Example: Your Research
-
-> Your Question Here
-
-<div class="columns-2">
-
-<center>
-<img src="https://i.imgur.com/ETBeDVR.jpg" width="100%" />
-<br />
-<br />
-<br />
-</center>
+::::
 
 
+## Your Own Research
+
+> Your research question(s) here
+
+:::: {.columns}
+
+::: {.column width="50%"}
+![](https://i.imgur.com/ETBeDVR.jpg){fig-align="center"}
+:::
+
+::: {.column width="50%"}
 - Model 1
 - Model 2
 - Model 3
 - ...
+:::
 
-</div>
+::::
+
 
 ## References
 
