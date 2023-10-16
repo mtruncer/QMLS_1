@@ -1,0 +1,601 @@
+---
+title: "Tests of a Mean"
+author:
+  - Elizabeth King
+  - Kevin Middleton
+format:
+  revealjs:
+    theme: [default, custom.scss]
+    standalone: true
+    self-contained: true
+    logo: QMLS_Logo.png
+    slide-number: true
+    show-slide-number: all
+code-annotations: hover
+bibliography: QMLS_Bibliography.bib
+csl: evolution.csl
+---
+
+<!--
+Datasets
+  Stickleback_Plates.csv
+-->
+
+## Why would you test a mean?
+
+```{r setup, echo=FALSE, message=FALSE, warning=FALSE}
+# Need dev version of plotly:
+# devtools::install_github("ropensci/plotly")
+
+library(tidyverse)
+library(cowplot)
+library(plotly)
+library(vembedr)
+library(htmltools)
+
+theme_set(theme_cowplot())
+
+mode <- function(x) {
+  dd <- density(x)
+  dd$x[which.max(dd$y)]
+}
+
+```
+
+
+- You have a sample of observations
+- You want to know if the mean of the sample is different from a particular value (e.g., the population mean).
+
+
+## A bit of history
+
+:::: {.columns}
+
+::: {.column width="60%"}
+![](https://i.imgur.com/av682V7.png){fig-align="center"}
+:::
+
+::: {.column width="40%"}
+![](https://miro.medium.com/v2/1*chgYpijERWp3_0bBj4ZjJA.jpeg){fig-align="center"}
+:::
+
+::::
+
+
+## Frameworks for inference
+
+1. Frequentist
+1. Maximum likelihood
+1. Bayesian
+
+
+## Human body temperature
+
+![](https://ehealth.eletsonline.com/wp-content/uploads/2020/01/human-body-temperature.jpg){fig-align="center"}
+
+
+## Sampling people
+
+```{r}
+#| echo: true
+
+temps <- c(98.4, 98.6, 97.8, 98.8, 97.9, 99.0, 98.2, 98.8)
+```
+
+```{r}
+ggplot() +
+  geom_vline(xintercept = 98.6, color = "firebrick", linewidth = 1) +
+  geom_dotplot(data = tibble(temps), aes(temps), binwidth = 0.05) +
+  labs(x = "Temperature (F)", y = "Count") +
+  scale_x_continuous(limits = c(97.6, 99.6), breaks = seq(97.6, 99.6, by = 0.2))
+
+```
+
+
+## Inferring a mean
+
+What is the mean temperature for this sample of healthy people?
+
+
+## Analytical inference of mean
+
+Arithmetic mean:
+
+$$\hat{Y} = \frac{\sum_{i=1}^{n}Y_i}{n}$$
+
+$$Mean~Temp. = \frac{\sum_{i=1}^{n}Temperature_i}{n}$$
+
+
+## Analytical inference of mean
+
+```{r}
+#| echo: true
+
+sum(temps) / length(temps)
+mean(temps)
+```
+
+"Closed form solution"
+
+
+## One-sample *t*-test
+
+```{r}
+#| echo: true
+
+t.test(temps, mu = 98.6)
+```
+
+
+## Maximum likelihood inference of mean
+
+Use `dnorm()` to calculate the relative likelihood of an observed value $Y_i$ drawn from a normal distribution given a mean ($\mu$) and standard deviation ($\sigma$).
+
+$$f\left(Y_i; \mu, \sigma\right) = \frac{1}{\sqrt{2\pi\sigma^{2}}} e^{\frac{-\left(Y_i-\mu\right)^{2}}{2\sigma^{2}}}$$
+
+What is a reasonable value for $\sigma$?
+
+- ~95% of points fall within $2 \times \sigma$ of the mean
+
+
+## Standard normal distribution
+
+```{r}
+#| echo: true
+
+dnorm(0, mean = 0, sd = 1)
+```
+
+```{r}
+#| label: normal_plot
+#| fig-height: 4
+
+M <- tibble(x = seq(-3, 3, length = 100),
+            y = dnorm(x))
+ggplot() + 
+  geom_line(data = M, aes(x, y), linewidth = 1, color = "navyblue") +
+  labs(x = "Y", y = "Relative Likelihood")
+```
+
+
+## Our normal distribution
+
+```{r}
+#| echo: true
+
+dnorm(98.6, mean = 98.6, sd = 0.1)
+```
+
+```{r}
+#| label: normal_plot_2
+#| fig-height: 4
+
+M <- tibble(x = seq(97.6, 99.6, length = 100),
+            y = dnorm(x, mean = 98.6, sd = 0.1))
+ggplot() +
+  geom_line(data = M, aes(x, y), linewidth = 1, color = "navyblue") +
+  geom_vline(xintercept = 98.6, color = "firebrick", linewidth = 1) +
+  geom_dotplot(data = tibble(temps), aes(temps), binwidth = 0.05) +
+  labs(x = "Temperature", y = "Relative Likelihood") +
+  scale_x_continuous(limits = c(97.6, 99.6), breaks = seq(97.6, 99.6, by = 0.2))
+```
+
+
+## Calculating a likelihood
+
+*Hypothesizing that the population mean is 98.6 and the standard deviation is 0.1*, what is the likelihood of the observed values?
+
+1. This is a model.
+2. Calculate the relative likelihood of each observation
+3. Model likelihood is the product of the individual likelihoods
+4. log-likelihood is more tractable, so calculate that
+
+
+## Model Likelihood ($\mathcal{L}$)
+
+For a set of observations ($Y$) and hypothesized parameters ($\Theta$; i.e., mean and standard deviation) the model likelihood is the product of the observations' individual likelihoods:
+
+\begin{align*}
+
+\mathcal{L}\left[ Y; \Theta\right] &= \prod Pr\left[Y; \Theta\right]\\
+
+\log\left( \mathcal{L}\left[ Y; \Theta\right] \right) &= \sum \log\left(Pr\left[Y; \Theta\right]\right)
+\end{align*}
+
+- Sum the log-probabilities
+
+
+## Calculating the log-likelihood for a single combination of $\mu$ and $\sigma$
+
+*Hypothesizing that the population mean is 0 and the standard deviation is 1*, what is the likelihood of the observed values?
+
+Likelihood for the first observation (`temps[1]`):
+
+```{r}
+#| echo: true
+
+temps[1]
+dnorm(temps[1], mean = 98.6, sd = 0.1)
+```
+
+
+## Calculating the log-likelihood for a single combination of $\mu$ and $\sigma$
+
+```{r, echo=FALSE, fig.height=3.5}
+#| fig-height: 3.5
+
+ggplot() +
+  geom_line(data = M, aes(x, y), linewidth = 1, color = "navyblue") +
+  geom_vline(xintercept = 98.6, color = "firebrick", linewidth = 1) +
+  geom_dotplot(data = tibble(temps), aes(temps), binwidth = 0.05) +
+  labs(x = "Temperature", y = "Relative Likelihood") +
+  scale_x_continuous(limits = c(97.6, 99.6), breaks = seq(97.6, 99.6, by = 0.2)) +
+  geom_point(aes(x = temps[1],
+                 y = dnorm(temps[1], mean = 98.6, sd = 0.1)),
+             color = "violet",
+             size = 3) +
+  geom_segment(aes(x = temps[1],
+                   xend = temps[1],
+                   y = 0,
+                   yend = dnorm(temps[1],mean = 98.6, sd = 0.1)),
+               color = "violet", linewidth = 1.5)
+```
+
+This is only the likelihood for *one* observation. We need the likelihoods for all `r length(temps)` temperatures to get a model likelihood.
+
+
+## Calculating the log-likelihood for a single combination of $\mu$ and $\sigma$
+
+Vector of likelihoods for all values in `temps` given `mu = 0` and `sigma = 1`:
+
+```{r}
+#| echo: true
+
+(rel_liks <- dnorm(temps, mean = 98.6, sd = 0.1))
+```
+
+
+## Calculating the log-likelihood for a single combination of $\mu$ and $\sigma$
+
+Model likelihood is the product of those likelihoods:
+
+```{r}
+#| echo: true
+
+(lik <- prod(rel_liks))
+```
+
+
+## Likelihood to log-likelihood
+
+```{r}
+#| echo: true
+
+log(lik)
+```
+
+Rather than logging the product, we can sum the log-likelihoods:
+
+```{r}
+#| echo: true
+
+sum(log(rel_liks))
+```
+
+For a model in which the mean is 98.6 and standard deviation is 0.1, the model log-likelihood is `r round(log(lik), 2)`.
+
+
+## Higher likelihood
+
+Is there another combination of $\mu$ and $\sigma$ that gives a higher likelihood (= larger log-likelihood)?
+
+Try $\mu = 98.4$ and $\sigma = 0.1$:
+
+```{r}
+#| echo: true
+
+sum(log(dnorm(temps, mean = 98.4, sd = 0.1)))
+```
+
+This is an improvement over $\mu = 98.6$ and $\sigma = 0.1$.
+
+
+## Calculating the log-likelihood for a _range_ of $\mu$ and $\sigma$
+
+Find the combination of $\mu$ and $\sigma$ that maximizes the log-likelihood of the model for the mean and standard deviation of temperatures.
+
+Ranges of possible values:
+
+1. Mean ($\mu$): $-\infty < \mu < \infty$
+2. Standard deviation ($\sigma$): $0 < \sigma < \infty$
+
+
+## Grid approximation
+
+For combinations of $\mu$ and $\sigma$, calculate the model likelihood. Pick the largest log-likelihood as the parameter estimates.
+
+Set up the grid:
+
+```{r}
+#| echo: true
+
+n <- 100                            # How fine is the grid?
+mu <- seq(97.6, 99.6, length = n)   # Vector of mu
+sigma <- seq(0.05, 0.5, length = n) # Vector of sigma
+
+grid_approx <- crossing(mu, sigma)
+```
+
+---
+
+```{r}
+grid_approx
+```
+
+
+## Grid approximation
+
+```{r grid_approx, cache=TRUE}
+#| echo: true
+
+log_lik <- numeric(length = nrow(grid_approx))
+
+for (ii in 1:nrow(grid_approx)) {
+  log_lik[ii] <- 
+    sum(dnorm(temps,
+              mean = grid_approx$mu[ii],
+              sd = grid_approx$sigma[ii],
+              log = TRUE))
+}
+grid_approx$log_lik <- log_lik
+```
+
+- Iterate through the rows ($ii$) of `grid_approx`
+- For each row, assign the model log-likelihood calculated for that `mu` and `sigma` to `log_lik`
+
+---
+
+```{r}
+grid_approx
+```
+
+- For a 100 X 100 grid, there are 10,000 calculations.
+- If there were 3 parameters, there would be 1,000,000.
+
+
+## Visualizing the likelihood surface
+
+```{r}
+grid_approx <- do.call(data.frame,
+                       lapply(grid_approx,
+                              function(x) replace(x, is.infinite(x), NA)))
+
+fig <- plot_ly() %>%
+  add_markers(data = grid_approx,
+              x = ~ mu,
+              y = ~ sigma,
+              z = ~ log_lik,
+              color = ~ log_lik,
+              size = 1,
+              showlegend = FALSE) %>%
+  add_markers(data = grid_approx[which.max(grid_approx$log_lik), ],
+              x = ~ mu,
+              y = ~ sigma,
+              z = ~ log_lik,
+              size = 2,
+              showlegend = FALSE) %>% 
+  hide_colorbar() %>%
+  layout(scene = list(xaxis = list(title = 'Mu'),
+                      yaxis = list(title = 'Sigma'),
+                      zaxis = list(title = 'log-Likelihood')))
+
+fig
+```
+
+
+## Grid approximation
+
+On this grid, the maximum likelihood estimates of $\mu$ and $\sigma$ are:
+
+```{r}
+#| echo: true
+
+grid_approx[which.max(grid_approx$log_lik), ]
+```
+
+The analytical estimates are:
+
+```{r}
+#| echo: true
+
+mean(temps)
+sd(temps)
+```
+
+
+## Maximum likelihood via optimization
+
+*Search* for the most likely values of $\mu$ and $\sigma$ across all possible values.
+
+```{r}
+#| fig-height: 4
+fig
+```
+
+
+## Maximum likelihood via optimization
+
+Define a function that takes a vector of values to optimize `x` ($\mu$ and $\sigma$) as well as a set of data `Y` and returns the log-likelihood:
+
+```{r}
+#| echo: true
+
+log_lik <- function(x, Y){
+  liks <- dnorm(Y, mean = x[1], sd = x[2], log = TRUE)
+  return(sum(liks))
+}
+```
+
+We can now simultaneously optimize $\mu$ and $\sigma$, maximizing the log-likelihood.
+
+
+## Maximum likelihood via optimization
+
+`reltol` says to stop when the improvement is $<10^{-100}$.
+
+```{r}
+#| echo: true
+#| label: ML_optim
+#| warning: false
+
+optim(c(99, 0.5), # Start at 100, 0.1
+      log_lik,
+      Y = temps,
+      control = list(fnscale = -1,
+                     reltol = 10^-100))
+```
+
+
+## Maximum likelihood via optimization
+
+`glm()` fits generalized linear modules via optimization:
+
+```{r ML_glm}
+#| echo: true
+
+fm <- glm(temps ~ 1) # Estimate a mean only
+coef(fm)
+logLik(fm)
+```
+
+**For a small enough tolerance, the maximum likelihood estimate equals the analytical estimate.**
+
+
+## Bayesian vs. ML inference
+
+Maximum likelihood inference:
+
+- Probability of the data, given the parameter estimate
+- Parameters are fixed; data varies.
+- No prior possible
+
+Bayesian inference:
+
+- Probability of the parameters, given the data
+- Data are fixed; parameters vary.
+- Prior required
+
+
+## Bayesian inference of the mean
+
+Ranges of possible maximum likelihood values:
+
+1. $\mu$: $-\infty < \mu < \infty$
+2. $\sigma$: $0 < \sigma < \infty$
+
+Drawbacks:
+
+1. $\mu$ can't be negative (no negative temperatures) and probably isn't a large number
+2. $\sigma$ is also probably not huge either
+
+Can we do better? Yes, Bayesian priors.
+
+
+## Prior for the mean
+
+```{r}
+ggplot() +
+  geom_line(data = M, aes(x, y), linewidth = 1, color = "navyblue") +
+  geom_vline(xintercept = mean(temps), color = "firebrick", linewidth = 1) +
+  geom_dotplot(data = tibble(temps), aes(temps), binwidth = 0.05) +
+  labs(x = "Temperature", y = "Relative Likelihood") +
+  scale_x_continuous(limits = c(97.6, 99.6), breaks = seq(97.6, 99.6, by = 0.2))
+```
+
+
+## Bayesian model
+
+[stan](http://mc-stan.org/) code:
+
+```{r}
+#| echo: true
+
+model <- "
+  data{
+    int<lower=1> N;
+    real temps[N];
+  }
+  parameters{
+    real<lower=0> mu;
+    real<lower=0> sigma;
+  }
+  model{
+    mu ~ normal(98.6, 0.1);
+    sigma ~ normal(0, 1);
+    temps ~ normal(mu, sigma);
+  }
+"
+```
+
+
+## Sample the Bayesian model
+
+```{r}
+#| label: stan_fit
+#| message: false
+#| warning: false
+#| results: hide
+#| echo: true
+
+library(rstan)
+library(bayesplot)
+fm_bayes <- stan(
+  model_code = model,
+  data = list(temps = temps,
+              N = length(temps)),
+  iter = 1e4,
+  open_progress = FALSE,
+  chains = 4)
+```
+
+
+## Inspecting the samples
+
+```{r}
+#| message: false
+#| warning: false
+
+post <- as.array(fm_bayes)
+mcmc_trace(post, pars = c("mu", "sigma"))
+```
+
+
+## Summarizing the results
+
+```{r}
+#| fig-height: 3
+post <- as.data.frame(fm_bayes) |> 
+  mutate(Difference = 98.6 - mu)
+
+mcmc_dens(post,
+          pars = c("mu", "sigma"))
+
+```
+
+- Modes: $\mu = `r round(mode(post$mu), 2)`$ and $\sigma = `r round(mode(post$sigma), 2)`$
+- Higher mean than the analytical or ML estimate (`r round(mean(temps), 2)`), because the prior places less probability on lower values.
+
+
+## Difference of samples and 98.6
+
+```{r}
+#| fig-height: 4
+
+ggplot() +
+  geom_vline(xintercept = 0) +
+  geom_density(data = post, aes(Difference)) +
+  labs(y = "Density")
+
+quantile(post$Difference, c(0.025, 0.975))
+```
+
