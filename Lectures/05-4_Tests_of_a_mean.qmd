@@ -16,22 +16,17 @@ bibliography: QMLS_Bibliography.bib
 csl: evolution.csl
 ---
 
-<!--
-Datasets
-  Stickleback_Plates.csv
--->
 
 ## Why would you test a mean?
 
-```{r setup, echo=FALSE, message=FALSE, warning=FALSE}
-# Need dev version of plotly:
-# devtools::install_github("ropensci/plotly")
+```{r}
+#| label: setup
+#| message: false
+#| warning: false
 
 library(tidyverse)
 library(cowplot)
 library(plotly)
-library(vembedr)
-library(htmltools)
 
 theme_set(theme_cowplot())
 
@@ -118,7 +113,7 @@ mean(temps)
 "Closed form solution"
 
 
-## One-sample *t*-test
+## Frequentist: One-sample *t*-test
 
 ```{r}
 #| echo: true
@@ -135,7 +130,7 @@ $$f\left(Y_i; \mu, \sigma\right) = \frac{1}{\sqrt{2\pi\sigma^{2}}} e^{\frac{-\le
 
 What is a reasonable value for $\sigma$?
 
-- ~95% of points fall within $2 \times \sigma$ of the mean
+- ~95% of points fall within $2 \cdot \sigma$ of the mean
 
 
 ## Standard normal distribution
@@ -207,7 +202,7 @@ For a set of observations ($Y$) and hypothesized parameters ($\Theta$; i.e., mea
 
 ## Calculating the log-likelihood for a single combination of $\mu$ and $\sigma$
 
-*Hypothesizing that the population mean is 0 and the standard deviation is 1*, what is the likelihood of the observed values?
+*Hypothesizing that the population mean is 98.6 and the standard deviation is 0.1*, what is the likelihood of the observed values?
 
 Likelihood for the first observation (`temps[1]`):
 
@@ -246,7 +241,7 @@ This is only the likelihood for *one* observation. We need the likelihoods for a
 
 ## Calculating the log-likelihood for a single combination of $\mu$ and $\sigma$
 
-Vector of likelihoods for all values in `temps` given `mu = 0` and `sigma = 1`:
+Vector of likelihoods for all values in `temps` given `mu = 98.6` and `sigma = 0.1`:
 
 ```{r}
 #| echo: true
@@ -326,8 +321,6 @@ sigma <- seq(0.05, 0.5, length = n) # Vector of sigma
 grid_approx <- crossing(mu, sigma)
 ```
 
----
-
 ```{r}
 grid_approx
 ```
@@ -335,17 +328,17 @@ grid_approx
 
 ## Grid approximation
 
-```{r grid_approx, cache=TRUE}
+```{r}
+#| label: grid-approx
 #| echo: true
 
 log_lik <- numeric(length = nrow(grid_approx))
 
 for (ii in 1:nrow(grid_approx)) {
-  log_lik[ii] <- 
-    sum(dnorm(temps,
-              mean = grid_approx$mu[ii],
-              sd = grid_approx$sigma[ii],
-              log = TRUE))
+  log_lik[ii] <- sum(dnorm(temps,
+                           mean = grid_approx$mu[ii],
+                           sd = grid_approx$sigma[ii],
+                           log = TRUE))
 }
 grid_approx$log_lik <- log_lik
 ```
@@ -370,21 +363,21 @@ grid_approx <- do.call(data.frame,
                        lapply(grid_approx,
                               function(x) replace(x, is.infinite(x), NA)))
 
-fig <- plot_ly() %>%
+fig <- plot_ly() |>
   add_markers(data = grid_approx,
               x = ~ mu,
               y = ~ sigma,
               z = ~ log_lik,
               color = ~ log_lik,
               size = 1,
-              showlegend = FALSE) %>%
+              showlegend = FALSE) |>
   add_markers(data = grid_approx[which.max(grid_approx$log_lik), ],
               x = ~ mu,
               y = ~ sigma,
               z = ~ log_lik,
               size = 2,
-              showlegend = FALSE) %>% 
-  hide_colorbar() %>%
+              showlegend = FALSE) |> 
+  hide_colorbar() |>
   layout(scene = list(xaxis = list(title = 'Mu'),
                       yaxis = list(title = 'Sigma'),
                       zaxis = list(title = 'log-Likelihood')))
@@ -425,13 +418,13 @@ fig
 
 ## Maximum likelihood via optimization
 
-Define a function that takes a vector of values to optimize `x` ($\mu$ and $\sigma$) as well as a set of data `Y` and returns the log-likelihood:
+Define a function that takes a vector of values to optimize `theta` ($\mu$ and $\sigma$) as well as a set of data `Y` and returns the log-likelihood:
 
 ```{r}
 #| echo: true
 
-log_lik <- function(x, Y){
-  liks <- dnorm(Y, mean = x[1], sd = x[2], log = TRUE)
+log_lik <- function(theta, Y){
+  liks <- dnorm(Y, mean = theta[1], sd = theta[2], log = TRUE)
   return(sum(liks))
 }
 ```
@@ -559,17 +552,6 @@ fm_bayes <- stan(
 ```
 
 
-## Inspecting the samples
-
-```{r}
-#| message: false
-#| warning: false
-
-post <- as.array(fm_bayes)
-mcmc_trace(post, pars = c("mu", "sigma"))
-```
-
-
 ## Summarizing the results
 
 ```{r}
@@ -593,9 +575,23 @@ mcmc_dens(post,
 
 ggplot() +
   geom_vline(xintercept = 0) +
-  geom_density(data = post, aes(Difference)) +
+  geom_density(data = post, aes(Difference),
+               color = "firebrick4", linewidth = 1.5) +
   labs(y = "Density")
 
+```
+
+Quantiles
+
+```{r}
 quantile(post$Difference, c(0.025, 0.975))
 ```
+
+
+## From data to inference via models
+
+- Many paths from data to inference
+- No one way is best or uniquely correct
+
+![](../images/Models_schematic.png){fig-align="center"}
 
