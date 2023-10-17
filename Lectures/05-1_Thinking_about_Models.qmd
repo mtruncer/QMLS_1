@@ -191,8 +191,9 @@ The method you use for inference is part of the model.
 - Many will give very similar answers
 
 
-
+::: {.notes}
 Notes: what do we assume when we use a method? how do we know what "the answer" is? how do we know how certain we are about the answer?
+:::
 
 
 ## Example: Wing Dimorphic Crickets
@@ -215,6 +216,7 @@ Controlling for body mass,
 
 ::::
 
+
 ## Observe some data
 
 ```{r}
@@ -229,6 +231,7 @@ CD |>
   
 ```
 
+
 ## Observe some data
 
 ```{r}
@@ -242,12 +245,14 @@ CD |>
   
 ```
 
+
 ## Do long-winged crickets have a higher resting metabolic rate than short-winged crickets?
 
 - What is the probability the two groups have the same mean?
 - What is the probability of observing a difference like this from sampling error only?
 - What is the probability these are two samples from the same distribution?
 - How well can you predict metabolic rate from wing morph?
+
 
 ## Frameworks for Inference
 
@@ -256,7 +261,8 @@ CD |>
 
 -  Each is a different way to approach the question with different costs and benefits. 
 -  One is not inherently better than the other.
--  Both use similar concepts (e.g. likelihood and probability) and ideas.
+-  Both use similar concepts (e.g., likelihood and probability) and ideas.
+
 
 ## Frequentist/Likelihood Framework
 
@@ -264,7 +270,8 @@ CD |>
     - Can simulate these expectations given assumptions
     - Often closed-form answers based on modeling the data with distributions with known behavior
     
--  For a given situation (e.g. parameter & distribution), how likely is observing my data?
+-  For a given situation (e.g., parameter & distribution), how likely is observing my data?
+
 
 ## Could this observed difference just be sampling error?
 
@@ -279,12 +286,14 @@ CD |>
   
 ```
 
+
 ## How big of a difference do you get from sampling error?
 
 1. Assume LW and SW share a distribution
 2. Put all values from both morphs in one group
 3. Randomly assign SW and LW labels to values
 4. Repeat over and over
+
 
 ## How big of a difference do you get from sampling error?
 
@@ -301,25 +310,6 @@ CD |>
   
 ```
 
-## How big of a difference do you get from sampling error?
-
-```{r}
-#| echo: false
-#| eval: true
-
-CD$WM_Shuffle <- sample(CD$Wing_Morph)
-
-CD |>
-  group_by(WM_Shuffle) |>
-  summarise(Mean = mean(CO2_resid))
-
-
-CD |>
-  ggplot(aes(WM_Shuffle, CO2_resid)) +
-  geom_point(position = position_jitter(width = 0.3), alpha = 0.5) +
-  stat_summary(fun = mean, geom = "point", size = 3, color = "red") 
-  
-```
 
 ## How big of a difference do you get from sampling error?
 
@@ -340,6 +330,28 @@ CD |>
   stat_summary(fun = mean, geom = "point", size = 3, color = "red") 
   
 ```
+
+
+## How big of a difference do you get from sampling error?
+
+```{r}
+#| echo: false
+#| eval: true
+
+CD$WM_Shuffle <- sample(CD$Wing_Morph)
+
+CD |>
+  group_by(WM_Shuffle) |>
+  summarise(Mean = mean(CO2_resid))
+
+
+CD |>
+  ggplot(aes(WM_Shuffle, CO2_resid)) +
+  geom_point(position = position_jitter(width = 0.3), alpha = 0.5) +
+  stat_summary(fun = mean, geom = "point", size = 3, color = "red") 
+  
+```
+
 
 ## What do we expect to see when there is a meaningful difference between wing morphs?
 
@@ -354,12 +366,14 @@ CD |>
   
 ```
 
+
 ## What do we expect to see when there is a meaningful difference between wing morphs? 
 
-1.  Assume corrected metabolic rate is normally distributed
-2.  Pull random values for long wings from a normal distribution with a higher mean
+1. Assume corrected metabolic rate is normally distributed
+2. Pull random values for long wings from a normal distribution with a higher mean
 3. Pull random values for short wings from a normal distribution with a lower mean
 4. Repeat over and over
+
 
 ## Simulate a difference using distributions
 
@@ -383,6 +397,7 @@ SS |> group_by(Wing_Morph) |>
 
 ```
 
+
 ## Simulate a difference using distributions
 
 ```{r}
@@ -426,24 +441,25 @@ SS |>
   
 ```
 
+
 ## Frequentist/Likelihood Framework
 
 -  A framework for inference based on the expected set of possible outcomes
     - Can simulate these expectations given assumptions
     - Often closed-form answers based on modeling the data with distributions with known behavior
-    
--  For a given situation (e.g. parameter & distribution), how likely is observing my data?
+-  For a given situation (e.g., parameter & distribution), how likely is observing my data?
+
 
 ## Bayesian Framework
 
-- A framework for inference based on 
 - Inferences from data conditioned on prior knowledge
 - Prior knowledge may be strong or weak
+- Uses the same equation as conditional probability
 
 $$Pr[\theta | Data] = \frac{Pr[Data | \theta] \times Pr[\theta]}{Pr[Data]}$$
 
     
--  For a given dataset and my prior knowledge, how likely is a situation (e.g. parameter)?
+-  For a given dataset, my prior knowledge and a statistical model, how likely is a situation (e.g., parameter)?
 
 
 ## References
