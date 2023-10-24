@@ -21,6 +21,15 @@ Datasets
   Stickleback_Plates.csv
 -->
 
+Pull 6-1 over (minus CI)
+In order to build models, we need to summarize data 
+- to do what we just did, we needed to define a mean and sd - model a difference
+- focus on uncertainty and describing uncertainty
+
+Mention mean for proportions - or first slide of 5-3
+
+
+
 
 ## Measures of central tendency (location)
 
