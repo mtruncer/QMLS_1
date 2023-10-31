@@ -1,5 +1,6 @@
 ---
 title: "From Probability to Likelihood"
+subtitle: "Discrete Data"
 author:
   - Elizabeth King
   - Kevin Middleton
@@ -374,3 +375,16 @@ log_liks_comb |>
   ylim(c(-200, 0))
 ```
 
+
+## Describing discrete data: 2 heads / 6 flips
+
+- Notice that the ML estimate was ~0.33
+- The mean of a discrete set of trials is k / n: 2 / 6
+
+```{r}
+#| echo: true
+
+2/6
+mean(c(1, 1, 0, 0, 0, 0))
+mean(c(TRUE, TRUE, FALSE, FALSE, FALSE, FALSE))
+```

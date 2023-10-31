@@ -1,5 +1,5 @@
 ---
-title: "Measures of Central Tendency"
+title: "Describing Data"
 author:
   - Elizabeth King
   - Kevin Middleton
@@ -16,22 +16,12 @@ bibliography: QMLS_Bibliography.bib
 csl: evolution.csl
 ---
 
+## How do we describe a dataset?
+
 <!--
 Datasets
   Stickleback_Plates.csv
 -->
-
-Pull 6-1 over (minus CI)
-In order to build models, we need to summarize data 
-- to do what we just did, we needed to define a mean and sd - model a difference
-- focus on uncertainty and describing uncertainty
-
-Mention mean for proportions - or first slide of 5-3
-
-
-
-
-## Measures of central tendency (location)
 
 ```{r}
 #| label: setup
@@ -44,6 +34,39 @@ library(cowplot)
 theme_set(theme_cowplot())
 ```
 
+:::: {.columns}
+
+::: {.column width="40%"}
+
+- We need ways to summarize data
+    - What do our questions ask?
+    - How do we model our data?
+    - How can we describe uncertainty?
+
+:::
+
+::: {.column width="60%"}
+
+<br/>
+<br/>
+<br/>
+
+```{r}
+
+CD <- read_csv("../data/Cricket_Metabolic_MassCor.csv")
+CD |>
+  ggplot(aes(Wing_Morph, CO2_resid)) +
+  geom_point(position = position_jitter(width = 0.3), alpha = 0.5) +
+  stat_summary(fun = mean, geom = "point", size = 3, color = "red") 
+
+```
+
+:::
+
+::::
+    
+## Measures of central tendency (location)
+
 The value around which the distribution is centered
 
 1. Mean 
@@ -55,10 +78,7 @@ The value around which the distribution is centered
 
 $$\bar{Y} = \frac{\sum^n_{i=1}Y_i}{n}$$
 
-The term "mean" is preferred to "average". 
-
-- The arithmetic mean is one kind of average, but there are others (as there are other types of means).
-- One argument: "Average" is a statistic determined by an arithmetic procedure. "Mean" is a parameter describing a sample.
+The term "mean" is preferred to "average". Most of the time they are synonymous. 
 
 
 ## Median
@@ -194,4 +214,183 @@ ggplot() +
 1. When might you substitute the median for the mean?
 1. Why don't we always use the median?
 1. When would you use the mode?
+
+
+
+## Measures of spread
+
+- A measure of how much variation is present in a distribution around its center
+- How widely scattered the observations are
+
+
+## Percentiles and quantiles
+
+The $X$th **percentile** of a sample is the value below which $X\%$ of the observations lie. Percentiles are reported as percent.
+
+ **Quantile** = Percentile / 100%. The range of quantiles is $0 \rightarrow 1$.
+
+```{r}
+#| echo: true
+
+xx <- rnorm(100000)
+quantile(xx, 0.84)
+quantile(xx, 0.975)
+```
+
+
+## Quartiles and interquartile range
+
+*Quartiles*
+
+- Divide a set of data into quarters
+- Minimum, maximum, 25th and 75th percentiles
+
+*Interquartile range*
+
+- Difference between the first and third quartiles
+
+
+## Boxplots {.smaller}
+
+Different variations, but the most standard recipe is:
+
+1. Median = center line
+2. Box = IQR (25th to 75th percentiles)
+3. Whiskers at 1.5 X 25th and 75th percentiles
+4. Dots for anything outside 1.5 X 25th and 75th percentiles
+
+```{r echo=FALSE, fig.height = 3, fig.width = 5, fig.align = 'center'}
+ggplot(SticklebackPlates, aes(x = genotype, y = plates)) +
+  geom_boxplot(outlier.shape = NA) +
+  geom_point(position = position_jitter(width = 0.3), alpha = 0.5)
+```
+
+
+## Deviates {.smaller}
+
+Lots of statistics have their basis in the deviation of an observation from a mean.
+
+<center>
+<img src="https://i.imgur.com/FxGzm7g.png" width="40%" />
+</center>
+
+The $i$th deviate is the difference of that observation and the sample mean:
+$$
+\textrm{Deviate}_i = Y_i - \bar{Y}
+$$
+We would like to have a single number to summarize the deviates for a sample.
+
+
+## Sum of squares
+
+Deviates are most often squared and summed:
+
+$$
+SS = \sum \left(Y_i - \bar{Y}\right)^2
+$$
+
+1. Why squared?
+1. What does the sum of squares represent?
+
+
+## Mean deviates
+
+This is why we don't use the mean absolute deviation:
+
+<center>
+<img src="https://i.imgur.com/grGq9PZ.png" width="75%" />
+</center>
+
+Absolute value wouldn't capture the greater variability in the right image.
+
+
+## Sample variance
+
+Sum of squares standardized by the sample size minus one ($n - 1$):
+
+$$
+s^2 = \frac{\sum \left(Y_i - \bar{Y}\right)^2}{n - 1}
+$$
+
+- Mean squared deviation of the observations from the mean.
+- Measures the dispersion of a distribution away from the sample mean.
+
+
+## Sample standard deviation {.smaller}
+
+$$
+s = \sqrt{\frac{\sum \left(Y_i - \bar{Y}\right)^2}{n - 1}}
+$$
+
+- Square root of the sample variance.
+- Think of $s$ as the "mean" for deviation.
+- About 68% of the observations are $\pm 1$ standard deviation from the mean for a normal distribution.
+- When sample size is not low, the sample variance ($s^2$) is an *unbiased estimator* of the population variance ($\sigma^2$), though the calculation is a little different (divide by $n$ rather than $n − 1$) See [explanation of $n$ vs. $n-1$](http://stats.stackexchange.com/q/3931/597) 
+
+
+## Coefficient of variation
+
+Coefficient of variation represents the standard deviation as a percentage of the mean. Elephant mass has an inherently higher standard deviation than mouse mass.
+
+$$
+CV = 100\% \times \frac{s}{\bar{Y}}
+$$
+
+- Can be used as a general indicator of the amount of variability in a sample.
+- Can also be used to (cautiously) compare variables that are not measured in the same units (e.g., basal metabolic rate to ear area).
+
+
+## Coefficient of variation
+
+```{r}
+#| echo: true
+
+
+SticklebackPlates |>
+  group_by(genotype) |>
+  summarise(Mean = mean(plates),
+            SD = sd(plates),
+            CV = 100 * sd(plates) / mean(plates))
+
+```
+
+
+## Standard error of the sample mean {.smaller}
+
+$$SE_{\bar{Y}} = \frac{s}{\sqrt{n}}$$
+
+Means are always reported with standard errors (or standard deviations).
+
+- **Standard deviation** quantifies scatter — how much the values vary from one another and does not change predictably as you collect more data.
+- **Standard error** of the mean quantifies how precisely you know the population mean. It takes into account both the value of $s$ and the sample size. Always decreases with larger sample size.
+
+
+## Standard error of the sample mean
+
+```{r}
+#| echo: true
+
+SEM <- function(x) {sd(x) / sqrt(length(x))}
+
+SticklebackPlates |> 
+  group_by(genotype) |> 
+  summarise(SEM_plates = SEM(plates))
+
+```
+
+
+## Raw data with summary stats
+
+```{r}
+#| echo: true
+#| output-location: slide 
+
+ggplot(SticklebackPlates, aes(x = genotype, y = plates)) +
+  geom_point(position = position_jitter(width = 0.2, seed = 423479),
+             alpha = 0.5) +
+  stat_summary(fun = mean, geom = "point", size = 3, color = "red") + 
+  stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.1,
+               color = "red", linewidth = 1)
+```
+
 

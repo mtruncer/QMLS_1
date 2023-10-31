@@ -25,7 +25,7 @@ library(tidyverse)
 library(cowplot)
 theme_set(theme_cowplot())
 library(readxl)
-
+set.seed(6273)
 ```
 
 
@@ -143,11 +143,11 @@ Controlling for body mass,
 
 :::: {.columns}
 
-::: {.column width="50%"}
+::: {.column width="40%"}
 ![](https://i.imgur.com/scZSjNE.png){fig-align="center"}
 :::
 
-::: {.column width="50%"}
+::: {.column width="60%"}
 Determinate:
 
 $Length\left(Age\right) = \frac{\theta_1}{1 + \exp((\theta_2 - Age) / \theta_3)}$

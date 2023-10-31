@@ -1,5 +1,6 @@
 ---
-title: "Tests of a Mean"
+title: "From Probability to Likelihood"
+subtitle: "Continuous Data"
 author:
   - Elizabeth King
   - Kevin Middleton
@@ -17,7 +18,7 @@ csl: evolution.csl
 ---
 
 
-## Why would you test a mean?
+## Why would you test the mean of a sample vs. a specific value?
 
 ```{r}
 #| label: setup
@@ -45,6 +46,9 @@ mode <- function(x) {
 - You have a sample of observations
 - You want to know if the mean of the sample is different from a particular value (e.g., the population mean).
     - Calibrating an instrument
+    - Validating a protocol
+    - Compare a set of values to what is "expected"
+    - Is data within the "healthy range"?
 
 
 ## A bit of history
@@ -95,36 +99,6 @@ ggplot() +
 ## Inferring a mean
 
 What is the mean temperature for this "sample" of healthy people?
-
-
-## Analytical inference of mean
-
-Arithmetic mean:
-
-$$\bar{Y} = \frac{\sum_{i=1}^{n}Y_i}{n}$$
-
-$$Mean~Temp. = \frac{\sum_{i=1}^{n}Temperature_i}{n}$$
-
-
-## Analytical inference of mean
-
-```{r}
-#| echo: true
-
-sum(temps) / length(temps)
-mean(temps)
-```
-
-"Closed form solution"
-
-
-## Frequentist: One-sample *t*-test
-
-```{r}
-#| echo: true
-
-t.test(temps, mu = 98.6)
-```
 
 
 ## Maximum likelihood inference of mean
@@ -321,7 +295,7 @@ Ranges of possible values:
 2. Standard deviation ($\sigma$): $0 < \sigma < \infty$
 
 
-## Grid approximation
+## Try other combinations of values
 
 For combinations of $\mu$ and $\sigma$, calculate the model likelihood. Pick the largest log-likelihood as the parameter estimates.
 
@@ -334,42 +308,42 @@ n <- 100                            # How fine is the grid?
 mu <- seq(97.6, 99.6, length = n)   # Vector of mu
 sigma <- seq(0.05, 0.5, length = n) # Vector of sigma
 
-grid_approx <- crossing(mu, sigma) # <1>
+grid_LL <- crossing(mu, sigma) # <1>
 ```
 
 1. `crossing()` creates a tibble will all pairwise combinations of mu and sigma.
 
 ```{r}
-grid_approx
+grid_LL
 ```
 
 
-## Grid approximation
+## Try other combinations of values
 
 ```{r}
 #| label: grid-approx
 #| echo: true
 
-log_lik <- numeric(length = nrow(grid_approx))
+log_lik <- numeric(length = nrow(grid_LL))
 
-for (ii in 1:nrow(grid_approx)) {
+for (ii in 1:nrow(grid_LL)) {
   log_lik[ii] <- sum(dnorm(temps,
-                           mean = grid_approx$mu[ii],
-                           sd = grid_approx$sigma[ii],
+                           mean = grid_LL$mu[ii],
+                           sd = grid_LL$sigma[ii],
                            log = TRUE)) # <1>
 }
-grid_approx$log_lik <- log_lik
+grid_LL$log_lik <- log_lik
 ```
 
 1. Return the log probability from `dnorm()` to avoid the extra step (and possible numerical problems)
 
-- Iterate through the rows ($ii$) of `grid_approx`
+- Iterate through the rows ($ii$) of `grid_LL`
 - For each row, assign the model log-likelihood calculated for that combination of `mu` and `sigma` to `log_lik`
 
 ---
 
 ```{r}
-grid_approx
+grid_LL
 ```
 
 - For a 100 X 100 grid, there are 10,000 calculations.
@@ -379,19 +353,19 @@ grid_approx
 ## Visualizing the likelihood surface
 
 ```{r}
-grid_approx <- do.call(data.frame,
-                       lapply(grid_approx,
+grid_LL <- do.call(data.frame,
+                       lapply(grid_LL,
                               function(x) replace(x, is.infinite(x), NA)))
 
 fig <- plot_ly() |>
-  add_markers(data = grid_approx,
+  add_markers(data = grid_LL,
               x = ~ mu,
               y = ~ sigma,
               z = ~ log_lik,
               color = ~ log_lik,
               size = 1,
               showlegend = FALSE) |>
-  add_markers(data = grid_approx[which.max(grid_approx$log_lik), ],
+  add_markers(data = grid_LL[which.max(grid_LL$log_lik), ],
               x = ~ mu,
               y = ~ sigma,
               z = ~ log_lik,
@@ -406,14 +380,14 @@ fig
 ```
 
 
-## Grid approximation
+## Try other combinations of values
 
-On this grid, the maximum likelihood estimates of $\mu$ and $\sigma$ are:
+For this set, the maximum likelihood estimates of $\mu$ and $\sigma$ are:
 
 ```{r}
 #| echo: true
 
-grid_approx[which.max(grid_approx$log_lik), ] # <1>
+grid_LL[which.max(grid_LL$log_lik), ] # <1>
 ```
 
 1. `which.max()` return the index of the maximum value of `log_lik`.
@@ -430,7 +404,7 @@ sd(temps)
 
 ## Maximum likelihood via optimization
 
-- Grid approximation is slow and imprecise
+- Trying combinations of values is slow and imprecise
     - Impractical (impossible?) for large numbers of parameters
 - *Search* for the most likely values of $\mu$ and $\sigma$ across all possible values.
 
@@ -472,10 +446,18 @@ optim(par = c(99, 0.5), # Start at 100, 0.1
 1. `fnscale = -1` tells `optim()` to minimize the function
 2. `reltol` says to stop when the improvement is <1^-100^.
 
+## Closed-form Solution (Frequentist/Likelihood Framework): One-sample *t*-test
+
+```{r}
+#| echo: true
+
+t.test(temps, mu = 98.6)
+```
+
 
 ## Bayesian vs. ML inference
 
-Maximum likelihood inference:
+Frequentist/Likelihood inference:
 
 - Probability of the data, given the parameter estimate
 - Parameters are fixed; data varies
@@ -618,4 +600,9 @@ quantile(samples$Difference, c(0.025, 0.975))
 - No one way is best or uniquely correct
 
 ![](../images/Models_schematic.png){fig-align="center"}
+
+
+
+
+
 
