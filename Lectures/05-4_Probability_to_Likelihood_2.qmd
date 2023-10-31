@@ -436,14 +436,14 @@ Simultaneously optimize $\mu$ and $\sigma$, maximizing the log-likelihood.
 #| label: ML_optim
 #| warning: false
 
-optim(par = c(99, 0.5), # Start at 100, 0.1
+optim(par = c(99, 0.5), # Start at 99, 0.5
       fn = log_lik,
       Y = temps,
       control = list(fnscale = -1,      # <1>
                      reltol = 10^-100)) # <2>
 ```
 
-1. `fnscale = -1` tells `optim()` to minimize the function
+1. `fnscale = -1` tells `optim()` to maximize the function
 2. `reltol` says to stop when the improvement is <1^-100^.
 
 ## Closed-form Solution (Frequentist/Likelihood Framework): One-sample *t*-test
