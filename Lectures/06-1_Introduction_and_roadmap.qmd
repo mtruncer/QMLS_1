@@ -1,0 +1,168 @@
+---
+title: "Introduction to Linear Models"
+author:
+  - Elizabeth King
+  - Kevin Middleton
+format:
+  revealjs:
+    theme: [default, custom.scss]
+    standalone: true
+    self-contained: true
+    logo: QMLS_Logo.png
+    slide-number: true
+    show-slide-number: all
+code-annotations: hover
+bibliography: QMLS_Bibliography.bib
+csl: evolution.csl
+---
+
+## Review 
+
+```{r}
+#| label: setup
+#| message: false
+#| warning: false
+
+library(tidyverse)
+library(cowplot)
+library(latex2exp)
+theme_set(theme_cowplot())
+```
+
+- Probability $\rightarrow$ Likelihood
+- Describing data (location and spread)
+- Means of a single sample
+
+
+## Roadmap
+
+
+
+## Types of predictors
+
+1. <span style="color:blue;">Categorical</span>
+    - Groups
+    - Genotypes
+2. <span style="color:red;">Continuous</span>
+    - Continuous number line
+    - Rounding okay
+
+
+## Example: Wing Dimorphic Crickets
+
+> Do <span style="color:blue;">long-winged</span> crickets have a higher resting metabolic rate than <span style="color:blue;">short-winged</span> crickets?
+
+:::: {.columns}
+
+::: {.column width="40%"}
+![](https://i.imgur.com/kgPmw0b.jpg){fig-align="center"}
+:::
+
+::: {.column width="60%"}
+Controlling for <span style="color:red;">body mass</span>,
+
+- <span style="color:red;">Metabolic rates</span> do not differ
+- Average metabolic rate of long-wings is higher
+- Average metabolic rate of long-wings is lower
+:::
+
+::::
+
+
+## Example: Genetics of Corn Oil Content
+
+> Which set of <span style="color:blue;">loci</span> best predicts <span style="color:red;">oil content</span> in corn kernels?
+
+:::: {.columns}
+
+::: {.column width="40%"}
+![](https://i.imgur.com/w6z5m2e.jpg){fig-align="center"}
+:::
+
+::: {.column width="60%"}
+- Heritability of corn oil content is 0
+- Different possible combinations of SNPs
+- All additive
+- Dominance
+- Epistasis
+- Structural variants
+:::
+
+::::
+
+
+## Example: Species richness in Missouri lakes
+
+> Does the <span style="color:red;">number</span> of phytoplankton species change with <span style="color:purple;">agricultural intensity</span> around lakes?
+
+:::: {.columns}
+
+::: {.column width="40%"}
+![](https://i.imgur.com/GoOM9bb.png){fig-align="center"}
+:::
+
+::: {.column width="60%"}
+- There is no relationship between species richness and agricultural intensity
+- There is a positive relationship
+- There is a negative relationship
+:::
+
+::::
+
+
+## Linear models
+
+- General term for a linear relationship between an outcome (observed) variable and one or more predictors
+- A functional relationship + "noise"
+- Most common type of statistical model
+
+
+## Does "linear" mean a straight line?
+
+- Yes and no, depending on the context
+- Straight line $Y \sim X$ relationships
+- $X$ is continuous
+- "Straight" line $Y \sim X$ relationships
+- $X$ is categorical
+- Polynomials ($X^2$, $X^3$, etc.)
+
+
+## Non-linear models
+
+- Does $e^X$ appear as one of the predictors? (e.g., growth)
+- Are there ratios of predictors? (e.g., enzyme kinetics)
+
+```{r}
+set.seed(238746)
+DD <- tibble(Age = seq(0, 20, length.out = 25),
+             Length = 30 + 140 / (1 + exp(-0.65 * (Age - 10)))) |> 
+  mutate(Length = Length + rnorm(n(), 0, 2))
+ggplot(DD, aes(Age, Length)) +
+  geom_hline(yintercept = 170, color = "darkred", linewidth = 1) +
+  geom_point() +
+  annotate(
+    geom = "text",
+    x = 5, y = 150,
+    label = TeX("$Length(Age) = \\frac{Length_{final}}{1 + e^{-b~(Age - c)}}$",
+                output = "character"),
+    parse = TRUE,
+    size = 7)
+```
+
+
+## Mathematical similarities among linear models
+
+- Continuous and categroical predictors are not different mathematically
+    - Categorical variables internally converted to 0/1 codings
+
+> "How much does the outcome variable change for a 1 unit increase in the predictor?"
+
+
+## Diagnostics and assumptions - intro
+
+
+
+## Estimation, hypothesis testing, questions - show how they are the same
+
+
+## Frameworks reminder

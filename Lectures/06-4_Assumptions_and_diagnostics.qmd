@@ -1,0 +1,24 @@
+---
+title: "Introduction and roadmap"
+author:
+  - Elizabeth King
+  - Kevin Middleton
+format:
+  revealjs:
+    theme: [default, custom.scss]
+    standalone: true
+    self-contained: true
+    logo: QMLS_Logo.png
+    slide-number: true
+    show-slide-number: all
+code-annotations: hover
+bibliography: QMLS_Bibliography.bib
+csl: evolution.csl
+---
+
+## Introduction
+
+- Linear models are all the same
+- Diagnostics and assumptions - intro
+- Estimation, hypothesis testing, questions - show how they are the same
+- Frameworks reminder

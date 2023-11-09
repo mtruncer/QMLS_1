@@ -1,0 +1,621 @@
+---
+title: "Applications of Inference Frameworks: Linear Regression"
+author:
+  - Elizabeth King
+  - Kevin Middleton
+format:
+  revealjs:
+    theme: [default, custom.scss]
+    standalone: true
+    self-contained: true
+    logo: QMLS_Logo.png
+    slide-number: true
+    show-slide-number: all
+code-annotations: hover
+bibliography: QMLS_Bibliography.bib
+csl: evolution.csl
+---
+
+```{r}
+#| label: setup
+#| message: false
+#| warning: false
+
+library(tidyverse)
+library(cowplot)
+library(latex2exp)
+library(rethinking)
+theme_set(theme_cowplot())
+
+ssPlot <- function(X, Y, b, do.plot = TRUE, do.labels = TRUE) {
+  n <- length(X)
+  pred <- (X * b + (mean(Y) - b * mean(X)))
+  SSy <- sum((Y - pred) ^ 2)
+
+  M <- tibble(X, Y, pred)
+
+  if (do.plot) {
+    p <- ggplot() +
+      geom_point(data = tibble(X = mean(X), Y = mean(Y)),
+                 aes(X, Y), color = "blue", size = 7, pch = 1) +
+      geom_abline(slope = b, intercept = mean(Y) - b * mean(X),
+                  color = "blue", linewidth = 1) +
+      geom_segment(data = M, aes(x = X, xend = X, y = Y, yend = pred),
+                   color = "red", linewidth = 1) +
+      geom_point(data = M, aes(x = X, y = Y), size = 3)
+
+    v1 <- round(b, 2)
+    v2 <- round(SSy, 2)
+    
+    ll1 <- glue::glue("$\\theta_1 = {v1}$")
+    ll2 <- glue::glue("$\\SS = {v2}$")
+
+    xpos <- min(X) + 0.15 * diff(range(X))
+    ypos <- min(Y) + 0.8 * diff(range(Y))
+
+    if(do.labels) {
+      p <- p +
+        annotate(geom = "text",
+                 label = TeX(ll1, output = "character"),
+                 x = xpos, y = ypos,
+                 parse = TRUE,
+                 hjust = 0,
+                 size = 7) +
+        annotate(geom = "text",
+                 label = TeX(ll2, output = "character"),
+                 x = xpos, y = ypos * 0.98,
+                 parse = TRUE,
+                 hjust = 0,
+                 size = 7)
+    }
+    print(p)
+  }
+  return(SSy)
+}
+```
+
+
+## Frameworks for inference
+
+1. Analytical
+2. Maximum likelihood
+3. Resampling
+4. Bayesian
+
+
+## For example...
+
+1. Calibration curves
+2. Metabolic rate vs. Body mass
+3. Leaf area vs. Total rainfall
+
+Continuous variable vs. continuous variable
+
+
+## Linear regression
+
+What values of $\theta_0$ and $\theta_1$ provide the best fit line through $Y$ as a function of $X$?
+
+$$Y = \theta_0 + \theta_1 X$$
+
+<center>
+<img src="https://i.imgur.com/hbkIVLg.gif" width="30%" />
+</center>
+
+- How do we estimate $\theta_0$ and $\theta_1$?
+- What is "best fit"?
+
+
+## Generate data
+
+Generate $n=30$ random data points: $X \sim \mathcal{N}(10, 1)$ and $Y = 2.3 X + \epsilon$, where $\epsilon \sim \mathcal{N}(1, 1)$:
+
+```{r Generate_data}
+set.seed(4)
+n <- 30
+X <- rnorm(n, mean = 10, sd = 1)
+Y <- 2.3 * X + rnorm(n, mean = 1, sd = 1)
+M <- data.frame(X, Y)
+M |> head()
+```
+
+
+## Generate data
+
+```{r, echo=FALSE}
+ggplot(M, aes(X, Y)) + 
+  geom_point()
+```
+
+
+## Analytical solution
+
+An infinite range of possible slopes ($\theta_1$)
+
+1. All pass through $\left(\bar{X}, \bar{Y}\right)$.
+1. Sum of the squared deviations vary continuously.
+1. Only one value of $\theta_1$ will minimize the SS.
+    - The *Ordinary Least Squares* estimate
+
+
+## Analytical calculation of $\theta_1$
+
+$$\theta_1 = \frac{\sum\left(X_{i}-\bar{X}\right)\left(Y_{i}-\bar{Y}\right)}{\sum\left(X_{i}-\bar{X}\right)^{2}}$$
+
+Numerator:  Sum of the products of *X* and *Y*
+
+Denominator: Sum of squares of *X*
+
+
+## Analytical calculation of $\theta_0$
+
+Because the OLS line must pass through $\left(\bar{X},\bar{Y}\right)$:
+
+$$\theta_0 = \bar{Y} - \theta_1 \bar{X}$$
+
+
+## Assumptions of OLS
+
+At each *X*, there is a normally distributed population of *Y* observations with a mean at the regression line
+
+- The variance of all *Y* observations is equal. 
+
+Few assumptions are made about *X*
+
+- *Is* measured without error
+- Not that it is normal
+- Not that it is randomly sampled
+- Think about calibration curves. You set the *X* observations explicitly.
+
+
+## Normally distributed population of *Y* observations
+
+<center>
+<img src="https://i.imgur.com/F0Y5Fva.png" width="70%" />
+</center>
+
+
+## Minimizing Sums of Squares
+
+```{r echo=FALSE}
+p <- ggplot() +
+  geom_point(data = M, aes(x = X, y = Y), size = 2)
+p
+```
+
+
+## Minimizing Sums of Squares
+
+```{r echo=FALSE}
+y_bar <- paste("bar(Y)==", round(mean(Y), 2))
+x_bar <- paste("bar(X)==", round(mean(X), 2))
+
+p +
+  geom_point(data = tibble(X = mean(X), Y = mean(Y)),
+             aes(X, Y), color = "blue", size = 7, pch = 1) +
+  annotate("text", x = 9.25, y= 28 ,
+           label = y_bar,
+           parse = TRUE,
+           size = 7) +
+  annotate("text", x = 9.25, y= 27 ,
+           label = x_bar,
+           parse = TRUE,
+           size = 7)
+```
+
+
+## Minimizing Sums of Squares
+
+```{r echo=FALSE, results='hide'}
+# b = 0
+ssPlot(X, Y, 0)
+```
+
+
+## Minimizing Sums of Squares
+
+```{r echo=FALSE, results='hide'}
+# b = 0.5
+ssPlot(X, Y, 0.5)
+```
+
+
+## Minimizing Sums of Squares
+
+```{r echo=FALSE, results='hide'}
+# b = 1
+ssPlot(X, Y, 1)
+```
+
+
+## Minimizing Sums of Squares
+
+```{r echo=FALSE, results='hide'}
+# b = 1.5
+ssPlot(X, Y, 1.5)
+```
+
+
+## Minimizing Sums of Squares
+
+```{r echo=FALSE, results='hide'}
+# b = 2
+ssPlot(X, Y, 2)
+```
+
+## Minimizing Sums of Squares
+
+```{r echo=FALSE, results='hide'}
+# b = 2.1
+ssPlot(X, Y, 2.1)
+```
+
+
+## Minimizing Sums of Squares
+
+```{r}
+# Iteratively find the minimum SS
+theta_1 <- seq(-10, 10, by = 0.01)
+
+# data.frame to hold output
+SumSq <- data.frame(theta_1 = theta_1,
+                    SS = numeric(length(theta_1)))
+head(SumSq)
+```
+
+
+## Minimizing Sums of Squares
+
+```{r}
+# Iterate through slopes
+for (ii in 1:nrow(SumSq)) {
+  theta_1 <- SumSq$theta_1[ii]
+  SumSq$SS[ii] <- ssPlot(X, Y, theta_1, do.plot = FALSE)
+}
+
+# Location of minimum SS
+minSS.theta_1 <- SumSq$theta_1[which.min(SumSq$SS)]
+minSS.SS <- SumSq$SS[which.min(SumSq$SS)]
+```
+
+
+## Minimizing Sums of Squares
+
+```{r echo=FALSE}
+xpos <- min(SumSq$theta_1) + 0.6 * diff(range(SumSq$theta_1))
+ypos <- min(SumSq$SS) + 0.4 * diff(range(SumSq$SS))
+
+ggplot() +
+  geom_line(data = SumSq, aes(x = theta_1, y = SS), linewidth = 1) +
+  geom_point(data = tibble(x = minSS.theta_1, y = minSS.SS),
+             aes(x, y), color = "red", size = 4) +
+  labs(x = "theta_1", y = "Sum of Squares") +
+  annotate(geom = "text", x = xpos, y = ypos,
+           label = paste("theta_1 = ", round(minSS.theta_1, 2),
+                         "\nSS = ", round(minSS.SS, 2)),
+           size = 7)
+```
+
+
+## Linear regression {.smaller}
+
+Generate $n=30$ random data points: $X \sim \mathcal{N}(10, 1)$ and $Y = 2.3 X + \epsilon$, where $\epsilon \sim \mathcal{N}(1, 1)$:
+
+```{r, echo = FALSE, fig.width = 5, fig.height = 3.5, fig.align = 'center'}
+set.seed(4)
+n <- 30
+X <- rnorm(n, mean = 10, sd = 1)
+Y <- 2.3 * X + rnorm(n, mean = 1, sd = 1)
+M <- data.frame(X, Y)
+
+ggplot(M, aes(X, Y)) + geom_point()
+```
+
+What values of $\theta_0$ and $\theta_1$ provide the best fit line through $Y$ as a function of $X$?
+
+$$Y = \theta_0 + \theta_1 X$$
+
+
+## Frameworks for inference
+
+1. ~~Analytical~~
+2. Maximum likelihood
+    - Minimizing the residual sum of squares is numerically equal to *maximizing* the model likelihood.
+3. Resampling
+4. Bayesian
+
+
+## Errors are normally distributed around the regression line
+
+<center>
+<img src="https://i.imgur.com/F0Y5Fva.png" width="60%" />
+</center>
+
+How would probabilities change for a different slope estimate?
+
+
+## What is the likelihood of an observed value given a regression model? 
+
+Define a function to calculate the likelihood of an observed value $Y_i$ given the mean ($\mu$) and standard deviation ($\sigma$). Default to the standard normal distribution $\mathcal{N}(0,1)$.
+
+$$Pr\left[Y_i\right] = \frac{1}{\sqrt{2\pi\sigma^{2}}} e^{\frac{-\left(Y_i-\mu\right)^{2}}{2\sigma^{2}}}$$
+
+
+## Define a model
+
+$$y = \bar{Y} + \theta_1 X$$
+
+$$\theta_1 = 0$$
+
+This is a flat line ($\theta_1 = 0$) through the mean of $Y$.
+
+
+## Define a model
+
+```{r echo=FALSE, results='hide'}
+set.seed(4)
+n <- 30
+X <- rnorm(n, mean = 10, sd = 1)
+Y <- 2.3 * X + rnorm(n, mean = 1, sd = 1)
+M <- data.frame(X, Y)
+
+ssPlot(X, Y, b = 0, do.labels = FALSE)
+```
+
+
+## Calculate the predicted values
+
+Just the mean of $Y$ repeated 30 times.
+
+```{r}
+Y_bar <- mean(Y)
+Y_hat <- rep(Y_bar, length(Y))
+Y_hat
+```
+
+
+## Likelihood of a predicted value of $Y$
+
+$$Pr\left[Y_i\right]=\frac{1}{\sqrt{2\pi\hat{\sigma}^2}} e^{\frac{-\left(Y_i - \mu\right)^{2}}{2\hat{\sigma}^2}}$$
+
+- $\mu =$ the predicted value $\hat{Y}_i$
+- Need the estimate of the residual variance $\left(\hat{\sigma}^2\right)$.
+
+
+## Residual variance
+
+$$\hat{\sigma}^2 = \frac{\Sigma_i\left(Y_i - \hat{Y}_i\right)^2}{n}$$
+
+This is a biased estimate, but that's ok. It is how model likelihoods are calculated in this case. 
+
+$$s^2 = MSE = \frac{n}{n-2}\left(\hat{\sigma}^2\right)$$
+
+For non-small $n$, $s^2 \approx \left(\hat{\sigma}^2\right)$. Here ~7% difference.
+
+
+## Calculate the estimated residual variance and standard deviation
+
+```{r}
+# Estimated variance
+var_hat <- sum((Y - Y_hat)^2) / (length(Y))
+var_hat
+sd_hat <- sqrt(var_hat)
+sd_hat
+```
+
+
+## Likelihoods for observed $Y$s
+
+```{r}
+# Check the likelihood for the first Y
+dnorm(Y[1], mean = Y_hat[1], sd = sd_hat)
+
+# Calculate for all Ys
+(liks_Y <- dnorm(Y, mean = Y_hat, sd = sd_hat))
+```
+
+
+## Model Likelihood ($\mathcal{L}$)
+
+For a set of $Y_i$ and parameters ($\Theta$; i.e., slope and intercept) the likelihood of the model is the product of their individual probabilities:
+
+$$\mathcal{L}\left(\left\{ Y_{i}\right\} _{i=1}^{n};\Theta\right) = \prod_{i=1}^{n}Pr\left[Y_{i}; \Theta\right]$$
+
+$$\log\left(\mathcal{L}\left(\left\{ Y_{i}\right\} _{i=1}^{n};\Theta\right)\right) = \sum_{i=1}^{n} \log\left(Pr\left[Y_{i};\Theta\right]\right)$$
+
+
+## Model Likelihood ($\mathcal{L}$)
+
+```{r}
+# Sum of the log-likelihoods
+sum(log(liks_Y))
+```
+
+
+## Likelihood from linear regression with $\theta_1 = 0$
+
+Fit a linear model (`lm()`) with only an intercept (`~ 1`) and use the built-in function `logLik()` to extract the log-likelihood.
+
+```{r}
+fm <- lm(Y ~ 1)
+logLik(fm)
+```
+
+
+## Maximizing the log-Likelihood
+
+Function to calculate the log-likelihood. Input the slope ($\theta_1$) and observed values of $X$ and $Y$. Return the log-likelihood.
+
+```{r log_lik}
+log_lik <- function(theta_1, X, Y){
+  Y_bar <- mean(Y)
+  X_bar <- mean(X)
+  theta_0 <- Y_bar - theta_1 * X_bar
+  Y_hat <- theta_0 + theta_1 * X
+  var_hat <- sum((Y - Y_hat) ^ 2) / (length(Y))
+  sd_hat <- sqrt(var_hat)
+  liks_Y <- dnorm(Y, mean = Y_hat, sd = sd_hat)
+  return(sum(log(liks_Y)))
+}
+```
+
+
+## Maximizing the log-Likelihood
+
+For a range of $\theta_1$ from -10 to 10 in increments of 0.01, calculate the log-likelihood of the model. Save to a variable called `lls`. Then find the maximum value of `lls`, the associated $\theta_1$ and log-likelihood.
+
+```{r}
+theta_1 <- seq(-10, 10, by = 0.01)
+lls <- numeric(length(theta_1))
+for (ii in 1:length(theta_1)) {
+  lls[ii] <- log_lik(theta_1[ii], X, Y)
+}
+
+# Location of maximum log-likelihood
+max.ll <- lls[which.max(lls)]
+
+# Slope at maximum log-likelihood
+theta_1_hat <- theta_1[which.max(lls)]
+```
+
+
+## Maximizing the log-Likelihood
+
+```{r echo=FALSE}
+LL_max <- round(max.ll, 2)
+ll1 <- glue::glue("$\\theta_1 = {theta_1_hat}$")
+ll2 <- glue::glue("$log~Likelihood = {LL_max}$")
+
+ggplot() +
+  geom_line(data = tibble(lls, theta_1), aes(y = lls, x = theta_1)) +
+  geom_point(data = tibble(x = theta_1_hat, y = max.ll), aes(x, y),
+             color = "red", size = 3) +
+  labs(x = TeX("$\\theta_1$"), y = "log Likelihood") +
+  annotate(geom = "text",
+           x = -9, y = -60,
+           size = 7,
+           label = TeX(ll1, output = "character"),
+           parse = TRUE,
+           hjust = 0) +
+    annotate(geom = "text",
+           x = -9, y = -65,
+           size = 7,
+           label = TeX(ll2, output = "character"),
+           parse = TRUE,
+           hjust = 0)
+
+```
+
+
+## Maximizing the log-Likelihood
+
+```{r}
+max.ll
+fm <- lm(Y ~ 1 + X) # Fit model with intercept and slope
+logLik(fm)      # Use built-in function to extract log-likelihood
+```
+
+The values are not identical, because we only calculated $\theta_1$ in increments of 0.01.
+
+
+## Bayesian priors
+
+What priors for intercept ($\theta_0$) and slope ($\theta_1$)?
+
+```{r echo=FALSE, fig.height=4}
+p1 <- M |> 
+  ggplot(aes(X, Y)) +
+  geom_point()
+x <- seq(-50, 50, length = 100)
+p2 <- tibble(x = x, y = dnorm(x, 0, 10)) |> 
+  ggplot(aes(x, y)) +
+  geom_line() +
+  labs(x = "value", y = "Probability",
+       title = TeX("$N(0, 10)$"))
+plot_grid(p1, p2, ncol = 2)
+```
+
+
+## Bayesian {.smaller}
+
+```{r}
+#| label: Bayes_regression
+#| cache: true
+#| message: false
+#| echo: true
+
+fm <- ulam(
+  alist(
+    Y ~ normal(mu, sigma),
+    mu <- theta_0 + theta_1 * X,
+    theta_0 ~ normal(0, 10),
+    theta_1 ~ normal(0, 5),
+    sigma ~ exponential(0.5)
+  ),
+  data = M,
+  iter = 1e4,
+  chains = 4)
+```
+
+
+## Bayesian sampling
+
+```{r}
+trankplot(fm)
+```
+
+
+## Bayesian posteriors
+
+```{r}
+post <- extract.samples(fm) |> as_tibble() |> 
+  select(-sigma)
+post |>
+  gather(variable, value) |> 
+  ggplot(aes(value)) +
+  geom_line(stat = "density") +
+  facet_grid(. ~ variable, scales = "free_x")
+```
+
+
+## Bayesian summary
+
+```{r}
+#| echo: true
+
+precis(fm, digits = 4)
+coef(lm(Y ~ X, data = M))
+```
+
+
+## Bayesian posterior regression lines
+
+```{r echo = FALSE}
+post_samp <- post |>
+  sample_n(200)
+ggplot() +
+  geom_abline(data = post_samp, aes(intercept = theta_0, slope = theta_1),
+              alpha = 0.2, color = "red") +
+  geom_point(data = M, aes(X, Y), size = 2.5)
+```
+
+
+## Key features
+
+- Analytical solutions are fast, hand-calculable
+    - Unavailable for complex models (e.g., hierarchical models)
+- Analytical and maximum likelihood estimates will converge given enough precision
+- Bayesian estimates can include prior knowledge
+- Bayesian estimates will converge on ML estimates for sufficiently flat priors and/or sufficient data
+
+
+## Key points
+
+Comparison of means between groups:
+
+- Categorical predictor variables (factors)
+
+Linear relationships
+
+- Continuous predictor variables
+
