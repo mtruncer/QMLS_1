@@ -1,5 +1,5 @@
 ---
-title: "Applications of Inference Frameworks: Linear Regression"
+title: "Bivariate Regression"
 author:
   - Elizabeth King
   - Kevin Middleton
