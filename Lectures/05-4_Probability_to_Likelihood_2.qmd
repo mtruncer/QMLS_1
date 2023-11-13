@@ -514,11 +514,11 @@ model <- "
     real<lower=0> sigma;
   }
   model{
-    # Priors
+    // Priors
     mu ~ normal(98.6, 0.1);
     sigma ~ normal(0, 1);
     
-    # Distribution of temps
+    // Distribution of temps
     temps ~ normal(mu, sigma);
   }
 "
