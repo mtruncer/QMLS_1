@@ -270,9 +270,25 @@ ggplot(SticklebackPlates, aes(x = genotype, y = plates)) +
 
 Lots of statistics have their basis in the deviation of an observation from a mean.
 
-<center>
-<img src="https://i.imgur.com/FxGzm7g.png" width="40%" />
-</center>
+```{r}
+#| fig-height: 3
+
+DD <- tibble(x = 1:4,
+             y = c(4, -2, 2, -4))
+ggplot() +
+  theme_void() +
+  geom_segment(aes(x = 0, xend = 4.5, y = 0, yend = 0),
+               linewidth = 1.5) +
+  geom_segment(data = DD, aes(x = x, xend = x,
+                              y = y, yend = 0),
+               color = "firebrick4",
+               linetype = "dotted",
+               linewidth = 1) +
+  geom_point(data = DD, aes(x, y), size = 4) +
+  annotate(geom = "text", x = 5, y = 0,
+           label = "Mean",
+           size = 6)
+```
 
 The $i$th deviate is the difference of that observation and the sample mean:
 $$
