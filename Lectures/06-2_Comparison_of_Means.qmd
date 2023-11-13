@@ -1,0 +1,423 @@
+---
+title: "Comparison of Means"
+author:
+  - Elizabeth King
+  - Kevin Middleton
+format:
+  revealjs:
+    theme: [default, custom.scss]
+    standalone: true
+    self-contained: true
+    logo: QMLS_Logo.png
+    slide-number: true
+    show-slide-number: all
+code-annotations: hover
+bibliography: QMLS_Bibliography.bib
+csl: evolution.csl
+---
+
+
+## Horned lizard predation
+
+```{r}
+#| label: setup
+#| message: false
+#| warning: false
+
+library(tidyverse)
+library(cowplot)
+library(latex2exp)
+library(wesanderson)
+library(cmdstanr)
+library(bayesplot)
+library(posterior)
+library(qs)
+
+theme_set(theme_cowplot())
+
+```
+
+![](https://tpwd.texas.gov/huntwild/wild/images/reptiles/horned_lizardlarge.jpg){fig-align="center" width=90%}
+
+<center>
+*Phrynosoma cornutum*
+</center>
+
+
+## Loggerhead shrike
+
+![](https://i.imgur.com/Q1ee6FQ.png){fig-align="center" width=90%}
+
+
+## Are longer horns protective against predation?
+
+![](https://i.imgur.com/asOgPnC.jpg){fig-align="center" width=80%}
+
+
+## Horned lizard predation
+
+- Alive: n = 150, mean horn length = 24.5 mm, sd = 2.6
+- Dead: n = 30, mean horn length = 22.0 mm, sd = 2.7
+
+```{r}
+#| echo: true
+#| output-location: slide
+
+set.seed(3575575)
+
+Alive <- rnorm(n = 150, mean = 24.5, sd = 2.6)
+Dead <- rnorm(n = 30, mean = 22.0, sd = 2.7)
+Group <- c(rep("Alive", 150),
+           rep("Dead", 30))
+
+HL <- tibble(Horn_Length = c(Alive, Dead),
+             Group = factor(Group))
+HL
+```
+
+
+## Horned lizard predation
+
+```{r}
+HL |> 
+  ggplot(aes(Horn_Length)) +
+  geom_histogram(bins = 30, fill = "gray50") +
+  facet_grid(Group ~ .) +
+  labs(x = "Horn Length (mm)", y = "Count")
+```
+
+
+## Summarize
+
+```{r}
+#| echo: true
+
+HL |>
+  summarize(Horn_mean = mean(Horn_Length),
+            Horn_sd = sd(Horn_Length),
+            n = length(Horn_Length),
+            .by = Group)
+```
+
+
+## Are the means different?
+
+Horn length in live horned lizards: `r round(mean(HL$Horn_Length[HL$Group == "Alive"]), 1)` mm
+
+Horn length in dead horned lizards: `r round(mean(HL$Horn_Length[HL$Group == "Dead"]), 1)` mm
+
+Imagine you collected 100 live horned lizards and randomly assigned 50 to each of two groups.
+
+- Do you think they would have the same mean horn length?
+- How different do you think the means would be?
+- Think about how the variability among individual horn length measurements would affect your intuition here.
+
+
+## How large of a difference do we expect from sampling error?
+
+:::: {.columns}
+
+::: {.column width="50%"}
+![](https://i.imgur.com/EIfjPa0.jpg){fig-align="center" width=100%}
+:::
+
+::: {.column width="50%"}
+- Imagine a distribution of horn lengths for a population of horned lizards (mean = 24, sd = 3)
+- Randomly catch two groups of $n = 50$ from this population
+- How different are the groups?
+:::
+
+::::
+
+
+## How large of a difference do we expect from sampling error?
+
+```{r}
+#| echo: true
+
+set.seed(883231)
+
+mu.horn <- 24   # mean
+sd.horn <- 3    # standard deviation
+n.iter <- 10000 # number of iterations
+n.samp <- 50    # number in each sample
+sim.diff <- tibble(dd = numeric(length = n.iter)) # to hold output  
+
+for (zz in 1:n.iter) {
+  s1 <- rnorm(n.samp, mu.horn, sd.horn) # sample 1
+  s2 <- rnorm(n.samp, mu.horn, sd.horn) # sample 2
+  sim.diff[zz, 'dd'] <- mean(s1) - mean(s2) # difference in means
+}
+```
+
+
+## How large of a difference do we expect from sampling error?
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{r}
+ggplot(sim.diff, aes(x = dd)) +
+  geom_histogram(bins = 30, fill = "gray50") +
+  labs(x = "Difference of Means", y = "Count")
+```
+:::
+
+::: {.column width="50%"}
+- Imagine a distribution of horn lengths for a population of horned lizards (mean = 24, sd = 3)
+- Randomly catch two groups of $n = 50$ from this population
+- How different are they?
+:::
+
+::::
+
+
+## How large of a difference do we expect from sampling error?
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{r}
+HL |> 
+  ggplot(aes(Horn_Length)) +
+  geom_histogram(bins = 30, fill = "gray50") +
+  facet_grid(Group ~ .) +
+  labs(x = "Horn Length (mm)", y = "Count")
+```
+:::
+
+::: {.column width="50%"}
+Horn length in live horned lizards: `r round(mean(HL$Horn_Length[HL$Group == "Alive"]), 1)` mm
+
+Horn length in dead horned lizards: `r round(mean(HL$Horn_Length[HL$Group == "Dead"]), 1)` mm
+
+Difference: `r round(mean(HL$Horn_Length[HL$Group == "Alive"]), 1) - round(mean(HL$Horn_Length[HL$Group == "Dead"]), 1)`
+
+Are the means different?
+:::
+
+::::
+
+
+## How large of a difference do we expect from sampling error?
+
+```{r}
+p1 <- ggplot(sim.diff, aes(x = dd)) +
+  geom_histogram(bins = 30, fill = "gray50") +
+  labs(x = "Difference of Means", y = "Count")
+
+HL_mean <- HL |> 
+  group_by(Group) |> 
+  summarize(Mean = mean(Horn_Length)) |> 
+  gather(Value, x, -Group)
+
+p2 <- HL |> 
+  ggplot(aes(Horn_Length)) +
+  geom_histogram(bins = 30, fill = "gray50") +
+  geom_vline(data = HL_mean, aes(xintercept = x, color = Value),
+             linewidth = 2, color = "firebrick4") +
+  facet_grid(Group ~ .) +
+  labs(x = "Horn Length (mm)", y = "Count") +
+  theme(legend.position = "none")
+
+plot_grid(p2, p1, ncol = 2)
+```
+
+<center>
+Difference = `r round(mean(HL$Horn_Length[HL$Group == "Alive"]), 1) - round(mean(HL$Horn_Length[HL$Group == "Dead"]), 1)` mm
+</center>
+
+
+## Frameworks for Inference
+
+1. Frequentist/Likelihood
+2. Bayesian 
+
+- Each is a different way to approach the question with different costs and benefits. 
+- One is not inherently better than the other.
+- Both use similar concepts (e.g., likelihood and probability) and ideas.
+
+
+## `lm()`
+
+
+## Linear model comparing two means: *t*-test
+
+- Test statistic based on means, standard deviations, and sample size 
+- Follows a *t* distribution
+    - a normal distribution that accounts for sample size
+
+
+## *t* Distribution
+
+```{r}
+x <- seq(-3, 3, by = 0.001)
+
+sim <- tibble(df = c(2, 10, 50)) |>
+  group_by(df) |>
+  do(tibble(x = x, y = dt(x, .$df))) |>
+  mutate(Parameters = paste0("df = ", df)) |>
+  ungroup() |>
+  mutate(Parameters = factor(Parameters, levels = unique(Parameters)))
+
+norm <- tibble(
+  x = x,
+  y = dnorm(x, 0, 1)
+)
+
+pal <- wes_palette("Moonrise3", 3, type = "discrete")
+
+ggplot() +
+  geom_line(data = sim, aes(x, y, color = Parameters), size = 1.5) +
+  geom_line(data = norm, aes(x, y)) +
+  scale_color_manual(values = pal, name = "Degrees of\nFreedom") +
+  labs(x = "x", y = "Relative Likelihood") +
+  theme(legend.position = c(0.9, 0.75))
+```
+
+
+## *t*-test
+
+```{r}
+#| echo: true
+
+t.test(Horn_Length ~ Group, data = HL, var.equal = TRUE)
+```
+
+
+## Horned lizard predation
+
+:::: {.columns}
+
+::: {.column width="40%"}
+```{r message=FALSE, echo = FALSE, fig.width = 3.5}
+HL_mean <- HL |> group_by(Group) |> 
+  summarize(Mean = mean(Horn_Length)) |> 
+  gather(Value, x, -Group)
+
+HL |> 
+  ggplot(aes(Horn_Length)) +
+  geom_histogram(bins = 30) +
+  geom_vline(data = HL_mean, aes(xintercept = x, color = Value),
+             size = 2) +
+  facet_grid(Group ~ .) +
+  labs(x = "Horn Length (mm)", y = "Count") +
+  theme(legend.position = "none")
+```
+:::
+
+::: {.column width="60%"}
+Horn length in live horned lizards: `r round(mean(HL$Horn_Length[HL$Group == "Alive"]), 1)` mm
+
+Horn length in dead horned lizards: `r round(mean(HL$Horn_Length[HL$Group == "Dead"]), 1)` mm
+
+Difference: `r round(mean(HL$Horn_Length[HL$Group == "Alive"]), 1) - round(mean(HL$Horn_Length[HL$Group == "Dead"]), 1)`
+
+Are the means different?
+:::
+
+::::
+
+
+## Bayesian framework
+
+
+## Bayes model
+
+```{r}
+#| echo: true
+
+model <- "
+  data{
+    int N;
+    array[N] real Horn_Length;
+    array[N] int Group12;
+  }
+  parameters{
+    vector[2] b;
+    real<lower=0> sigma;
+  }
+  model{
+    // Priors
+    b ~ normal(20, 10);
+    sigma ~ normal(0, 4);
+    
+    // Model
+    Horn_Length ~ normal(b[Group12], sigma);
+  }
+"
+```
+
+
+## Sample the model...
+
+```{r}
+#| label: stan_fit
+#| message: false
+#| warning: false
+#| results: hide
+
+if (FALSE) {
+  # Only run this interactively to avoid needing to refit the model
+  # each time you render the slides. Posterior samples are saved out
+  # to a qs file to save space. Only saving mu and sigma without
+  # any diagnostics, etc.
+  bayes_model <- cmdstan_model(stan_file = write_stan_file(model))
+  fm_bayes <- bayes_model$sample(
+    data = list(N = nrow(HL),
+                Horn_Length = HL$Horn_Length,
+                Group12 = as.integer(HL$Group)),
+    iter_warmup = 2500,
+    iter_sampling = 2500,
+    seed = 2236726,
+    chains = 4)
+  samples <- fm_bayes$draws(variables = c("b", "sigma"))
+  qsave(x = samples, file = "../data/bayes_model_HL.qs")
+}
+
+# Read the posterior samples from the saved qs file.
+post <- qread("../data/bayes_model_HL.qs")
+
+mcmc_trace(post)
+```
+
+
+## Summarizing the results
+
+1. `b[1]` = Alive horn length
+1. `b[2]` = Dead horn length
+1. `sigma` = Standard deviation of the mean
+
+```{r}
+#| fig-height: 3
+
+samples <- post |>
+  as_draws_df() |> 
+  mutate(Difference = `b[1]` - `b[2]`)
+
+mcmc_dens(samples,
+          pars = c("b[1]", "b[2]", "sigma"))
+
+```
+
+
+## Posterior Difference
+
+```{r}
+QQ <- quantile(samples$Difference, probs = c(0.025, 0.5, 0.975)) |> 
+  as.numeric()
+```
+
+- Median: `r round(QQ[2], 2)`
+- 95% Highest-density interval: `r round(QQ[1], 2)` -- `r round(QQ[3], 2)`
+
+```{r}
+#| fig-height: 4
+
+ggplot(samples, aes(Difference)) +
+  geom_density(fill = "firebrick4", alpha = 0.5) +
+  geom_vline(xintercept = QQ[2]) +
+  geom_vline(xintercept = QQ[c(1, 3)], linetype = "dotted") +
+  labs(y = "Density", x = "Difference (Alive - Dead), mm")
+```
+
