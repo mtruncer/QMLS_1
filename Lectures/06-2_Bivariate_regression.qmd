@@ -75,14 +75,6 @@ ssPlot <- function(X, Y, b, do.plot = TRUE, do.labels = TRUE) {
 ```
 
 
-## Frameworks for inference
-
-1. Analytical
-2. Maximum likelihood
-3. Resampling
-4. Bayesian
-
-
 ## For example...
 
 1. Calibration curves
@@ -98,9 +90,7 @@ What values of $\theta_0$ and $\theta_1$ provide the best fit line through $Y$ a
 
 $$Y = \theta_0 + \theta_1 X$$
 
-<center>
-<img src="https://i.imgur.com/hbkIVLg.gif" width="30%" />
-</center>
+![](https://i.imgur.com/hbkIVLg.gif){fig-align="center" width="30%}
 
 - How do we estimate $\theta_0$ and $\theta_1$?
 - What is "best fit"?
@@ -170,9 +160,7 @@ Few assumptions are made about *X*
 
 ## Normally distributed population of *Y* observations
 
-<center>
-<img src="https://i.imgur.com/F0Y5Fva.png" width="70%" />
-</center>
+![](https://i.imgur.com/F0Y5Fva.png){fig-align="center" width="70%}
 
 
 ## Minimizing Sums of Squares

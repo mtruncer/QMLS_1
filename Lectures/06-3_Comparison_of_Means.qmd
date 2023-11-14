@@ -17,6 +17,17 @@ csl: evolution.csl
 ---
 
 
+## Comparison of two means
+
+- 1 categorical variable (factor) with two levels
+    - Internally re-coded as 0 and 1
+- One level is the *reference* level
+    - Default is the alphabetically first
+    - Be careful with factors coded with integers
+
+> "How much does the outcome variable change (positive or negative) for each 1 unit increase in the predictor?"
+
+
 ## Horned lizard predation
 
 ```{r}
@@ -54,7 +65,21 @@ theme_set(theme_cowplot())
 ![](https://i.imgur.com/asOgPnC.jpg){fig-align="center" width=80%}
 
 
+## Are longer horns protective against predation?
+
+::: {.incremental}
+
+- Is mean horn length in live horned lizards *different* than in dead horned lizards?
+    - Is the mean horn length larger?
+- How does natural variation in horn length impact the observed mean value?
+    - What difference(s) do we expect from random sampling of horned lizards?
+
+:::
+
+
 ## Horned lizard predation
+
+Simulate data with ~10% difference in horn length:
 
 - Alive: n = 150, mean horn length = 24.5 mm, sd = 2.6
 - Dead: n = 30, mean horn length = 22.0 mm, sd = 2.7
