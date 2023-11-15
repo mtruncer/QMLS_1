@@ -42,7 +42,6 @@ library(wesanderson)
 library(cmdstanr)
 library(bayesplot)
 library(posterior)
-library(qs)
 
 theme_set(theme_cowplot())
 
@@ -397,11 +396,11 @@ if (FALSE) {
     seed = 2236726,
     chains = 4)
   samples <- fm_bayes$draws(variables = c("b", "sigma"))
-  qsave(x = samples, file = "../data/bayes_model_HL.qs")
+  write_rds(x = samples, file = "../data/bayes_model_HL.rds")
 }
 
-# Read the posterior samples from the saved qs file.
-post <- qread("../data/bayes_model_HL.qs")
+# Read the posterior samples from the saved file.
+post <- read_rds("../data/bayes_model_HL.rds")
 
 mcmc_trace(post)
 ```
