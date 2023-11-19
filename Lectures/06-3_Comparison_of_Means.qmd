@@ -19,10 +19,10 @@ csl: evolution.csl
 
 ## Comparison of two means
 
-- 1 categorical variable (factor) with two levels
+- One categorical predictor (factor) with two levels
     - Internally re-coded as 0 and 1
 - One level is the *reference* level
-    - Default is the alphabetically first
+    - Default is alphabetically first factor
     - Be careful with factors coded with integers
 
 > "How much does the outcome variable change (positive or negative) for each 1 unit increase in the predictor?"
