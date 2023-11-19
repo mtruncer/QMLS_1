@@ -303,7 +303,7 @@ Y_hat
 $$Pr\left[Y_i\right]=\frac{1}{\sqrt{2\pi\hat{\sigma}^2}} e^{\frac{-\left(Y_i - \mu\right)^{2}}{2\hat{\sigma}^2}}$$
 
 - $\mu =$ the predicted value $\hat{Y}_i$
-- Standard deviation $\hat{\sigma}$ can be calculated based on the variance of $Y$.
+- Standard deviation ($\hat{\sigma}$) can be calculated based on the variance of $Y$.
 
 ```{r}
 #| echo: false
