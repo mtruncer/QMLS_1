@@ -39,6 +39,8 @@ library(posterior)
 
 theme_set(theme_cowplot())
 
+set.seed(8371374)
+
 ssPlot <- function(X, Y, b, do.plot = TRUE, do.labels = TRUE) {
   n <- length(X)
   pred <- (X * b + (mean(Y) - b * mean(X)))
@@ -95,6 +97,24 @@ ssPlot <- function(X, Y, b, do.plot = TRUE, do.labels = TRUE) {
 
 All refer to a linear model where a normally distributed outcome variable is modeled by a single continuous predictor
 
+## Goal
+
+How do we model the relationship between rainfall and leaf area?
+
+```{r}
+#| echo: false
+#| eval: true
+
+dd <- tibble("rain" = rnorm(50, 800, 100))
+dd$LAI <- dd$rain/400 + rnorm(50,0,0.5)
+
+ggplot(dd, aes(rain, LAI)) +
+  geom_point(size = 3) +
+  xlab("Rainfall (mm)") +
+  ylab("Leaf Area Index")
+
+```
+
 
 ## Goal
 
@@ -145,15 +165,24 @@ An infinite set of possible slopes ($\theta_1$) and intercepts ($\theta_0$)
 1. Slopes and intercepts are tied together
 1. All lines must pass through $\left(\bar{X}, \bar{Y}\right)$.
 1. Sum of the squared deviations vary continuously.
-1. Only one value of $\theta_1$ will minimize the SS.
+1. Only one value of $\theta_1$ will minimize the SS (and maximize the likelihood).
     - The *Ordinary Least Squares* estimate
 
 
 ## Assumptions of OLS
 
-At each $X$, there is a normally distributed population of $Y$ observations with a mean at the regression line
+-  At each $X$, there is a normally distributed population of $Y$ observations with a mean at the regression line
 
-- The variance of all $Y$ observations is equal. 
+-  The variance of all $Y$ observations is equal. 
+
+![](https://i.imgur.com/F0Y5Fva.png){fig-align="center" width="70%}
+
+
+## Assumptions of OLS 
+
+:::: {.columns}
+
+::: {.column width="50%"}
 
 Few assumptions are made about $X$
 
@@ -161,15 +190,190 @@ Few assumptions are made about $X$
 - *Not* that it is normal or that it is randomly sampled
 - Think about calibration curves. The $X$ observations are fixed.
 
+:::
 
-## Normally distributed population of $Y$ observations
+::: {.column width="50%"}
 
-![](https://i.imgur.com/F0Y5Fva.png){fig-align="center" width="70%}
+```{r, fig.height = 5, fig.width = 5}
+
+#| echo: false
+#| eval: true
+set.seed(86)
+cc <- tibble("Concentration" = seq(from = 10, to = 110, by = 10))
+cc$Absorbance = cc$Concentration * 0.025 + rnorm(nrow(cc), 0, 0.15)
+
+ggplot(cc, aes(Concentration, Absorbance)) +
+  geom_point(size = 3) +
+  scale_x_continuous(n.breaks = 10) +
+  theme(text = element_text(size = 20))
+  
+```
+
+:::
+
+::::
+
+
+## Fitting a Model
+
+How would probabilities change for different slope estimates?
+
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+<center>
+<img src="https://i.imgur.com/F0Y5Fva.png" width="100%" />
+</center>
+
+:::
+
+::: {.column width="50%"}
+
+```{r}
+#| echo: true
+#| eval: false
+
+Y <- 2.3 * X + 
+  rnorm(n, mean = 1, sd = 1)
+
+```
+
+```{r, fig.height = 4, fig.width = 4}
+
+#| echo: false
+#| eval: true
+
+p + 
+  geom_abline(slope = 2.3, intercept = 0, color = "blue") +
+  geom_abline(slope = 1.4, intercept = 10, color = "grey50") +
+  geom_abline(slope = 2.0, intercept = 2, color = "grey50") +
+  geom_abline(slope = 3.5, intercept = -10, color = "grey50") 
+  
+```
+
+:::
+
+::::
+
+
+
+## What is the likelihood of an observed value given a regression model? 
+
+Define a function to calculate the likelihood of an observed value $Y_i$ given the mean ($\mu$) and standard deviation ($\sigma$). Default to the standard normal distribution $\mathcal{N}(0,1)$.
+
+$$Pr\left[Y_i\right] = \frac{1}{\sqrt{2\pi\sigma^{2}}} e^{\frac{-\left(Y_i-\mu\right)^{2}}{2\sigma^{2}}}$$
+
+
+## Define a model
+
+$$y = \bar{Y} + \theta_1 X$$
+
+$$\theta_1 = 0$$
+
+This is a flat line ($\theta_1 = 0$) through the mean of $Y$.
+
+
+## Define a model
+
+```{r echo=FALSE, results='hide'}
+set.seed(4)
+n <- 30
+X <- rnorm(n, mean = 10, sd = 1)
+Y <- 2.3 * X + rnorm(n, mean = 1, sd = 1)
+M <- data.frame(X, Y)
+
+ssPlot(X, Y, b = 0, do.labels = FALSE)
+```
+
+
+## Calculate the predicted values
+
+Just the mean of $Y$ repeated 30 times.
+
+```{r}
+#| echo: true
+
+Y_bar <- mean(Y)
+Y_hat <- rep(Y_bar, length(Y))
+Y_hat
+```
+
+
+## Likelihood of a predicted value of $Y$
+
+$$Pr\left[Y_i\right]=\frac{1}{\sqrt{2\pi\hat{\sigma}^2}} e^{\frac{-\left(Y_i - \mu\right)^{2}}{2\hat{\sigma}^2}}$$
+
+- $\mu =$ the predicted value $\hat{Y}_i$
+- sd can be calculated based on the variance of $Y$.
+
+```{r}
+#| echo: false
+
+# Estimated variance
+var_hat <- sum((Y - Y_hat)^2) / (length(Y))
+sd_hat <- sqrt(var_hat)
+
+```
+
+
+## Likelihoods for observed $Y$s
+
+```{r}
+#| echo: true
+
+# Check the likelihood for the first Y
+dnorm(Y[1], mean = Y_hat[1], sd = sd_hat)
+
+# Calculate for all Ys
+(liks_Y <- dnorm(Y, mean = Y_hat, sd = sd_hat))
+```
+
+
+## Model Likelihood ($\mathcal{L}$)
+
+For a set of $Y_i$ and parameters ($\Theta$; i.e., slope and intercept) the likelihood of the model is the product of their individual probabilities:
+
+$$\mathcal{L}\left(\left\{ Y_{i}\right\} _{i=1}^{n};\Theta\right) = \prod_{i=1}^{n}Pr\left[Y_{i}; \Theta\right]$$
+
+$$\log\left(\mathcal{L}\left(\left\{ Y_{i}\right\} _{i=1}^{n};\Theta\right)\right) = \sum_{i=1}^{n} \log\left(Pr\left[Y_{i};\Theta\right]\right)$$
+
+
+## Model Likelihood ($\mathcal{L}$)
+
+```{r}
+#| echo: true
+
+# Sum of the log-likelihoods
+sum(log(liks_Y))
+```
+
+## Maximizing the log-Likelihood
+
+Function to calculate the log-likelihood. Input the slope ($\theta_1$) and observed values of $X$ and $Y$. Return the log-likelihood.
+
+```{r log_lik}
+#| echo: true
+
+log_lik <- function(theta_1, X, Y){
+  Y_bar <- mean(Y)
+  X_bar <- mean(X)
+  theta_0 <- Y_bar - theta_1 * X_bar
+  Y_hat <- theta_0 + theta_1 * X
+  var_hat <- sum((Y - Y_hat) ^ 2) / (length(Y))
+  sd_hat <- sqrt(var_hat)
+  liks_Y <- dnorm(Y, mean = Y_hat, sd = sd_hat)
+  return(sum(log(liks_Y)))
+}
+
+log_lik(2.3, X, Y)
+```
 
 
 ## Minimizing Sums of Squares
 
-```{r echo=FALSE}
+```{r}
 p
 ```
 
@@ -321,8 +525,7 @@ $$\theta_0 = \bar{Y} - \theta_1 \bar{X}$$
 
 ## Bivariate regression as a linear model
 
-- We don't have to manually search for values of intercept ($\theta_0$) and slope ($\theta_1$)
-    - This is what Maximum Likelihood does
+- We don't have to manually search for values of intercept ($\theta_0$) and slope ($\theta_1$) or use an optimizaiton function (what maximum likelihood would do)
 - We want to solve the closed form solution directly
     - Matrix algebra
 
@@ -331,11 +534,59 @@ R has a function to do this.
 
 ## Introduction to `lm()`
 
+```{r}
+#| echo: true
+
+my_model <- lm(Y ~ X, data = M)
+
+my_model
+
+```
+
 
 ## Model formulas
 
+Y ~ X
+
+- Response variable (Y)
+- Predictor variable (X)
+- Equivalent to: $$Y = \theta_0 + \theta_1 X$$
+
 
 ## Summary from `lm()`
+
+```{r}
+#| echo: true
+
+summary(my_model)
+
+```
+
+## Likelihood from linear regression 
+
+Fit a linear model (`lm()`) with only an intercept (`~ 1`) and use the built-in function `logLik()` to extract the log-likelihood.
+
+```{r}
+#| echo: true
+
+fm <- lm(Y ~ 1)
+logLik(fm)
+
+```
+
+## Likelihood from linear regression 
+
+```{r}
+#| echo: true
+
+logLik(my_model)
+
+log_lik(2.39525, X, Y)
+
+log_lik(2.3, X, Y)
+
+```
+
 
 
 ## Bayesian framework
