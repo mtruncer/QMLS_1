@@ -16,13 +16,14 @@ bibliography: QMLS_Bibliography.bib
 csl: evolution.csl
 ---
 
+
 ## For example...
 
 1. Calibration curves
 2. Metabolic rate vs. Body mass
 3. Leaf area vs. Total rainfall
 
-Continuous variable vs. continuous variable
+Continuous variable modeled by one continuous variable
 
 
 ```{r}
@@ -97,19 +98,19 @@ ssPlot <- function(X, Y, b, do.plot = TRUE, do.labels = TRUE) {
 
 All refer to a linear model where a normally distributed outcome variable is modeled by a single continuous predictor
 
+
 ## Goal
 
-How do we model the relationship between rainfall and leaf area?
+How do we model the relationship between leaf area and rainfall?
 
 ```{r}
-#| echo: false
 #| eval: true
 
 dd <- tibble("rain" = rnorm(50, 800, 100))
 dd$LAI <- dd$rain/400 + rnorm(50,0,0.5)
 
 ggplot(dd, aes(rain, LAI)) +
-  geom_point(size = 3) +
+  geom_point(size = 3, color = "navy") +
   xlab("Rainfall (mm)") +
   ylab("Leaf Area Index")
 
@@ -132,7 +133,7 @@ $$Y = \theta_0 + \theta_1 X$$
 
 Generate $n = 30$ random data points: 
 
-- $X \sim Normal(10, 1)$
+- $X \sim Normal(mean = 10, sd = 1)$
 - $Y = 2.3 X + \epsilon$ ("functional relationship")
 - where $\epsilon \sim Normal(1, 1)$ ("noise")
 
@@ -218,14 +219,11 @@ ggplot(cc, aes(Concentration, Absorbance)) +
 
 How would probabilities change for different slope estimates?
 
-
 :::: {.columns}
 
 ::: {.column width="50%"}
 
-<center>
-<img src="https://i.imgur.com/F0Y5Fva.png" width="100%" />
-</center>
+![](https://i.imgur.com/F0Y5Fva.png){fig-align="center"}
 
 :::
 
@@ -240,16 +238,14 @@ Y <- 2.3 * X +
 
 ```
 
-```{r, fig.height = 4, fig.width = 4}
-
-#| echo: false
-#| eval: true
+```{r}
+#| fig-height: 7
 
 p + 
-  geom_abline(slope = 2.3, intercept = 0, color = "blue") +
-  geom_abline(slope = 1.4, intercept = 10, color = "grey50") +
-  geom_abline(slope = 2.0, intercept = 2, color = "grey50") +
-  geom_abline(slope = 3.5, intercept = -10, color = "grey50") 
+  geom_abline(slope = 2.3, intercept = 0, color = "blue", linewidth = 1) +
+  geom_abline(slope = 1.4, intercept = 10, color = "grey50", linewidth = 1) +
+  geom_abline(slope = 2.0, intercept = 2, color = "grey50", linewidth = 1) +
+  geom_abline(slope = 3.5, intercept = -10, color = "grey50", linewidth = 1) 
   
 ```
 
@@ -258,10 +254,9 @@ p +
 ::::
 
 
-
 ## What is the likelihood of an observed value given a regression model? 
 
-Define a function to calculate the likelihood of an observed value $Y_i$ given the mean ($\mu$) and standard deviation ($\sigma$). Default to the standard normal distribution $\mathcal{N}(0,1)$.
+Define a function to calculate the likelihood of an observed value $Y_i$ given the mean ($\mu$) and standard deviation ($\sigma$). Default to the standard normal distribution: $Normal(0,1)$.
 
 $$Pr\left[Y_i\right] = \frac{1}{\sqrt{2\pi\sigma^{2}}} e^{\frac{-\left(Y_i-\mu\right)^{2}}{2\sigma^{2}}}$$
 
@@ -272,12 +267,14 @@ $$y = \bar{Y} + \theta_1 X$$
 
 $$\theta_1 = 0$$
 
-This is a flat line ($\theta_1 = 0$) through the mean of $Y$.
+This is a horizontal line ($\theta_1 = 0$) through the mean of $Y$.
 
 
 ## Define a model
 
-```{r echo=FALSE, results='hide'}
+```{r}
+#| results: hide
+
 set.seed(4)
 n <- 30
 X <- rnorm(n, mean = 10, sd = 1)
@@ -306,7 +303,7 @@ Y_hat
 $$Pr\left[Y_i\right]=\frac{1}{\sqrt{2\pi\hat{\sigma}^2}} e^{\frac{-\left(Y_i - \mu\right)^{2}}{2\hat{\sigma}^2}}$$
 
 - $\mu =$ the predicted value $\hat{Y}_i$
-- sd can be calculated based on the variance of $Y$.
+- Standard deviation ($\hat{\sigma}$) can be calculated based on the variance of $Y$.
 
 ```{r}
 #| echo: false
@@ -320,13 +317,17 @@ sd_hat <- sqrt(var_hat)
 
 ## Likelihoods for observed $Y$s
 
+Check the likelihood for the first $Y$:
+
 ```{r}
 #| echo: true
-
-# Check the likelihood for the first Y
 dnorm(Y[1], mean = Y_hat[1], sd = sd_hat)
+```
 
-# Calculate for all Ys
+Calculate for all $Y$s
+
+```{r}
+#| echo: true
 (liks_Y <- dnorm(Y, mean = Y_hat, sd = sd_hat))
 ```
 
@@ -342,10 +343,11 @@ $$\log\left(\mathcal{L}\left(\left\{ Y_{i}\right\} _{i=1}^{n};\Theta\right)\righ
 
 ## Model Likelihood ($\mathcal{L}$)
 
+Sum of the log-likelihoods:
+
 ```{r}
 #| echo: true
 
-# Sum of the log-likelihoods
 sum(log(liks_Y))
 ```
 
@@ -363,8 +365,8 @@ log_lik <- function(theta_1, X, Y){
   Y_hat <- theta_0 + theta_1 * X
   var_hat <- sum((Y - Y_hat) ^ 2) / (length(Y))
   sd_hat <- sqrt(var_hat)
-  liks_Y <- dnorm(Y, mean = Y_hat, sd = sd_hat)
-  return(sum(log(liks_Y)))
+  liks_Y <- dnorm(Y, mean = Y_hat, sd = sd_hat, log = TRUE)
+  return(sum(liks_Y))
 }
 
 log_lik(2.3, X, Y)
@@ -562,6 +564,7 @@ summary(my_model)
 
 ```
 
+
 ## Likelihood from linear regression 
 
 Fit a linear model (`lm()`) with only an intercept (`~ 1`) and use the built-in function `logLik()` to extract the log-likelihood.
@@ -571,10 +574,19 @@ Fit a linear model (`lm()`) with only an intercept (`~ 1`) and use the built-in 
 
 fm <- lm(Y ~ 1)
 logLik(fm)
-
 ```
 
+Using our manual `log_lik()` function:
+
+```{r}
+#| echo: true
+log_lik(0, X, Y)
+```
+
+
 ## Likelihood from linear regression 
+
+Minimizing the sum of squares *equals* maximizing the likelihood
 
 ```{r}
 #| echo: true
@@ -582,19 +594,37 @@ logLik(fm)
 logLik(my_model)
 
 log_lik(2.39525, X, Y)
+```
 
-log_lik(2.3, X, Y)
+```{r}
+#| fig-height: 4
+#| fig-align: center
+
+ggplot() +
+  geom_line(data = SumSq, aes(x = theta_1, y = SS), linewidth = 1) +
+  geom_point(data = tibble(x = minSS.theta_1, y = minSS.SS),
+             aes(x, y), color = "red", size = 4) +
+  labs(x = TeX("$\\theta_1$"),
+       y = "Sum of Squares")
 
 ```
 
 
-
 ## Bayesian framework
+
+- Likelihood frameworks allows any values of $\theta_0$ and $\theta_1$
+- What if we have *a priori* information? (e.g., $\theta_1$ should be positive)
+    - Leaf area should increase with rainfall
+    - Absorbance should increase with concentration
+- Bayesian framework uses priors to inform the model
 
 
 ## Normal(0, 10) priors for intercept ($\theta_0$) and slope ($\theta_1$)?
 
 ```{r}
+#| fig-width: 14
+#| fig-align: center
+
 p1 <- M |> 
   ggplot(aes(X, Y)) +
   geom_point()
@@ -677,6 +707,9 @@ mcmc_trace(post)
 1. `sigma` = Standard deviation of the mean
 
 ```{r}
+#| fig-width: 13
+#| fig-align: center
+
 mcmc_dens(post)
 ```
 
