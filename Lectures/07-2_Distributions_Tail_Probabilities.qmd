@@ -1,0 +1,256 @@
+---
+title: "Distributions & Tail Probabilities"
+author:
+  - Elizabeth King
+  - Kevin Middleton
+format:
+  revealjs:
+    theme: [default, custom.scss]
+    standalone: true
+    self-contained: true
+    logo: QMLS_Logo.png
+    slide-number: true
+    show-slide-number: all
+code-annotations: hover
+bibliography: QMLS_Bibliography.bib
+csl: evolution.csl
+---
+
+```{r}
+#| label: setup
+#| echo: false
+
+library(tidyverse)
+library(cowplot)
+theme_set(theme_cowplot())
+source("https://raw.githubusercontent.com/kmiddleton/quant_methods/master/Lectures/Shade_Distributions.R")
+
+```
+
+## A miscellanea of distributions {.nostretch}
+
+![](https://i.imgur.com/Mks8NPD.png"){fig-align="center" width="80%"}
+
+
+## Random normal values
+
+- Generate 100,000 values from a normal distribution with a mean of 5 and a standard deviation of 1
+- Generate 100,000 values from a normal distribution with a mean of 5 and a standard deviation of 5
+
+```{r}
+#| echo: true
+
+set.seed(832476)
+sd1 <- tibble(y = rnorm(100000, 5, 1))
+sd5 <- tibble(y = rnorm(100000, 5, 5))
+```
+
+
+## Plots of random normal values
+
+```{r echo=FALSE}
+p1 <- sd1 %>% ggplot(aes(y)) +
+  geom_histogram(bins = 50) +
+  labs(y = "Count")
+p2 <- sd5 %>% ggplot(aes(y)) +
+  geom_histogram(bins = 50) +
+  labs(y = "Count")
+
+plot_grid(p1, p2, ncol = 2)
+```
+
+
+## What proportion of values from each set are above 7?
+
+```{r}
+#| echo: true
+
+nrow(sd1[sd1$y > 7, ]) / nrow(sd1)
+nrow(sd5[sd5$y > 7, ]) / nrow(sd5)
+```
+
+
+## Use `pnorm()` to calculate the probability of observing a value of 7 or greater for each distribution.
+
+```{r}
+#| echo: true
+
+pnorm(7, mean = 5, sd = 1, lower.tail = FALSE)
+pnorm(7, mean = 5, sd = 5, lower.tail = FALSE)
+```
+
+Compare the values returned by `pnorm()` to the proportions on the previous slide.
+
+
+## Tail probabilities
+
+```{r fig.height = 3}
+#| echo: true
+
+shade_normal(0.025, tail = "both")
+qnorm(0.025)
+```
+
+## *t* Distribution
+
+```{r fig.height = 3}
+#| echo: true
+
+shade_t(0.025, df = 5)
+qt(0.025, df = 5)
+```
+
+
+## Calculating exact confidence intervals
+
+```{r}
+#| echo: false
+
+shade_t(0.025, 5) +
+  ggtitle(TeX("$t$-distribution with df = 5"))
+```
+
+Need the critical value that marks the 2.5% cutoff at each tail.
+
+## Calculating exact confidence intervals
+
+Multiply the $SEM$ by the *t*-value encompassing 95% for a *t* distribution with a given degrees of freedom (e.g., $n-1$).
+
+```{r t_plot, message=FALSE, fig.height=3.5}
+#| echo: false
+#| warning: false
+
+x <- seq(-2.5, 2.5, by = 0.01)
+
+sim <- tibble(df = c(2, 5, 20)) %>%
+  group_by(df) %>%
+  do(tibble(x = x, y = dt(x, .$df))) %>%
+  mutate(Parameters = paste0("df = ", df)) %>%
+  ungroup() %>%
+  mutate(Parameters = factor(Parameters, levels = unique(Parameters)))
+
+norm <- tibble(
+  x = x,
+  y = dnorm(x, 0, 1)
+)
+
+pal <- palette()[2:4]
+
+ggplot() +
+  geom_line(data = norm, aes(x, y), size = 3) +
+  geom_line(data = sim, aes(x, y, color = Parameters), size = 1.5) +
+  scale_color_manual(values = pal, name = "Degrees of\nFreedom") +
+  labs(x = "t", y = "Relative Likelihood") +
+  theme(legend.position = c(0.85, 0.75))
+```
+
+
+## Calculating exact confidence intervals
+
+```{r}
+#| echo: true
+
+qt(0.975, 10 - 1)
+
+qt(0.975, 100 - 1)
+
+qt(0.975, 1000000000 - 1)
+
+qnorm(0.975, 0, 1)
+```
+
+## Example CI calculation
+
+```{r}
+#| echo: true
+
+undulation_rate <- c(0.9, 1.2, 1.2, 1.3, 1.4, 1.4, 1.6, 2.0)
+
+undulation_mean <- mean(undulation_rate)
+undulation_SEM <- sd(undulation_rate) / sqrt(length(undulation_rate))
+
+crit <- qt(0.025, df = 8 - 1, lower.tail = FALSE)
+
+lower <- undulation_mean - crit * undulation_SEM
+upper <- undulation_mean + crit * undulation_SEM
+
+c(lower, undulation_mean, upper)
+
+```
+
+
+## *F* Distribution
+
+```{r fig.height = 3}
+#| echo: true
+
+shade_F(0.05, df1 = 2, df2 = 10)
+qf(0.05, df1 = 2, df2 = 10, lower.tail = FALSE)
+```
+
+
+## $\chi^2$ Distribution
+
+```{r fig.height = 3}
+#| echo: true
+
+shade_chisq(0.05, df = 2)
+qchisq(0.05, df = 2, lower.tail = FALSE)
+```
+
+
+## Why do we always seem to use 0.05 or 0.025?
+
+5% is a special number - the arbitrary threshold for statistical significance
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+```{r, fig.height=4,fig.width=4.5}
+#| echo: false
+
+shade_normal(0.025, tail = "both")
+```
+
+:::
+
+::: {.column width="50%"}
+
+```{r, fig.height=4,fig.width=4.5}
+#| echo: false
+
+shade_normal(0.05, tail = "upper")
+```
+
+:::
+
+::::
+
+## We could choose any probability for any distribution
+
+```{r}
+#| echo: true
+
+shade_normal(0.34, tail='upper')
+```
+
+
+
+## The `r`, `d`, `p`, and `q` functions for distributions {.smaller}
+
+Example for a normal distribution (Specify `mean` and `sd` or defaults is standard normal: $\mu = 0$, $\sigma = 1$):
+
+1. `rnorm(n, ...)`: `n` random draws
+1. `dnorm(x, ...)`: Relative likelihood (density) at `x` values
+1. `pnorm(q, ...)`: (Lower) tail probability for a quantile `q` 
+1. `qnorm(p, ...)`: Quantile for a given (lower) tail probability `p`
+
+- `lower.tail = FALSE` for the upper tail
+- `log = TRUE` for log-probability
+
+
+## References
+
+::: {#refs}
+:::
