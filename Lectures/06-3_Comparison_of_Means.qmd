@@ -134,13 +134,14 @@ HL$CatJitter <- HL$CatNum + rnorm(nrow(HL), 0, 0.1)
 HL |>
   ggplot(aes(CatJitter, Horn_Length)) +
   geom_point(color = "navy", size = 3) +
-  xlab("Group") +
-   scale_x_continuous(breaks = c(0,1),labels = c("Alive","Dead")) +
+  labs(x = "Group", y = "Horn Length (mm)") +
+  scale_x_continuous(breaks = c(0, 1),
+                     labels = c("Alive", "Dead")) +
   theme(text = element_text(size = 20))
 
 ```
 
-## Model Characteristics
+## Model characteristics
 
 ```{r}
 #| echo: true
@@ -152,44 +153,69 @@ Dead <- rnorm(n = 30, mean = 22.0, sd = 2.7)
 
 
 ```{r}
-
 mu1 <- 24.5
 mu2 <- 22
 yrange <- seq(14, 32, length = 200)
 Distp1 <- tibble(y = yrange,
-                  x = dnorm(yrange,mu1,2.6) + 0.4)
+                 x = dnorm(yrange,mu1,2.6) + 0.4)
 Distp2 <- tibble(y = yrange,
-                  x = dnorm(yrange,mu2,2.7) + 1.4)
+                 x = dnorm(yrange,mu2,2.7) + 1.4)
 
 mu3 <- 26
 mu4 <- 26
 Distp3 <- tibble(y = yrange,
-                  x = dnorm(yrange,mu3,2.6) + 0.4)
+                 x = dnorm(yrange,mu3,2.6) + 0.4)
 Distp4 <- tibble(y = yrange,
-                  x = dnorm(yrange,mu4,2.7) + 1.4)
+                 x = dnorm(yrange,mu4,2.7) + 1.4)
 
 
 p <- ggplot(HL, aes(CatJitter, Horn_Length)) +
-  geom_segment(x = -0.5, y = mu1, xend = 0.6, yend = mu1) +
-  geom_segment(x = 0.7, y = mu2, xend = 1.6, yend = mu2) +  
+  geom_segment(x = -0.5, y = mu1, xend = 0.6, yend = mu1, linewidth = 1) +
+  geom_segment(x = 0.7, y = mu2, xend = 1.6, yend = mu2, linewidth = 1) +  
   geom_point(color = "navy", size = 3) +
-  geom_path(data= Distp1, aes(x,y)) +
-  geom_path(data= Distp2, aes(x,y)) +
-  geom_segment(x = -0.5, y = mu3, xend = 0.6, yend = mu3, color = "red") +
-  geom_segment(x = 0.7, y = mu4, xend = 1.6, yend = mu4, color = "red") +  
-  geom_path(data= Distp3, aes(x,y), color = "red") +
-  geom_path(data= Distp4, aes(x,y), color = "red") +
-  ylim(c(14,32)) +
-  xlab("Group") +
+  geom_path(data= Distp1, aes(x, y), linewidth = 1) +
+  geom_path(data= Distp2, aes(x, y), linewidth = 1) +
+  geom_segment(x = -0.5, y = mu3, xend = 0.6, yend = mu3, 
+               color = "red", linewidth = 1) +
+  geom_segment(x = 0.7, y = mu4, xend = 1.6, yend = mu4, 
+               color = "red", linewidth = 1) +  
+  geom_path(data= Distp3, aes(x,y), color = "red", linewidth = 1) +
+  geom_path(data= Distp4, aes(x,y), color = "red", linewidth = 1) +
+  ylim(c(14, 32)) +
+  labs(x = "Group", y = "Horn Length (mm)") +
   scale_x_continuous(breaks = c(0,1),labels = c("Alive","Dead")) +
-    theme(text = element_text(size = 20))
+  theme(text = element_text(size = 20))
 
 p
 
 ```
 
+## Model assumptions
 
--  Assumptions
+- Observations normally distributed *within* groups
+    - Not between groups (e.g., bimodal distribution when all observations are pooled)
+- Within-group variances are (approximately) equal
+
+```{r}
+#| fig-width: 14
+#| fig-align: center
+
+set.seed(21347)
+n <- 40
+Males <- rnorm(n, 181.5, 23)
+Females <- rnorm(n, 90.5, 15)
+
+DD <- tibble(Mass = c(Males, Females),
+             Sex = rep(c("Male", "Female"), each = n))
+
+ggplot() +
+  geom_density(data = DD, aes(Mass), fill = "gray75") +
+  geom_density(data = DD, aes(Mass, color = Sex), linewidth = 2) +
+  scale_color_manual(values = c("#B66DFF", "#009292")) +
+  labs(y = "Density")
+
+```
+
 
 ## Minimize sums of squares
 
@@ -203,10 +229,12 @@ HL$pred[HL$Group == "Dead"] <- mu.d
 
 HL |>
   ggplot(aes(CatJitter, Horn_Length)) +
-  geom_segment(data = HL, aes(x = CatJitter, xend = CatJitter, y = Horn_Length, yend = pred),
-                   color = "firebrick", linewidth = 0.75) +
+  geom_segment(data = HL, aes(x = CatJitter, xend = CatJitter,
+                              y = Horn_Length, yend = pred),
+               color = "firebrick", linewidth = 0.75,
+               alpha = 0.75) +
   geom_point(color = "navy", size = 2.5) +
-  xlab("Group") +
+  labs(x = "Group", y = "Horn Length (mm)") +
   geom_segment(x = -0.5, y = mu.a, xend = 0.4, yend = mu.a) +
   geom_segment(x = 0.6, y = mu.d, xend = 1.5, yend = mu.d) +
   scale_x_continuous(breaks = c(0,1),labels = c("Alive","Dead")) +
@@ -356,44 +384,64 @@ plot_grid(p2, p1, ncol = 2)
 ```
 
 <center>
-Difference = `r round(mean(HL$Horn_Length[HL$Group == "Alive"]), 1) - round(mean(HL$Horn_Length[HL$Group == "Dead"]), 1)` mm
+Observed difference = `r round(mean(HL$Horn_Length[HL$Group == "Alive"]), 1) - round(mean(HL$Horn_Length[HL$Group == "Dead"]), 1)` mm
 </center>
+
 
 ## Horned lizard predation
 
 :::: {.columns}
 
-::: {.column width="40%"}
-```{r message=FALSE, echo = FALSE, fig.width = 3.5}
+::: {.column width="50%"}
+
+```{r}
+#| fig-height: 10
+
 HL_mean <- HL |> group_by(Group) |> 
   summarize(Mean = mean(Horn_Length)) |> 
   gather(Value, x, -Group)
 
-HL |> 
-  ggplot(aes(Horn_Length)) +
-  geom_histogram(bins = 30) +
-  geom_vline(data = HL_mean, aes(xintercept = x, color = Value),
-             size = 2) +
-  facet_grid(Group ~ .) +
-  labs(x = "Horn Length (mm)", y = "Count") +
-  theme(legend.position = "none")
+p2
 ```
+
 :::
 
-::: {.column width="60%"}
-Horn length in live horned lizards: `r round(mean(HL$Horn_Length[HL$Group == "Alive"]), 1)` mm
+::: {.column width="50%"}
 
-Horn length in dead horned lizards: `r round(mean(HL$Horn_Length[HL$Group == "Dead"]), 1)` mm
+Live horned lizards: `r round(mean(HL$Horn_Length[HL$Group == "Alive"]), 1)` mm
 
-Difference: `r round(mean(HL$Horn_Length[HL$Group == "Alive"]), 1) - round(mean(HL$Horn_Length[HL$Group == "Dead"]), 1)`
+Dead horned lizards: `r round(mean(HL$Horn_Length[HL$Group == "Dead"]), 1)` mm
+
+Observed difference: `r round(mean(HL$Horn_Length[HL$Group == "Alive"]), 1) - round(mean(HL$Horn_Length[HL$Group == "Dead"]), 1)`
+
+<br />
 
 Are the means different?
+
 :::
 
 ::::
 
 
 ## Bayesian framework
+
+- Likelihood frameworks allows any values for the group means
+- What if we have *a priori* information about horn length?
+    - Must be positive
+- Bayesian framework uses priors to inform the model
+
+
+## Normal(24, 10) prior for horn length
+
+```{r}
+DD <- tibble(`Horn Length` = seq(0, 48, length.out = 100),
+             Probability = dnorm(`Horn Length`, 24, 10))
+p3 <- ggplot(DD, aes(x = `Horn Length`, y = Probability)) +
+  geom_vline(xintercept = 24, linetype = "dotted", linewidth = 1) +
+  geom_line(linewidth = 1, color = "firebrick4")
+
+plot_grid(p2, p3, ncol = 2)
+```
 
 
 ## Bayes model
@@ -408,12 +456,12 @@ model <- "
     array[N] int Group12;
   }
   parameters{
-    vector[2] b;
+    vector<lower=0>[2] b;
     real<lower=0> sigma;
   }
   model{
     // Priors
-    b ~ normal(20, 10);
+    b ~ normal(24, 10);
     sigma ~ normal(0, 4);
     
     // Model
@@ -458,8 +506,8 @@ mcmc_trace(post)
 
 ## Summarizing the results
 
-1. `b[1]` = Alive horn length
-1. `b[2]` = Dead horn length
+1. `b[1]` = Alive lizard horn length
+1. `b[2]` = Dead lizard horn length
 1. `sigma` = Standard deviation of the mean
 
 ```{r}
@@ -489,10 +537,9 @@ QQ <- quantile(samples$Difference, probs = c(0.025, 0.5, 0.975)) |>
 #| fig-height: 4
 
 ggplot(samples, aes(Difference)) +
-  geom_density(fill = "firebrick4", alpha = 0.5) +
-  geom_vline(xintercept = QQ[2]) +
-  geom_vline(xintercept = QQ[c(1, 3)], linetype = "dotted") +
-  labs(y = "Density", x = "Difference (Alive - Dead), mm")
+  geom_density(fill = "firebrick4", alpha = 0.5, linewidth = 1) +
+  geom_vline(xintercept = QQ[2], linewidth = 1) +
+  geom_vline(xintercept = QQ[c(1, 3)], linewidth = 1, linetype = "dotted") +
+  labs(y = "Density", x = "Difference (Alive - Dead, mm)")
 ```
-
 
