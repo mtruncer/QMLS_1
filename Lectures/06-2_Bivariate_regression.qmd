@@ -632,7 +632,7 @@ x <- seq(-40, 40, length = 100)
 p2 <- tibble(x = x, y = dnorm(x, 0, 10)) |> 
   ggplot(aes(x, y)) +
   geom_line() +
-  labs(x = "value", y = "Probability")
+  labs(x = "Theta", y = "Probability")
 plot_grid(p1, p2, ncol = 2)
 ```
 
