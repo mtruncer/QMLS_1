@@ -1,0 +1,191 @@
+---
+title: "07-08-slides"
+format: html
+---
+
+## Non-linear models
+
+- Does $e^x$ appear as one of the predictors? (e.g., growth)
+- Are there ratios of predictors? (e.g., enzyme kinetics)
+
+```{r}
+set.seed(238746)
+DD <- tibble(Age = seq(0, 20, length.out = 25),
+             Length = 30 + 140 / (1 + exp(-0.65 * (Age - 10)))) |> 
+  mutate(Length = Length + rnorm(n(), 0, 2))
+ggplot(DD, aes(Age, Length)) +
+  geom_hline(yintercept = 170, color = "darkred", linewidth = 1) +
+  geom_point() +
+  annotate(
+    geom = "text",
+    x = 5, y = 150,
+    label = TeX("$Length(Age) = \\frac{Length_{final}}{1 + e^{-b~(Age - c)}}$",
+                output = "character"),
+    parse = TRUE,
+    size = 7)
+```
+
+
+## How does the mean change in alive lizards compared to dead?
+
+Horn length in live horned lizards: `r round(mean(HL$Horn_Length[HL$Group == "Alive"]), 1)` mm
+
+Horn length in dead horned lizards: `r round(mean(HL$Horn_Length[HL$Group == "Dead"]), 1)` mm
+
+Imagine you collected 100 live horned lizards and randomly assigned 50 to each of two groups.
+
+- Do you think they would have the same mean horn length?
+- How different do you think the means would be?
+- Think about how the variability among individual horn length measurements would affect your intuition here.
+
+
+## How large of a difference do we expect from sampling error?
+
+:::: {.columns}
+
+::: {.column width="50%"}
+![](https://i.imgur.com/EIfjPa0.jpg){fig-align="center" width=100%}
+:::
+
+::: {.column width="50%"}
+- Imagine a distribution of horn lengths for a population of horned lizards (mean = 24, sd = 3)
+- Randomly catch two groups of $n = 50$ from this population
+- How different are the groups?
+:::
+
+::::
+
+
+## How large of a difference do we expect from sampling error?
+
+```{r}
+#| echo: true
+
+set.seed(883231)
+
+mu.horn <- 24   # mean
+sd.horn <- 3    # standard deviation
+n.iter <- 10000 # number of iterations
+n.samp <- 50    # number in each sample
+sim.diff <- tibble(dd = numeric(length = n.iter)) # to hold output  
+
+for (zz in 1:n.iter) {
+  s1 <- rnorm(n.samp, mu.horn, sd.horn) # sample 1
+  s2 <- rnorm(n.samp, mu.horn, sd.horn) # sample 2
+  sim.diff[zz, 'dd'] <- mean(s1) - mean(s2) # difference in means
+}
+```
+
+
+## How large of a difference do we expect from sampling error?
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{r}
+ggplot(sim.diff, aes(x = dd)) +
+  geom_histogram(bins = 30, fill = "gray50") +
+  labs(x = "Difference of Means", y = "Count")
+```
+:::
+
+::: {.column width="50%"}
+- Imagine a distribution of horn lengths for a population of horned lizards (mean = 24, sd = 3)
+- Randomly catch two groups of $n = 50$ from this population
+- How different are they?
+:::
+
+::::
+
+
+## How large of a difference do we expect from sampling error?
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{r}
+HL |> 
+  ggplot(aes(Horn_Length)) +
+  geom_histogram(bins = 30, fill = "gray50") +
+  facet_grid(Group ~ .) +
+  labs(x = "Horn Length (mm)", y = "Count")
+```
+:::
+
+::: {.column width="50%"}
+Horn length in live horned lizards: `r round(mean(HL$Horn_Length[HL$Group == "Alive"]), 1)` mm
+
+Horn length in dead horned lizards: `r round(mean(HL$Horn_Length[HL$Group == "Dead"]), 1)` mm
+
+Difference: `r round(mean(HL$Horn_Length[HL$Group == "Alive"]), 1) - round(mean(HL$Horn_Length[HL$Group == "Dead"]), 1)`
+
+Are the means different?
+:::
+
+::::
+
+
+## How large of a difference do we expect from sampling error?
+
+```{r}
+p1 <- ggplot(sim.diff, aes(x = dd)) +
+  geom_histogram(bins = 30, fill = "gray50") +
+  labs(x = "Difference of Means", y = "Count")
+
+HL_mean <- HL |> 
+  group_by(Group) |> 
+  summarize(Mean = mean(Horn_Length)) |> 
+  gather(Value, x, -Group)
+
+p2 <- HL |> 
+  ggplot(aes(Horn_Length)) +
+  geom_histogram(bins = 30, fill = "gray50") +
+  geom_vline(data = HL_mean, aes(xintercept = x, color = Value),
+             linewidth = 2, color = "firebrick4") +
+  facet_grid(Group ~ .) +
+  labs(x = "Horn Length (mm)", y = "Count") +
+  theme(legend.position = "none")
+
+plot_grid(p2, p1, ncol = 2)
+```
+
+<center>
+Observed difference = `r round(mean(HL$Horn_Length[HL$Group == "Alive"]), 1) - round(mean(HL$Horn_Length[HL$Group == "Dead"]), 1)` mm
+</center>
+
+
+## Horned lizard predation
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+```{r}
+#| fig-height: 10
+
+HL_mean <- HL |> group_by(Group) |> 
+  summarize(Mean = mean(Horn_Length)) |> 
+  gather(Value, x, -Group)
+
+p2
+```
+
+:::
+
+::: {.column width="50%"}
+
+Live horned lizards: `r round(mean(HL$Horn_Length[HL$Group == "Alive"]), 1)` mm
+
+Dead horned lizards: `r round(mean(HL$Horn_Length[HL$Group == "Dead"]), 1)` mm
+
+Observed difference: `r round(mean(HL$Horn_Length[HL$Group == "Alive"]), 1) - round(mean(HL$Horn_Length[HL$Group == "Dead"]), 1)`
+
+<br />
+
+Are the means different?
+
+:::
+
+::::
+
+
