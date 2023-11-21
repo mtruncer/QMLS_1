@@ -23,7 +23,9 @@ csl: evolution.csl
 library(tidyverse)
 library(cowplot)
 theme_set(theme_cowplot())
-source("https://raw.githubusercontent.com/kmiddleton/quant_methods/master/Lectures/Shade_Distributions.R")
+#source("https://raw.githubusercontent.com/kmiddleton/quant_methods/master/Lectures/Shade_Distributions.R")
+
+source("../../quant_methods/Lectures/Shade_Distributions.R")
 
 ```
 
@@ -248,6 +250,125 @@ Example for a normal distribution (Specify `mean` and `sd` or defaults is standa
 
 - `lower.tail = FALSE` for the upper tail
 - `log = TRUE` for log-probability
+
+
+## `rnorm(n=50, mean=0, sd=1)`
+
+
+```{r}
+#| echo: true
+
+set.seed(387493)
+RR <- tibble("values" = rnorm(50,0,1))
+
+```
+
+
+
+:::: {.columns}
+
+::: {.column width="40%"}
+
+```{r, fig.height=4,fig.width=4.5}
+#| echo: false
+shade_normal(0, tail = "both")
+
+```
+
+:::
+
+::: {.column width="20%"}
+
+```{r}
+#| echo: false
+
+RR
+
+```
+
+
+:::
+
+::: {.column width="40%"}
+
+```{r, fig.height=4,fig.width=4.5}
+#| echo: false
+
+ggplot(RR, aes(values)) + 
+geom_dotplot() +
+scale_y_continuous(NULL, breaks = NULL) +
+xlim(c(-4,4))
+
+
+```
+
+:::
+
+::::
+
+
+## `dnorm(x = 1, mean = 0, sd = 1)`
+
+
+```{r}
+#| echo: true
+dnorm(x = 1, mean = 0, sd = 1)
+```
+
+```{r}
+#| echo: false
+
+M <- tibble(x = seq(-4, 4, length = 200),
+            y = dnorm(x))
+
+p <- ggplot(M, aes(x, y)) +
+  geom_line() +
+  geom_hline(yintercept = dnorm(1), linetype = "dashed") +
+  geom_vline(xintercept = 1) +
+  annotate("text", x = 4, y = dnorm(1) + 0.02, label = round(dnorm(1),4)) +
+  labs(x = "Value", y = "Relative Likelihood") +
+  scale_x_continuous(breaks = -4:4)
+
+p
+
+```
+
+## `pnorm(q=1, mean=0, sd=1)`
+
+```{r}
+#| echo: true
+
+pnorm(q=1, mean=0, sd=1)
+
+```
+
+```{r}
+#| echo: false
+
+shade_normal(0.8413447, tail = "lower")
+
+```
+
+## `qnorm(p=0.841, mean=0, sd=1)`
+
+
+```{r}
+#| echo: true
+
+qnorm(p=0.841, mean=0, sd=1)
+
+```
+
+```{r}
+#| echo: false
+
+pp <- shade_normal(0.8413447, tail = "lower") +
+  geom_vline(xintercept = 1) +
+  scale_x_continuous(breaks = -4:4)
+
+pp
+  
+```
 
 
 ## References
