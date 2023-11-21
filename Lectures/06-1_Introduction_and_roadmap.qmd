@@ -122,6 +122,8 @@ Controlling for <span style="color:red;">body mass</span>,
 - A functional relationship + "noise"
 - Most common type of statistical model
 
+$$\mbox{Outcome variable} \sim \mbox{Predictor variable(s)} + \mbox{Error}$$
+
 
 ## Does "linear" mean a straight line?
 
@@ -131,29 +133,6 @@ Controlling for <span style="color:red;">body mass</span>,
     - "Straight" line $y \sim x$ relationships
 - $x$ is categorical
 - Polynomials ($x^2$, $x^3$, etc.): think of these as transformations
-
-
-## Non-linear models
-
-- Does $e^x$ appear as one of the predictors? (e.g., growth)
-- Are there ratios of predictors? (e.g., enzyme kinetics)
-
-```{r}
-set.seed(238746)
-DD <- tibble(Age = seq(0, 20, length.out = 25),
-             Length = 30 + 140 / (1 + exp(-0.65 * (Age - 10)))) |> 
-  mutate(Length = Length + rnorm(n(), 0, 2))
-ggplot(DD, aes(Age, Length)) +
-  geom_hline(yintercept = 170, color = "darkred", linewidth = 1) +
-  geom_point() +
-  annotate(
-    geom = "text",
-    x = 5, y = 150,
-    label = TeX("$Length(Age) = \\frac{Length_{final}}{1 + e^{-b~(Age - c)}}$",
-                output = "character"),
-    parse = TRUE,
-    size = 7)
-```
 
 
 ## Mathematical similarities among linear models
@@ -166,14 +145,20 @@ All linear models answer the same question:
 > "How much does the outcome variable change (positive or negative) for each 1 unit increase in the predictor?"
 
 
-## Roadmap
+## What we want to avoid
 
-*This unit*: Two fundamental **linear models** for a normally distributed outcome variable:
 
-1. Bivariate regression (association of two variables)
-1. Comparison of two means
+![](https://i.imgur.com/tVpUUwY.png){fig-align="center" width="80%"}
 
-*Later units*: Gradually add complexity (more groups, additional predictors, different outcome distributions)
+
+## What we want to encourage
+
+- Data exploration through visualization
+- Development of appropriate *models*
+- Fit and compare models
+- Make inferences
+
+![](https://i.imgur.com/mLP3Qj3.png){fig-align="center" width="100%"}
 
 
 ## Reframe traditional "named" tests
@@ -191,12 +176,21 @@ Linear models with some combination of predictors
   - How many of each?
 
 
-## Diagnostics and assumptions - intro
+## Roadmap
 
+*This unit*: Two fundamental **linear models** for a normally distributed outcome variable:
 
+1. Bivariate regression (association of two variables)
+1. Comparison of two means
 
-## Estimation, hypothesis testing, questions - show how they are the same
+*Later units*: Gradually add complexity (more groups, additional predictors, different outcome distributions)
 
 
 ## Frameworks reminder
 
+Regardless of the framework:
+
+- Likelihood / frequentist
+- Bayesian
+
+The linear model relates the outcome variable to one or more predictors
