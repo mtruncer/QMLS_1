@@ -58,7 +58,7 @@ HL <- tibble(Horn_Length = c(Alive, Dead),
 - Linear models are all related to one another
     - Bivariate regression and comparison of two means
     - Additional types of predictors in the coming units
-- Every model has assumptions that must be met to ensure an unbiased analysis
+- Every model has *assumptions* that must be met to ensure an unbiased analysis
 - *Diagnostics* can evaluate models *post hoc*
 
 
