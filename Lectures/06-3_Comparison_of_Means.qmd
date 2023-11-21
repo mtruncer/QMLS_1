@@ -141,6 +141,7 @@ HL |>
 
 ```
 
+
 ## Model characteristics
 
 ```{r}
@@ -189,6 +190,7 @@ p <- ggplot(HL, aes(CatJitter, Horn_Length)) +
 p
 
 ```
+
 
 ## Model assumptions
 
@@ -254,118 +256,21 @@ summary(mod)
 
 ```
 
-Horn length in live horned lizards: `r round(mean(HL$Horn_Length[HL$Group == "Alive"]), 4)` mm
-
-Horn length in dead horned lizards: `r round(mean(HL$Horn_Length[HL$Group == "Dead"]), 4)` mm
-
-
-## How does the mean change in alive lizards compared to dead?
+- Horn length in live horned lizards: `r round(mean(HL$Horn_Length[HL$Group == "Alive"]), 4)` mm
+- Horn length in dead horned lizards: `r round(mean(HL$Horn_Length[HL$Group == "Dead"]), 4)` mm
 
 
-Horn length in live horned lizards: `r round(mean(HL$Horn_Length[HL$Group == "Alive"]), 1)` mm
+## Bayesian framework
 
-Horn length in dead horned lizards: `r round(mean(HL$Horn_Length[HL$Group == "Dead"]), 1)` mm
-
-Imagine you collected 100 live horned lizards and randomly assigned 50 to each of two groups.
-
-- Do you think they would have the same mean horn length?
-- How different do you think the means would be?
-- Think about how the variability among individual horn length measurements would affect your intuition here.
+- Likelihood frameworks allows any values for the group means
+- What if we have *a priori* information about horn length?
+    - Must be positive
+- Bayesian framework uses priors to inform the model
 
 
-## How large of a difference do we expect from sampling error?
-
-:::: {.columns}
-
-::: {.column width="50%"}
-![](https://i.imgur.com/EIfjPa0.jpg){fig-align="center" width=100%}
-:::
-
-::: {.column width="50%"}
-- Imagine a distribution of horn lengths for a population of horned lizards (mean = 24, sd = 3)
-- Randomly catch two groups of $n = 50$ from this population
-- How different are the groups?
-:::
-
-::::
-
-
-## How large of a difference do we expect from sampling error?
+## Normal(24, 10) prior for horn length
 
 ```{r}
-#| echo: true
-
-set.seed(883231)
-
-mu.horn <- 24   # mean
-sd.horn <- 3    # standard deviation
-n.iter <- 10000 # number of iterations
-n.samp <- 50    # number in each sample
-sim.diff <- tibble(dd = numeric(length = n.iter)) # to hold output  
-
-for (zz in 1:n.iter) {
-  s1 <- rnorm(n.samp, mu.horn, sd.horn) # sample 1
-  s2 <- rnorm(n.samp, mu.horn, sd.horn) # sample 2
-  sim.diff[zz, 'dd'] <- mean(s1) - mean(s2) # difference in means
-}
-```
-
-
-## How large of a difference do we expect from sampling error?
-
-:::: {.columns}
-
-::: {.column width="50%"}
-```{r}
-ggplot(sim.diff, aes(x = dd)) +
-  geom_histogram(bins = 30, fill = "gray50") +
-  labs(x = "Difference of Means", y = "Count")
-```
-:::
-
-::: {.column width="50%"}
-- Imagine a distribution of horn lengths for a population of horned lizards (mean = 24, sd = 3)
-- Randomly catch two groups of $n = 50$ from this population
-- How different are they?
-:::
-
-::::
-
-
-## How large of a difference do we expect from sampling error?
-
-:::: {.columns}
-
-::: {.column width="50%"}
-```{r}
-HL |> 
-  ggplot(aes(Horn_Length)) +
-  geom_histogram(bins = 30, fill = "gray50") +
-  facet_grid(Group ~ .) +
-  labs(x = "Horn Length (mm)", y = "Count")
-```
-:::
-
-::: {.column width="50%"}
-Horn length in live horned lizards: `r round(mean(HL$Horn_Length[HL$Group == "Alive"]), 1)` mm
-
-Horn length in dead horned lizards: `r round(mean(HL$Horn_Length[HL$Group == "Dead"]), 1)` mm
-
-Difference: `r round(mean(HL$Horn_Length[HL$Group == "Alive"]), 1) - round(mean(HL$Horn_Length[HL$Group == "Dead"]), 1)`
-
-Are the means different?
-:::
-
-::::
-
-
-## How large of a difference do we expect from sampling error?
-
-```{r}
-p1 <- ggplot(sim.diff, aes(x = dd)) +
-  geom_histogram(bins = 30, fill = "gray50") +
-  labs(x = "Difference of Means", y = "Count")
-
 HL_mean <- HL |> 
   group_by(Group) |> 
   summarize(Mean = mean(Horn_Length)) |> 
@@ -380,60 +285,6 @@ p2 <- HL |>
   labs(x = "Horn Length (mm)", y = "Count") +
   theme(legend.position = "none")
 
-plot_grid(p2, p1, ncol = 2)
-```
-
-<center>
-Observed difference = `r round(mean(HL$Horn_Length[HL$Group == "Alive"]), 1) - round(mean(HL$Horn_Length[HL$Group == "Dead"]), 1)` mm
-</center>
-
-
-## Horned lizard predation
-
-:::: {.columns}
-
-::: {.column width="50%"}
-
-```{r}
-#| fig-height: 10
-
-HL_mean <- HL |> group_by(Group) |> 
-  summarize(Mean = mean(Horn_Length)) |> 
-  gather(Value, x, -Group)
-
-p2
-```
-
-:::
-
-::: {.column width="50%"}
-
-Live horned lizards: `r round(mean(HL$Horn_Length[HL$Group == "Alive"]), 1)` mm
-
-Dead horned lizards: `r round(mean(HL$Horn_Length[HL$Group == "Dead"]), 1)` mm
-
-Observed difference: `r round(mean(HL$Horn_Length[HL$Group == "Alive"]), 1) - round(mean(HL$Horn_Length[HL$Group == "Dead"]), 1)`
-
-<br />
-
-Are the means different?
-
-:::
-
-::::
-
-
-## Bayesian framework
-
-- Likelihood frameworks allows any values for the group means
-- What if we have *a priori* information about horn length?
-    - Must be positive
-- Bayesian framework uses priors to inform the model
-
-
-## Normal(24, 10) prior for horn length
-
-```{r}
 DD <- tibble(`Horn Length` = seq(0, 48, length.out = 100),
              Probability = dnorm(`Horn Length`, 24, 10))
 p3 <- ggplot(DD, aes(x = `Horn Length`, y = Probability)) +
@@ -531,7 +382,6 @@ QQ <- quantile(samples$Difference, probs = c(0.025, 0.5, 0.975)) |>
 ```
 
 - Median: `r round(QQ[2], 2)`
-- 95% Highest-density interval: `r round(QQ[1], 2)` -- `r round(QQ[3], 2)`
 
 ```{r}
 #| fig-height: 4
@@ -539,7 +389,6 @@ QQ <- quantile(samples$Difference, probs = c(0.025, 0.5, 0.975)) |>
 ggplot(samples, aes(Difference)) +
   geom_density(fill = "firebrick4", alpha = 0.5, linewidth = 1) +
   geom_vline(xintercept = QQ[2], linewidth = 1) +
-  geom_vline(xintercept = QQ[c(1, 3)], linewidth = 1, linetype = "dotted") +
   labs(y = "Density", x = "Difference (Alive - Dead, mm)")
 ```
 
