@@ -26,6 +26,9 @@ csl: evolution.csl
 library(tidyverse)
 library(cowplot)
 library(latex2exp)
+library(patchwork)
+library(magick)
+library(ggpubr)
 
 theme_set(theme_cowplot())
 
@@ -92,26 +95,6 @@ plot_grid(p1, p2, ncol = 2)
 ```
 
 
-## Non-linearity
-
-```{r}
-set.seed(238746)
-NLM <- tibble(Age = seq(0, 20, length.out = 25),
-             Length = 30 + 140 / (1 + exp(-0.65 * (Age - 10)))) |> 
-  mutate(Length = Length + rnorm(n(), 0, 2))
-ggplot(NLM, aes(Age, Length)) +
-  geom_hline(yintercept = 170, color = "darkred", linewidth = 1) +
-  geom_point() +
-  annotate(
-    geom = "text",
-    x = 5, y = 150,
-    label = TeX("$Length(Age) = \\frac{Length_{final}}{1 + e^{-b~(Age - c)}}$",
-                output = "character"),
-    parse = TRUE,
-    size = 7)
-```
-
-
 ## Deviations are *Residuals*
 
 ```{r}
@@ -155,6 +138,14 @@ M
 ## Looking at residuals
 
 ```{r}
+
+ss <- ssPlot(M$X, M$Y, b = coef(fm)[2], do.labels = TRUE)
+```
+
+
+## Looking at residuals
+
+```{r}
 p1 <- ggplot(M, aes(x = X, y = Residual)) +
   geom_point(size = 3, color = "navy")
 p2 <- ggplot(M, aes(Residual)) +
@@ -166,9 +157,67 @@ plot_grid(p1, p2)
 
 ## Bivariate model diagnostics
 
+[Performance package](https://easystats.github.io/performance/articles/check_model.html): `check_model()`
+
+- Posterior predictive checks: `check_predictions()`
+- Homogeneity of variance: `check_heteroskedasticity()`
+- Normality of residuals: `check_normality()`
+- Influential observations: `check_outliers()`
+
 ```{r}
-library(ggfortify)
-autoplot(fm, which = 1:2)
+#| echo: true
+#| output-location: slide
+
+library(performance)
+library(see)
+
+check_model(fm)
+```
+
+
+## Posterior predictive check
+
+```{r}
+PP <- plot(check_model(fm, panel = FALSE))
+PP[[1]]
+```
+
+## Linearity
+
+```{r}
+PP[[2]]
+```
+
+
+## Homogeneity of variance
+
+```{r}
+PP[[3]]
+```
+
+
+## Influential observations
+
+```{r}
+PP[[4]]
+```
+
+
+## Normality of residuals
+
+```{r}
+PP[[5]]
+```
+
+
+## Additional checks
+
+```{r}
+#| echo: true
+
+check_heteroskedasticity(fm)
+check_normality(fm)
+check_outliers(fm)
 ```
 
 
@@ -232,7 +281,53 @@ plot_grid(p1, p2)
 ## Linear model diagnostics
 
 ```{r}
-autoplot(fm, which = 1:2)
+check_model(fm)
+```
+
+
+## Posterior predictive check
+
+```{r}
+PP <- plot(check_model(fm, panel = FALSE))
+PP[[1]]
+```
+
+## Linearity
+
+```{r}
+PP[[2]]
+```
+
+
+## Homogeneity of variance
+
+```{r}
+PP[[3]]
+```
+
+
+## Influential observations
+
+```{r}
+PP[[4]]
+```
+
+
+## Normality of residuals
+
+```{r}
+PP[[5]]
+```
+
+
+## Additional checks
+
+```{r}
+#| echo: true
+
+check_heteroskedasticity(fm)
+check_normality(fm)
+check_outliers(fm)
 ```
 
 
@@ -253,7 +348,7 @@ ggplot() +
               se = FALSE, method = "lm", color = "navy") +
   theme(text = element_text(size = 20)) +
   xlim(c(8.5, 12)) +
-  ylim(c(20, 31.5))
+  ylim(c(20, 40.5))
 ```
 
 
@@ -262,7 +357,7 @@ ggplot() +
 ```{r}
 
 M2 <- M |> 
-  bind_rows(tibble(X = c(9, 11.5), Y = c(26, 31)))
+  bind_rows(tibble(X = c(9, 11.5), Y = c(35, 40)))
 ggplot() + 
   geom_point(data = M2, aes(X, Y), size = 3, color = "navy") +
   geom_smooth(data = M, aes(X, Y), formula = y ~ x,
@@ -271,7 +366,7 @@ ggplot() +
               se = FALSE, method = "lm", color = "firebrick4") +
   theme(text = element_text(size = 20)) +
   xlim(c(8.5, 12)) +
-  ylim(c(20, 31.5))
+  ylim(c(20, 40.5))
 ```
 
 
@@ -285,10 +380,83 @@ summary(fm)
 ```
 
 
-## Diagnostics with influential observations
+## Posterior predictive check
 
 ```{r}
-autoplot(fm, which = 1:2)
+PP <- plot(check_model(fm, panel = FALSE))
+PP[[1]]
+```
+
+## Linearity
+
+```{r}
+PP[[2]]
+```
+
+
+## Homogeneity of variance
+
+```{r}
+PP[[3]]
+```
+
+
+## Influential observations
+
+```{r}
+PP[[4]]
+```
+
+
+## Normality of residuals
+
+```{r}
+PP[[5]]
+```
+
+
+## Additional checks
+
+```{r}
+#| echo: true
+
+check_heteroskedasticity(fm)
+check_normality(fm)
+check_outliers(fm)
+```
+
+
+## Non-homogeneity of variance
+
+```{r}
+mri <- image_read("https://i.imgur.com/qltMa2y.jpg")
+
+img <- ggplot() + background_image(mri) 
+
+set.seed(58975)
+n <- 300
+
+Age <- runif(n, 20, 100)
+EDS <- 3 * Age + rnorm(n, 0, Age)
+NHV <- tibble(Age, EDS)
+
+p1 <- ggplot(NHV, aes(x = Age, y = EDS)) +
+  geom_smooth(formula = y ~ x, se = FALSE, method = "lm") +
+  geom_point(size = 2, color = "salmon") +
+  labs(x = "Age", y = "Extra-dural space")
+
+p1 + inset_element(img, left = 0, bottom = 0.37, right = 0.28, top = 1)
+```
+
+
+## Homogeneity of variance
+
+```{r}
+fm <- lm(Age ~ EDS, data = NHV)
+PP <- plot(check_model(fm, panel = FALSE))
+PP[[3]]
+
+check_normality(fm)
 ```
 
 
@@ -297,7 +465,7 @@ autoplot(fm, which = 1:2)
 *Don't panic* (linear models are fairly "robust"):
 
 - Somewhat non-normal residuals
-- Mild deviations from equal variances between groups (within a factor of ~2)
+- Mild deviations from equal variances between groups
 
 Consider a different model:
 
@@ -314,8 +482,3 @@ Consider a different model:
     - Unequal variances
 - Poor performance on both large and small sample size
 
-
-## Estimation, hypothesis testing, questions - show how they are the same
-
-
-## Frameworks reminder
