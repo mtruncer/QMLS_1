@@ -471,6 +471,7 @@ Consider a different model:
 
 - Non-normality within groups (transformation, Unit 12)
 - Non-independent observations (Unit 12)
+- Randomization, cross-validation (Unit 12)
 
 
 ## Formal tests of normality and homogeneity of variances
