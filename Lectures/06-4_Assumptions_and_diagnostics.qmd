@@ -1,5 +1,5 @@
 ---
-title: "Introduction and roadmap"
+title: "Assumptions and Regression Diagnostics"
 author:
   - Elizabeth King
   - Kevin Middleton
@@ -18,7 +18,304 @@ csl: evolution.csl
 
 ## Introduction
 
-- Linear models are all the same
-- Diagnostics and assumptions - intro
-- Estimation, hypothesis testing, questions - show how they are the same
-- Frameworks reminder
+```{r}
+#| label: setup
+#| message: false
+#| warning: false
+
+library(tidyverse)
+library(cowplot)
+library(latex2exp)
+
+theme_set(theme_cowplot())
+
+source("QMLS_functions.R")
+
+## Data setup ################################
+
+# Bivariate
+set.seed(4)
+n <- 30
+X <- rnorm(n, mean = 10, sd = 1)
+Y <- 2.3 * X + rnorm(n, mean = 1, sd = 1)
+M <- data.frame(X, Y)
+
+# Horn length
+set.seed(3575575)
+
+Alive <- rnorm(n = 150, mean = 24.5, sd = 2.6)
+Dead <- rnorm(n = 30, mean = 22.0, sd = 2.7)
+Group <- c(rep("Alive", 150),
+           rep("Dead", 30))
+
+HL <- tibble(Horn_Length = c(Alive, Dead),
+             Group = factor(Group)) |> 
+  mutate(CatNum = as.numeric(Group) - 1,
+         CatJitter = CatNum + rnorm(n(), 0, 0.1))
+
+```
+
+- Linear models are all related to one another
+    - Bivariate regression and comparison of two means
+    - Additional types of predictors in the coming units
+- Every model has assumptions that must be met to ensure an unbiased analysis
+- *Diagnostics* can evaluate models *post hoc*
+
+
+## Assumptions
+
+1. Linearity
+2. Independence
+3. Equal variance
+4. (Approximately) normal residuals
+
+2 and 3: "Independent and identically distributed" (IID)
+
+
+## Linearity 
+
+$$y \sim \theta_0 + \theta_1 x$$
+
+```{r}
+p1 <- ggplot(M, aes(X, Y)) + 
+  geom_point(size = 3, color = "navy") +
+  theme(text = element_text(size = 20))
+
+p2 <- HL |>
+  ggplot(aes(CatJitter, Horn_Length)) +
+  geom_point(color = "navy", size = 3) +
+  labs(x = "Group", y = "Horn Length (mm)") +
+  scale_x_continuous(breaks = c(0, 1),
+                     labels = c("Alive", "Dead")) +
+  theme(text = element_text(size = 20))
+plot_grid(p1, p2, ncol = 2)
+```
+
+
+## Non-linearity
+
+```{r}
+set.seed(238746)
+NLM <- tibble(Age = seq(0, 20, length.out = 25),
+             Length = 30 + 140 / (1 + exp(-0.65 * (Age - 10)))) |> 
+  mutate(Length = Length + rnorm(n(), 0, 2))
+ggplot(NLM, aes(Age, Length)) +
+  geom_hline(yintercept = 170, color = "darkred", linewidth = 1) +
+  geom_point() +
+  annotate(
+    geom = "text",
+    x = 5, y = 150,
+    label = TeX("$Length(Age) = \\frac{Length_{final}}{1 + e^{-b~(Age - c)}}$",
+                output = "character"),
+    parse = TRUE,
+    size = 7)
+```
+
+
+## Deviations are *Residuals*
+
+```{r}
+#| results: hide
+
+ssPlot(M$X, M$Y, b = 0, do.labels = FALSE)
+```
+
+
+## Problematic residuals
+
+![](https://openintro-ims.netlify.app/24-inf-model-slr_files/figure-html/whatCanGoWrongWithLinearModel-1.png){fig-align="center" width=100%}
+
+From [Introduction to Modern Statistics](https://openintro-ims.netlify.app/) (Çetinkaya-Rundel and Hardin, 2021)
+
+
+## Model summary `Residuals`
+
+- `Median` should be ~ 0
+- `Min` and `Max` should be approximately equal
+- `1Q` and `3Q` should be approximately equal
+
+```{r}
+#| echo: true
+
+fm <- lm(Y ~ X, data = M)
+summary(fm)
+```
+
+
+## Extracting residuals
+
+```{r}
+#| echo: true
+
+M <- M |> mutate(Residual = residuals(fm))
+M
+```
+
+
+## Looking at residuals
+
+```{r}
+p1 <- ggplot(M, aes(x = X, y = Residual)) +
+  geom_point(size = 3, color = "navy")
+p2 <- ggplot(M, aes(Residual)) +
+  geom_histogram(bins = 30, fill = "firebrick4") +
+  labs(y = "Count")
+plot_grid(p1, p2)
+```
+
+
+## Bivariate model diagnostics
+
+```{r}
+library(ggfortify)
+autoplot(fm, which = 1:2)
+```
+
+
+## Assumptions when comparing means
+
+- Observations are independent
+- Observations normally distributed *within* groups
+    - Not between groups (e.g., bimodal distribution when all observations are pooled)
+- Within-group variances are (approximately) equal
+
+
+## Model summary `Residuals`
+
+- `Median` should be ~ 0
+- `Min` and `Max` should be approximately equal
+- `1Q` and `3Q` should be approximately equal
+
+```{r}
+#| echo: true
+
+fm <- lm(Horn_Length ~ Group, data = HL)
+summary(fm)
+```
+
+
+## Looking at residuals
+
+```{r}
+HL$pred <- NA
+mu.a <- mean(HL$Horn_Length[HL$Group == "Alive"])
+mu.d <- mean(HL$Horn_Length[HL$Group == "Dead"])
+HL$pred[HL$Group == "Alive"] <- mu.a
+HL$pred[HL$Group == "Dead"] <- mu.d
+
+HL <- HL |> mutate(Residual = residuals(fm))
+
+p1 <- HL |>
+  ggplot(aes(CatJitter, Horn_Length)) +
+  geom_segment(data = HL, aes(x = CatJitter, xend = CatJitter,
+                              y = Horn_Length, yend = pred),
+               color = "firebrick", linewidth = 0.75,
+               alpha = 0.75) +
+  geom_point(color = "navy", size = 2.5) +
+  labs(x = "Group", y = "Horn Length (mm)") +
+  geom_segment(x = -0.5, y = mu.a, xend = 0.4, yend = mu.a) +
+  geom_segment(x = 0.6, y = mu.d, xend = 1.5, yend = mu.d) +
+  scale_x_continuous(breaks = c(0,1),labels = c("Alive","Dead")) +
+  theme(text = element_text(size = 16))
+
+
+p2 <- ggplot(HL, aes(Residual)) +
+  facet_grid(. ~ Group) +
+  geom_histogram(bins = 30) +
+  labs(y = "Count") +
+  theme(text = element_text(size = 16), )
+
+plot_grid(p1, p2)
+```
+
+
+## Linear model diagnostics
+
+```{r}
+autoplot(fm, which = 1:2)
+```
+
+
+## Influential observations
+
+- Every dataset has a most extreme observation
+    - If you remove it, one observation will still be the most extreme
+- Is the observation correct or not?
+    - Be careful labeling points as "outliers"
+
+
+## Bivariate data
+
+```{r}
+ggplot() + 
+  geom_point(data = M, aes(X, Y), size = 3, color = "navy") +
+  geom_smooth(data = M, aes(X, Y), formula = y ~ x,
+              se = FALSE, method = "lm", color = "navy") +
+  theme(text = element_text(size = 20)) +
+  xlim(c(8.5, 12)) +
+  ylim(c(20, 31.5))
+```
+
+
+## Influential observations
+
+```{r}
+
+M2 <- M |> 
+  bind_rows(tibble(X = c(9, 11.5), Y = c(26, 31)))
+ggplot() + 
+  geom_point(data = M2, aes(X, Y), size = 3, color = "navy") +
+  geom_smooth(data = M, aes(X, Y), formula = y ~ x,
+              se = FALSE, method = "lm", color = "navy") +
+  geom_smooth(data = M2, aes(X, Y), formula = y ~ x,
+              se = FALSE, method = "lm", color = "firebrick4") +
+  theme(text = element_text(size = 20)) +
+  xlim(c(8.5, 12)) +
+  ylim(c(20, 31.5))
+```
+
+
+## Influential observations
+
+```{r}
+#| echo: true
+
+fm <- lm(Y ~ X, data = M2)
+summary(fm)
+```
+
+
+## Diagnostics with influential observations
+
+```{r}
+autoplot(fm, which = 1:2)
+```
+
+
+## Violations of assumptions
+
+*Don't panic* (linear models are fairly "robust"):
+
+- Somewhat non-normal residuals
+- Mild deviations from equal variances between groups (within a factor of ~2)
+
+Consider a different model:
+
+- Non-normality within groups (transformation, Unit 12)
+- Non-independent observations (Unit 12)
+
+
+## Formal tests of normality and homogeneity of variances
+
+(Shapiro-Wilk, Kolmogorov-Smirnov, Levene's, Bartlett's, etc.)
+
+- Be cautious with "positive" results
+    - Non-normality
+    - Unequal variances
+- Poor performance on both large and small sample size
+
+
+## Estimation, hypothesis testing, questions - show how they are the same
+
+
+## Frameworks reminder
