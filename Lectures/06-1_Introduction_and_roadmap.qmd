@@ -39,7 +39,7 @@ theme_set(theme_cowplot())
 *This unit*: Two fundamental analyses for a normally distributed outcome variable:
 
 1. Bivariate regression (association of two variables)
-1. Comparison of two means
+1. Comparison of two group means
 
 *Later units*: Gradually add complexity (more groups, additional predictors, different outcome distributions)
 
@@ -126,16 +126,16 @@ Controlling for <span style="color:red;">body mass</span>,
 ## Does "linear" mean a straight line?
 
 - Yes and no, depending on the context
-    - Straight line $Y \sim X$ relationships
-- $X$ is continuous
-    - "Straight" line $Y \sim X$ relationships
-- $X$ is categorical
-- Polynomials ($X^2$, $X^3$, etc.)
+    - Straight line $y \sim x$ relationships
+- $x$ is continuous
+    - "Straight" line $y \sim x$ relationships
+- $x$ is categorical
+- Polynomials ($x^2$, $x^3$, etc.): think of these as transformations
 
 
 ## Non-linear models
 
-- Does $e^X$ appear as one of the predictors? (e.g., growth)
+- Does $e^x$ appear as one of the predictors? (e.g., growth)
 - Are there ratios of predictors? (e.g., enzyme kinetics)
 
 ```{r}
