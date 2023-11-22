@@ -409,7 +409,7 @@ ss <- ssPlot(X, Y, 2.1)
 
 ## Minimizing Sums of Squares
 
-- Search a range of values for $\theta_0$
+- Search a range of values for $\theta_1$
 
 ```{r}
 #| echo: true
@@ -613,7 +613,7 @@ model <- "
   }
   model{
     // Priors
-    theta_0 ~ normal(0, 20);
+    theta_0 ~ normal(0, 10);
     theta_1 ~ normal(0, 10);
     sigma ~ normal(0, 1);
     
