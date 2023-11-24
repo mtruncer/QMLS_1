@@ -1,0 +1,130 @@
+---
+title: "Model Synonyms"
+author:
+  - Elizabeth King
+  - Kevin Middleton
+format:
+  revealjs:
+    theme: [default, custom.scss]
+    standalone: true
+    self-contained: true
+    logo: QMLS_Logo.png
+    slide-number: true
+    show-slide-number: all
+code-annotations: hover
+bibliography: QMLS_Bibliography.bib
+csl: evolution.csl
+---
+
+```{r}
+#| label: setup
+#| echo: false
+
+library(tidyverse)
+library(cowplot)
+theme_set(theme_cowplot())
+
+```
+
+## Linear models
+
+- General term for a linear relationship between an outcome (observed) variable and one or more predictors
+- A functional relationship + "noise"
+- Most common type of statistical model
+
+$$\mbox{Outcome variable} \sim \mbox{Predictor variable(s)} + \mbox{Error}$$
+
+
+## Horned Lizards
+
+$$Horn Length = \theta_0 + \theta_1 Group$$
+
+```{r}
+
+set.seed(3575575)
+
+Alive <- rnorm(n = 150, mean = 24.5, sd = 2.6)
+Dead <- rnorm(n = 30, mean = 22.0, sd = 2.7)
+Group <- c(rep("Alive", 150),
+           rep("Dead", 30))
+
+HL <- tibble(Horn_Length = c(Alive, Dead),
+             Group = factor(Group))
+
+```
+
+This same model can be implemented via:
+
+- t-test (`t.test()`)
+- linear regression model (`lm()`)
+- ANOVA `aov()` or `anova(lm())`
+
+## t-test
+
+```{r}
+#| echo: true
+
+t.test(Horn_Length ~ Group, data = HL, var.equal = TRUE)
+```
+
+## Linear regression model 
+
+```{r}
+#| echo: true
+
+fm <- lm(Horn_Length ~ Group, data = HL)
+summary(fm)
+```
+
+## ANOVA 
+
+```{r}
+#| echo: true
+
+fm <- lm(Horn_Length ~ Group, data = HL)
+anova(fm)
+
+```
+
+## Categorical variables as numbers
+
+```{r}
+#| echo: true
+
+model.matrix(fm)[145:155,]
+
+```
+
+## Categorical variables coded as 0/1
+
+```{r}
+#| echo: true
+
+HL <- HL |>
+  mutate(Group_num = ifelse(Group=="Alive",0,1))
+
+HL
+
+```
+
+## Categorical variables coded as 0/1
+
+```{r}
+#| echo: true
+
+fm <- lm(Horn_Length ~ Group_num, data = HL)
+summary(fm)
+
+
+```
+
+
+## Named tests
+
+- `lm()` is always applicable for a simple linear model
+- `t.test` and ANOVA functions 
+    - apply to a subset of models
+        - e.g., categorical predictor
+    - are shorthand for a particular subset of results
+        - e.g., print the sums of squares
+
