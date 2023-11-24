@@ -1,6 +1,6 @@
 ---
 title: "Making Decisions"
-subtitle: "Uncertainty, Effect Sizes, & Hypothesis Testing"
+subtitle: "Uncertainty, Effect Sizes, and Hypothesis Testing"
 author:
   - Elizabeth King
   - Kevin Middleton
@@ -17,6 +17,8 @@ bibliography: QMLS_Bibliography.bib
 csl: evolution.csl
 ---
 
+## Goals of statistical inference
+
 ```{r}
 #| label: setup
 #| echo: false
@@ -24,17 +26,18 @@ csl: evolution.csl
 library(tidyverse)
 library(cowplot)
 theme_set(theme_cowplot())
-#source("https://raw.githubusercontent.com/kmiddleton/quant_methods/master/Lectures/Shade_Distributions.R")
-source("../../quant_methods/Lectures/Shade_Distributions.R")
 library(patchwork)
 library(magick)
 library(ggpubr)
+library(effectsize)
+options(es.use_symbols = TRUE)
+
+source("QMLS_functions.R")
 
 options(pillar.sigfig = 4)
 
 ```
 
-## Goals of statistical inference
 
 ```{r}
 set.seed(3575575)
@@ -55,11 +58,15 @@ img <- ggplot() + background_image(liz)
 P_HL <- HL |>
   ggplot(aes(Group, Horn_Length)) +
   geom_point(position = position_jitter(width = 0.2, seed = 423479),
-             alpha = 0.5, size = 3) 
+             alpha = 0.5, size = 3) +
+  theme(text = element_text(size = 20)) +
+  labs(y = "Horn Length (mm)")
+
 P_HL +
   inset_element(img, left = 0.8, bottom = 0.7, right = 1, top = 1)
 
 ```
+
 
 ## What is the effect of group on horn length? 
 
@@ -68,36 +75,48 @@ mu.a <- mean(HL$Horn_Length[HL$Group == "Alive"])
 mu.d <- mean(HL$Horn_Length[HL$Group == "Dead"])
 
 P_HL + 
-  geom_segment(x = 0.6, y = mu.a, xend = 1.4, yend = mu.a, color = "steelblue", linewidth = 2) +
-  geom_segment(x = 1.6, y = mu.d, xend = 2.4, yend = mu.d, color = "steelblue", linewidth = 2) +
-  theme(text = element_text(size = 20))
+  geom_segment(x = 0.6, y = mu.a, xend = 1.4, yend = mu.a,
+               color = "steelblue", linewidth = 2) +
+  geom_segment(x = 1.6, y = mu.d, xend = 2.4, yend = mu.d,
+               color = "steelblue", linewidth = 2) +
+  theme(text = element_text(size = 20)) +
+  labs(y = "Horn Length (mm)")
  
-
 ```
+
 
 ## What is the effect of group on horn length? 
 
 ```{r}
 P_HL + 
-  geom_segment(x = 0.6, y = mu.a, xend = 1.4, yend = mu.a, color = "steelblue", linewidth = 2) +
-  geom_segment(x = 1.6, y = mu.d, xend = 2.4, yend = mu.d, color = "steelblue", linewidth = 2) +
+  geom_segment(x = 0.6, y = mu.a, xend = 1.4, yend = mu.a,
+               color = "steelblue", linewidth = 2) +
+  geom_segment(x = 1.6, y = mu.d, xend = 2.4, yend = mu.d,
+               color = "steelblue", linewidth = 2) +
   stat_summary(fun.data = mean_cl_normal, geom = "errorbar", width = 0.1,
                color = "red", linewidth = 2) + 
-  theme(text = element_text(size = 20))
+  theme(text = element_text(size = 20)) +
+  labs(y = "Horn Length (mm)")
 
 ```
+
 
 ## What is the effect of group on horn length? 
 
 ```{r}
 dd <- mu.a - mu.d
 P_HL + 
-  geom_segment(x = 0, y = mu.a, xend = 3, yend = mu.a, color = "steelblue", linewidth = 2) +
-  geom_segment(x = 0, y = mu.d, xend = 3, yend = mu.d, color = "steelblue", linewidth = 2) +
+  geom_segment(x = 0, y = mu.a, xend = 3, yend = mu.a,
+               color = "steelblue", linewidth = 2) +
+  geom_segment(x = 0, y = mu.d, xend = 3, yend = mu.d,
+               color = "steelblue", linewidth = 2) +
   theme(text = element_text(size = 20)) +
-  annotate("text", x = 1.5, y = mu.d + 0.5*dd, label = paste0("Effect Size = ", round(dd, 2)))
+  annotate("text", x = 1.5, y = mu.d + 0.5 * dd,
+           label = paste0("Effect Size = ", round(dd, 2)),
+           size = 6)
 
 ```
+
 
 ## How certain are we of the effect of group?
 
@@ -109,37 +128,69 @@ uu <- ttt$conf.int[2]
 
 HL |>
   ggplot(aes(Group, Horn_Length)) +
-  geom_rect(xmin = 0, xmax = 2.2, ymin = g_mu - 0.5*uu, ymax = g_mu + 0.5*uu, fill = "lightblue") +
-  geom_rect(xmin = 0, xmax = 2.2, ymin = mu.d, ymax = mu.a, fill = "steelblue") +
-  geom_rect(xmin = 0, xmax = 2.2, ymin = g_mu - 0.5*ll, ymax = g_mu + 0.5*ll, fill = "navy") +
-  geom_segment(y = g_mu - 0.5*ll, yend = g_mu + 0.5*ll, x = 2.23, xend = 2.23, color = "navy", linewidth = 2) +
-  annotate("text", x = 2.33, y = mu.d + 0.5*dd, label = paste0("Lower \n", round(ll, 2))) +
-  geom_segment(y = mu.d, yend = mu.a, x = 2.43, xend = 2.43, color = "steelblue", linewidth = 2) +
-  annotate("text", x = 2.53, y = mu.d + 0.5*dd, label = paste0("Effect\nSize\n", round(dd, 2))) +
-  geom_segment(y = g_mu - 0.5*uu, yend = g_mu + 0.5*uu, x = 2.63, xend = 2.63, color = "lightblue", linewidth = 2) +
-  annotate("text", x = 2.73, y = mu.d + 0.5*dd, label = paste0("Upper \n", round(uu, 2))) +
+  geom_rect(xmin = 0, xmax = 2.2,
+            ymin = g_mu - 0.5 * uu, ymax = g_mu + 0.5 * uu,
+            fill = "lightblue") +
+  geom_rect(xmin = 0, xmax = 2.2, ymin = mu.d,
+            ymax = mu.a, fill = "steelblue") +
+  geom_rect(xmin = 0, xmax = 2.2,
+            ymin = g_mu - 0.5 * ll, ymax = g_mu + 0.5 * ll,
+            fill = "navy") +
+  geom_segment(y = g_mu - 0.5 * ll, yend = g_mu + 0.5 * ll,
+               x = 2.23, xend = 2.23, color = "navy", linewidth = 2) +
+  annotate("text", x = 2.33, y = mu.d + 0.5 * dd,
+           label = paste0("Lower \n", round(ll, 2)),
+           size = 4) +
+  geom_segment(y = mu.d, yend = mu.a,
+               x = 2.43, xend = 2.43, color = "steelblue", linewidth = 2) +
+  annotate("text", x = 2.53, y = mu.d + 0.5 * dd,
+           label = paste0("Effect\nSize\n", round(dd, 2)),
+           size = 4) +
+  geom_segment(y = g_mu - 0.5 * uu, yend = g_mu + 0.5 * uu,
+               x = 2.63, xend = 2.63, color = "lightblue", linewidth = 2) +
+  annotate("text", x = 2.73, y = mu.d + 0.5 * dd,
+           label = paste0("Upper \n", round(uu, 2)),
+           size = 4) +
   geom_point(position = position_jitter(width = 0.2, seed = 423479),
              alpha = 1/2, size = 3) +
-  expand_limits(x=c(0,3)) +
-  theme(text = element_text(size = 20)) 
+  expand_limits(x = c(0, 3)) +
+  theme(text = element_text(size = 20)) +
+  labs(y = "Horn Length (mm)")
 
 ```
 
+
 ## Standardized effect size
+
+- "Raw" effect size = 2.22 mm
+    - Specific to this analysis (original scale)
+- Standardize for comparing analyses
+    - Pearson's correlation (*r*), Cohen's *d*, etc. (Unit 11)
+
+$$d = \frac{\bar{x}_1 - \bar{x}_2}{s}$$
+
+```{r}
+#| echo: true
+
+library(effectsize)
+cohens_d(Horn_Length ~ Group, data = HL)
+```
+
 
 ## How does the mean change in alive lizards compared to dead? 
 
+- Live horned lizards: `r round(mean(HL$Horn_Length[HL$Group == "Alive"]), 1)` mm
+- Dead horned lizards: `r round(mean(HL$Horn_Length[HL$Group == "Dead"]), 1)` mm
 
-Horn length in live horned lizards: `r round(mean(HL$Horn_Length[HL$Group == "Alive"]), 1)` mm
+. . . 
+ 
+Imagine collecting 180 live horned lizards and randomly assigning 150 to one group and 30 to the other.
 
-Horn length in dead horned lizards: `r round(mean(HL$Horn_Length[HL$Group == "Dead"]), 1)` mm
-
-Imagine you collected 180 live horned lizards and randomly assigned 150 to one group and 30 to the other.
+. . .
 
 - Do you think they would have the same mean horn length?
 - How different do you think the means would be?
-- Think about how the variability among individual horn length measurements would affect your intuition here.
-
+- How would the variability among individual horn length measurements change your intuition?
 
 
 ## How large of a difference do we expect from sampling error?
@@ -167,11 +218,11 @@ Imagine you collected 180 live horned lizards and randomly assigned 150 to one g
 
 set.seed(883231)
 
-mu.horn <- 24   # mean
+mu.horn <- 24     # mean
 sd.horn <- 2.6    # standard deviation
-n.iter <- 100000 # number of iterations
+n.iter <- 100000  # number of iterations
 n.samp1 <- 150    # number in first sample
-n.samp2 <- 30    # number in second sample
+n.samp2 <- 30     # number in second sample
 sim.diff <- tibble(dd = numeric(length = n.iter)) # to hold output  
 
 for (zz in 1:n.iter) {
@@ -181,11 +232,103 @@ for (zz in 1:n.iter) {
 }
 ```
 
-## dotplot
-dotplot
+```{r}
+# Do the sampling here and save to Rds file.
+mu.horn <- 24     # mean
+sd.horn <- 2.6    # standard deviation
+n.iter <- 100000  # number of iterations
+n.samp1 <- 150    # number in first sample
+n.samp2 <- 30     # number in second sample
+
+if (FALSE) {
+  set.seed(883231)
+  
+  sim.diff <- tibble(dd = numeric(length = n.iter)) # to hold output  
+  
+  for (zz in 1:n.iter) {
+    s1 <- rnorm(n.samp1, mu.horn, sd.horn) # sample 1
+    s2 <- rnorm(n.samp2, mu.horn, sd.horn) # sample 2
+    sim.diff[zz, 'dd'] <- mean(s1) - mean(s2) # difference in means
+  }
+  write_rds(sim.diff, file = "../data/Random_horns.rds")
+}
+
+sim.diff <- readRDS("../data/Random_horns.rds")
+```
+
+
+## Sampling the null distribution
+
+```{r}
+set.seed(34872394)
+dots <- tibble(Horn_Length = rnorm(180, mean = mu.horn, sd = sd.horn),
+               Group = factor(c(rep("Alive", 150), rep("Dead", 30))))
+
+dots |> 
+  ggplot(aes(Horn_Length)) + 
+  geom_dotplot(method = "histodot", binwidth = 0.5, stackgroups = TRUE) +
+  scale_fill_viridis_d() +
+  scale_y_continuous(NULL, breaks = NULL) +
+  scale_x_continuous(limits = c(15, 35)) +
+  labs(x = "Horn Length (mm)")
+
+```
+
+
+## Sampling the null distribution
+
+```{r}
+dots |> 
+  ggplot(aes(Horn_Length, fill = Group)) + 
+  geom_dotplot(method = "histodot", binwidth = 0.5, stackgroups = TRUE) +
+  scale_fill_viridis_d() +
+  scale_y_continuous(NULL, breaks = NULL) +
+  theme(legend.position = c(0.8, 0.8)) +
+  scale_x_continuous(limits = c(15, 35)) +
+  labs(x = "Horn Length (mm)")
+
+```
+
+
+## Sampling the null distribution
+
+```{r}
+set.seed(3424)
+dots <- tibble(Horn_Length = rnorm(180, mean = mu.horn, sd = sd.horn),
+               Group = factor(c(rep("Alive", 150), rep("Dead", 30))))
+
+dots |> 
+  ggplot(aes(Horn_Length, fill = Group)) + 
+  geom_dotplot(method = "histodot", binwidth = 0.5, stackgroups = TRUE) +
+  scale_fill_viridis_d() +
+  scale_y_continuous(NULL, breaks = NULL) +
+  scale_x_continuous(limits = c(15, 35)) +
+  theme(legend.position = c(0.8, 0.8)) +
+  labs(x = "Horn Length (mm)")
+
+```
+
+
+## Sampling the null distribution
+
+```{r}
+set.seed(67566)
+dots <- tibble(Horn_Length = rnorm(180, mean = mu.horn, sd = sd.horn),
+               Group = factor(c(rep("Alive", 150), rep("Dead", 30))))
+
+dots |> 
+  ggplot(aes(Horn_Length, fill = Group)) + 
+  geom_dotplot(method = "histodot", binwidth = 0.5, stackgroups = TRUE) +
+  scale_fill_viridis_d() +
+  scale_y_continuous(NULL, breaks = NULL) +
+  scale_x_continuous(limits = c(15, 35)) +
+  theme(legend.position = c(0.8, 0.8)) +
+  labs(x = "Horn Length (mm)")
+
+```
+
 
 ## How large of a difference do we expect from sampling error?
-
 
 ```{r}
 
@@ -195,6 +338,7 @@ ggplot(sim.diff, aes(x = dd)) +
   geom_histogram(bins = 30, fill = "gray50") +
   labs(x = "Difference of Means", y = "Count")
 ```
+
 
 ## How large of a difference do we expect from sampling error?
 
@@ -225,17 +369,20 @@ Observed difference = `r round(mean(HL$Horn_Length[HL$Group == "Alive"]), 1) - r
 </center>
 
 
-
-
 ## Goals of Statistical Inference
 
-1. Parameter (i.e. effect) estimation
+::: {.incremental}
+
+1. Parameter (i.e., effect) estimation
     - Given a model, with unknown parameters ($\theta_0$, $\theta_1$, ..., $\theta_k$), how to estimate values of those parameters?
 2. Interval estimation
     - How to quantify the uncertainty associated with parameter estimates?
-3. Making decisions (i.e. Hypothesis testing)
+3. Making decisions (i.e., Hypothesis testing)
     - How to test hypotheses about parameter estimates?
     - What conclusions can we make from our analysis?
+
+:::
+
     
 ## Hypotheses
 
@@ -274,29 +421,32 @@ plot_grid(p2, p1, ncol = 2)
 Observed difference = `r round(mean(HL$Horn_Length[HL$Group == "Alive"]), 1) - round(mean(HL$Horn_Length[HL$Group == "Dead"]), 1)` mm
 </center>
 
+
 ## Making Decisions {.smaller}
 
->What is the probability of observing a difference as big or bigger than my observed difference from sampling error alone? 
+> What is the probability of observing a difference as big or bigger than my observed difference from sampling error alone? 
 
-The answer to this question is called a p-value: p = 4/100000 = 0.00004
+The answer to this question is called a *P*-value: *P* = 4/100000 = 0.00004
 
 
 ```{r}
+#| fig-align: center
+
 set_above <- sim.diff[sim.diff$dd >= dd | sim.diff$dd <= -dd,]
-set_above$y = 1
+set_above$y <- 1
+
 p1 <- ggplot(sim.diff, aes(x = dd)) +
   geom_histogram(bins = 30, fill = "gray50") +
   geom_vline(xintercept = c(-dd,dd), linewidth = 2, color = "firebrick4") +
-  geom_point(data = set_above, aes(dd, y), size = 3, alpha = 0.8, color = "firebrick4") +
+  geom_point(data = set_above, aes(dd, y), size = 3, alpha = 0.8,
+             color = "firebrick4") +
   labs(x = "Difference of Means", y = "Count") 
 p1
 
 ```
 
 
-## Obtaining P-values
-
-Fix shade 
+## Obtaining *P*-values
 
 - Calculate test statistic
 - Determine *P*-value (area under tail(s))
@@ -305,8 +455,13 @@ Fix shade
 
 ::: {.column width="50%"}
 
-```{r, echo=FALSE, fig.height=3.7,fig.width=3.5}
-shade_t(0.025, 178,tail = "both")
+```{r}
+#| fig-align: center
+#| fig-height: 7
+
+shade_t(0.025, 178, tail = "both") +
+  theme(text = element_text(size = 30))
+
 ```
 
 :::
@@ -314,15 +469,21 @@ shade_t(0.025, 178,tail = "both")
 ::: {.column width="50%"}
 
 
-```{r, echo=FALSE, fig.height=3.7,fig.width=3.5}
-shade_t(0.05, 178,tail = "upper")
+```{r}
+#| fig-align: center
+#| fig-height: 7
+
+shade_t(0.05, 178, tail = "upper") +
+  theme(text = element_text(size = 30))
+
 ```
 
 :::
 
 ::::
 
-## Obtaining P-values {.smaller}
+
+## Obtaining *P*-values
 
 ```{r}
 #| echo: true
@@ -332,7 +493,7 @@ summary(lm(Horn_Length ~ Group, data = HL))
 ```
 
 
-## One sided or two-sided tests {.smaller}
+## One sided or two-sided tests
 
 Data will always be on one side of H~0~ or the other.
 
@@ -348,18 +509,21 @@ Data will always be on one side of H~0~ or the other.
 - Multiply the one-sided *P* by 2.
 
 
-## Closed-form P-value
+## Closed-form *P*-value
 
 - Calculate test statistic
-- Determine *P*-value (area under tail(s))
+- Determine *P*-value:area under tail(s)
 
 :::: {.columns}
 
 ::: {.column width="50%"}
 
 ```{r}
-shade_t(0.15, 10,tail = "both") +
-  ggtitle("P = 0.3")
+#| fig-height: 7
+
+shade_t(p = 0.15, df = 10, tail = "both") +
+  ggtitle("P = 0.3") +
+  theme(text = element_text(size = 30))
 ```
 
 :::
@@ -367,8 +531,11 @@ shade_t(0.15, 10,tail = "both") +
 ::: {.column width="50%"}
 
 ```{r}
-shade_t(0.005, 10,tail = "both") +
-    ggtitle("P = 0.01")
+#| fig-height: 7
+
+shade_t(p = 0.005, 10, tail = "both") +
+  ggtitle("P = 0.01") +
+  theme(text = element_text(size = 30))
 
 ```
 
@@ -377,7 +544,7 @@ shade_t(0.005, 10,tail = "both") +
 ::::
 
 
-## Testing different hypotheses {.smaller}
+## Testing different hypotheses
 
 $$t = \frac{\theta - \theta_{null}}{\mbox{SE}_{\theta}}$$
 
@@ -386,13 +553,14 @@ is a general equation that can be used to test any null hypothesized parameter e
 - $\theta$ is the parameter estimate
 - $\theta_{null}$ is the null hypothesized value
     - often and by default $\theta_{null} = 0$
-- Analyses of allometry: the study of scaling relationships
+
 
 ## Bayesian Inference
 
-- Does the Credible Interval of a given parameter estimate encompass the value in question. e.g.,:
-    -  Does the credible interval for the difference in means include zero?
-    -  Does the credible interval for the parameter estimate include 98.6?
+- Does the Credible Interval of a given parameter estimate encompass the value in question?
+    - Does the credible interval for the difference in means include zero?
+    - Does the credible interval for the parameter estimate include 98.6?
+
 
 ## Decision errors {.smaller}
 
@@ -409,6 +577,7 @@ Type II error occurs when:
 
 - You decide there is not an important effect when in reality there is one.
 
+
 ## Power
 
 - Probability that a random sample will lead to a rejection of H~0~
@@ -418,107 +587,86 @@ Type II error occurs when:
     - Low power $\rightarrow$ high type II errors
 - Power analysis will come later in the course
 
+
 ## Making Decisions
 
 ```{r}
 
-g1 <- tibble("group" = rep("g1", 3),
-             "y" = rep(1,3),
-             "x" = c(0.01,0.31,0.61),
-             "Effect" = rep(0.31,3),
-             "P" = rep(0.05, 3),
-             "Significant" = rep("*", 3)
-             )
+gall <- tribble(
+  ~ group, ~ y, ~ x, ~ Effect, ~ P, ~ Significant,
+  "g1", 1,  0.01, 0.31,  0.050, "*",
+  "g1", 1,  0.31, 0.31,  0.050, "*",
+  "g1", 1,  0.61, 0.31,  0.050, "*",
+  
+  "g2", 2,  0.08, 0.10,  0.008, "*",
+  "g2", 2,  0.10, 0.10,  0.008, "*",
+  "g2", 2,  0.12, 0.10,  0.008, "*",
+  
+  "g3", 3,  0.64, 0.72,  0.001, "*",
+  "g3", 3,  0.72, 0.72,  0.001, "*",
+  "g3", 3,  0.80, 0.72,  0.001, "*",
 
-g2 <- tibble("group" = rep("g2", 3),
-             "y" = rep(2,3),
-             "x" = c(0.08,0.1,0.12),
-             "Effect" = rep(0.1,3),
-             "P" = rep(0.008, 3),
-             "Significant" = rep("*", 3)
-             )
+  "g4", 4,  0.00, 0.31,  0.310, "NS",
+  "g4", 4,  0.31, 0.31,  0.310, "NS",
+  "g4", 4,  0.62, 0.31,  0.310, "NS",
+  
+  "g5", 5, -0.18, 0.09,  0.700, "NS",
+  "g5", 5,  0.09, 0.09,  0.700, "NS",
+  "g5", 5,  0.36, 0.09,  0.700, "NS",
+  
+  "g6", 6,  0.32, 0.47,  0.005, "NS",
+  "g6", 6,  0.32, 0.47,  0.005, "NS",
+  "g6", 6,  0.32, 0.47,  0.005, "NS",
+  
+  "g7", 7,  0.04, 0.40,  0.020, "*",
+  "g7", 7,  0.44, 0.40,  0.020, "*",
+  "g7", 7,  0.84, 0.40,  0.020, "*",
+  
+  "g8", 8,  0.10, 0.18,  0.010, "*",
+  "g8", 8,  0.18, 0.18,  0.010, "*",
+  "g8", 8,  0.26, 0.18,  0.010, "*",
+  
+  "g9", 9, -0.05, 0.44,  0.200, "NS",
+  "g9", 9,  0.44, 0.44,  0.200, "NS",
+  "g9", 9,  0.93, 0.44,  0.200, "NS"
+)
 
-g3 <- tibble("group" = rep("g3", 3),
-             "y" = rep(3,3),
-             "x" = c(0.64,0.72,0.8),
-             "Effect" = rep(0.72,3),
-             "P" = rep(0.0001, 3),
-             "Significant" = rep("*", 3)
-             )
-
-g4 <- tibble("group" = rep("g4", 3),
-             "y" = rep(4,3),
-             "x" = c(0,0.31,0.62),
-             "Effect" = rep(0.31,3),
-             "P" = rep(0.06, 3),
-             "Significant" = rep("ns", 3)
-             )
-
-g5 <- tibble("group" = rep("g5", 3),
-             "y" = rep(5,3),
-             "x" = c(-0.18,0.09,0.36),
-             "Effect" = rep(0.09,3),
-             "P" = rep(0.7, 3),
-             "Significant" = rep("ns", 3)
-             )
-
-g6 <- tibble("group" = rep("g6", 3),
-             "y" = rep(6,3),
-             "x" = c(0.32,0.47,0.62),
-             "Effect" = rep(0.47,3),
-             "P" = rep(0.005, 3),
-             "Significant" = rep("*", 3)
-             )
-
-g7 <- tibble("group" = rep("g7", 3),
-             "y" = rep(7,3),
-             "x" = c(0.04,0.44,0.84),
-             "Effect" = rep(0.4,3),
-             "P" = rep(0.02, 3),
-             "Significant" = rep("*", 3)
-             )
-g8 <- tibble("group" = rep("g8", 3),
-             "y" = rep(8,3),
-             "x" = c(0.1,0.18,0.26),
-             "Effect" = rep(0.18,3),
-             "P" = rep(0.01, 3),
-             "Significant" = rep("*", 3)
-             )
-
-g9 <- tibble("group" = rep("g9", 3),
-             "y" = rep(9,3),
-             "x" = c(-0.05,0.44,0.93),
-             "Effect" = rep(0.44,3),
-             "P" = rep(0.2, 3),
-             "Significant" = rep("ns", 3)
-             )
-
-gall <- rbind(g1, g2,g3,g4,g5,g6,g7,g8,g9)
-
-bks <- -log10(c(0.001,0.01,0.05,0.2,0.5))
-lbs <- c(0.001,0.01,0.05,0.2,0.5)
+bks <- -log10(c(0.001, 0.01, 0.05, 0.2, 0.5))
+lbs <- c(0.001, 0.01, 0.05, 0.2, 0.5)
 
 dec.plot <- ggplot(gall, aes(x,y, group = group, color = -log10(P))) +
-  geom_rect(xmin = -0.4, xmax = 0.2, ymin = 0, ymax = 12, fill = "lightgoldenrod", color = "lightgoldenrod") +
-  geom_rect(xmin = 0.2, xmax = 0.5, ymin = 0, ymax = 12, fill = "grey", color = "grey") +
-  geom_rect(xmin = 0.5, xmax = 1.5, ymin = 0, ymax = 12, fill = "thistle", color = "thistle") +
+  geom_rect(xmin = -0.4, xmax = 0.2, ymin = 0, ymax = 12,
+            fill = "lightgoldenrod", color = "lightgoldenrod") +
+  geom_rect(xmin = 0.2, xmax = 0.5, ymin = 0, ymax = 12,
+            fill = "grey", color = "grey") +
+  geom_rect(xmin = 0.5, xmax = 1.5, ymin = 0, ymax = 12,
+            fill = "thistle", color = "thistle") +
   geom_vline(xintercept = 0, linetype = "dotted", color = "grey30") +
   geom_line(linewidth = 3) +
   geom_point(data=gall, aes(Effect,y,color = -log10(P)), size = 5) +
   xlim(c(-0.2, 1)) +
   ylab("Experiment") +
   xlab("Standardized Effect Size") +
-  scale_color_gradient(breaks = bks, labels = lbs, low = "black", high = "red", name = "P-value") +
-  annotate("text", x = 0, y = 10.5, label = "Not Biologicaly\nMeaningful") +
-  annotate("text", x = 0.35, y = 10.5, label = "Uncertain") +
-  annotate("text", x = 0.75, y = 10.5, label = "Clearly Biologicaly\nMeaningful") +
+  scale_color_gradient(breaks = bks, labels = lbs,
+                       low = "black", high = "red", name = "P-value") +
+  annotate("text", x = 0, y = 10.5, label = "Not Biologicaly\nMeaningful",
+           size = 6) +
+  annotate("text", x = 0.35, y = 10.5, label = "Uncertain",
+           size = 6) +
+  annotate("text", x = 0.75, y = 10.5,
+           label = "Clearly Biologicaly\nMeaningful",
+           size = 6) +
   ylim(c(1,11)) +
-  theme(axis.text.y = element_blank(), text = element_text(size = 20))
+  theme(axis.text.y = element_blank(), text = element_text(size = 20),
+        axis.ticks.y = element_blank())
 
 dec.plot
 ```
 
+<span style="font-size:60%;">
 Figure inspired by Ian Dworkin
+</span>
+
 
 ## Problems with All or Nothing Thinking
 
@@ -534,36 +682,38 @@ nhst.plot <- ggplot(gall, aes(x,y, group = group, color = Significant)) +
   ylab("Experiment") +
   xlab("Standardized Effect Size") +
   theme(axis.text.y = element_blank())  +
-    theme(axis.text.y = element_blank(), text = element_text(size = 20))
+  theme(axis.text.y = element_blank(), text = element_text(size = 20),
+        axis.ticks.y = element_blank())
 
 nhst.plot
 
-
 ```
-
 
 
 ## Controversy
 
 Philosophical and practical problems have been raised since the 1960's.
 
-- In 1986, the *American Journal of Public Health* told all researchers wanting to publish in the journal that he would no longer accept results based on *P*-values (and then backed down 2 years later)
+- In 1986, the *American Journal of Public Health* it would no longer accept results based on *P*-values (and then backed down 2 years later)
 - *Basic and Applied Social Psychology* banned *P*-values in 2015
-- In 2016, the American Statistical Association published a "Statement on *P*-Values: Context, Process, and Purpose" which critiqued the (mis)use of *P*-values.
+- In 2016, the American Statistical Association published a "Statement on *P*-Values: Context, Process, and Purpose" which critiqued the (mis)use of *P*-values. [@Wasserstein2016-qk]
+
 
 ## History
 
-- K. Pearson: Pearson's correlation, $\chi^2$, eugenics
-- Fisher: Fisher's exact test, "null hypothesis", ANOVA (*F*), eugenics
-- Gosset: *t* distribution, Student's *t*-tests, Guinness
-- Neyman and E. Pearson: "null hypothesis" testing, confidence intervals, decision theory
+- Karl Pearson: Pearson's correlation, $\chi^2$, eugenics
+- Ronald Fisher: Fisher's exact test, "null hypothesis", ANOVA (*F*), eugenics
+- William Gosset: *t* distribution, Student's *t*-tests, Guinness
+- Jerzy Neyman and Egon Pearson: "null hypothesis" testing, confidence intervals, decision theory
+
 
 ## History
 
 The modern idea is traced to these statisticians, but has been warped into something different:
 
-- Test statistics ($F$, $t$, $\chi^2$) and Fisher's rule-of-thumb $P = 0.05$ applied to Neyman-Pearson "null hypotheses"
+- Test statistics (*F*, *t*, $\chi^2$) and Fisher's rule-of-thumb *P* = 0.05 applied to Neyman-Pearson "null hypotheses"
 - H~0~ becomes a straw man hypothesis of no difference or no effect
+
 
 ## Problem with *P*-values
 
@@ -571,6 +721,7 @@ The modern idea is traced to these statisticians, but has been warped into somet
 - Apparent objectivity but actually arbitrary and dependent on the data collected and not collected
 - Experimental biases (experimenter introduced, sample size)
 - Science-wide publication bias
+
 
 ## Science-wide publication bias {.smaller}
 
@@ -583,13 +734,18 @@ Corollaries proposed by Ioannidis [-@Ioannidis2005-od]:
 5. The greater the financial and other interests and prejudices in a scientific field, the less likely the research findings are to be true.
 6. The hotter a scientific field (with more scientific teams involved), the less likely the research findings are to be true.
 
+
 ## How to make decisions
-incrmentl
+
+::: {.incremental}
 
 - Always consider the size of the effect on a biological scale and incorporate this into your decision about how meaningful the effect is.
     - Significance alone may not mean a biological effect is important.
 - Always consider your level uncertainty in your decision and report this clearly and openly.
     - No decision is made with 100% certainty. Embrace uncertainty and discuss the grey areas.
+
+:::
+
 
 ## How to make decisions
 
@@ -597,6 +753,7 @@ incrmentl
 
 ::: {.column width="50%"}
 
+This:
 
 ```{r, fig.height=10}
 
@@ -608,6 +765,7 @@ dec.plot
 
 ::: {.column width="50%"}
 
+Not this:
 
 ```{r, fig.height=10}
 
@@ -625,10 +783,10 @@ nhst.plot
 
 Preregistration of experimental design and planned analysis
 
-1. Report parameter estimates and confidence intervals only 
+1. Report parameter estimates, confidence intervals, and effect sizes 
 1. Model selection
 
-Either of above could be done in a frequentist/likelihood or Bayesian framework
+All could be done in a frequentist/likelihood or Bayesian framework
 
 
 ## References
