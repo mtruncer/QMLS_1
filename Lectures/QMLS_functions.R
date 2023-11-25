@@ -48,6 +48,7 @@ shade_normal <- function(p, tail = "both", mean = 0, sd = 1) {
   require(tidyverse, quietly = TRUE)
   require(cowplot)
   crit <- qnorm(p, mean, sd)
+  
   M <- tibble(x = seq(-4, 4, length = 200),
               y = dnorm(x))
   PP <- ggplot(M, aes(x, y)) +
@@ -62,7 +63,7 @@ shade_normal <- function(p, tail = "both", mean = 0, sd = 1) {
   if (tail == "both") PP <- PP + lower + upper
   if (tail == "lower") PP <- PP + lower
   if (tail == "upper") PP <- PP + upper
-  return(p)
+  return(PP)
 }
 
 shade_t <- function(p, df, tail = "both") {
