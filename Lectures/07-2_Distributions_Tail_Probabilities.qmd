@@ -86,17 +86,20 @@ Compare the values returned by `pnorm()` to the proportions on the previous slid
 
 ## Tail probabilities
 
-```{r fig.height = 3}
+```{r}
 #| echo: true
+#| fig-align: center
 
 shade_normal(0.025, tail = "both")
 qnorm(0.025)
 ```
 
+
 ## *t* Distribution
 
-```{r fig.height = 3}
+```{r}
 #| echo: true
+#| fig-align: center
 
 shade_t(0.025, df = 5)
 qt(0.025, df = 5)
@@ -114,13 +117,16 @@ shade_t(0.025, 5) +
 
 Need the critical value that marks the 2.5% cutoff at each tail.
 
+
 ## Calculating exact confidence intervals
 
-Multiply the $SEM$ by the *t*-value encompassing 95% for a *t* distribution with a given degrees of freedom (e.g., $n-1$).
+Multiply the *SEM* by the *t*-value encompassing 95% for a *t* distribution with a given degrees of freedom (e.g., *n*-1).
 
-```{r t_plot, message=FALSE, fig.height=3.5}
+```{r}
 #| echo: false
 #| warning: false
+#| fig-height: 5
+#| fig-align: center
 
 x <- seq(-2.5, 2.5, by = 0.01)
 
@@ -133,8 +139,7 @@ sim <- tibble(df = c(2, 5, 20)) %>%
 
 norm <- tibble(
   x = x,
-  y = dnorm(x, 0, 1)
-)
+  y = dnorm(x, 0, 1))
 
 pal <- palette()[2:4]
 
@@ -147,7 +152,7 @@ ggplot() +
 ```
 
 
-## Calculating exact confidence intervals
+## *t* Distribution approaches a normal as df increases
 
 ```{r}
 #| echo: true
@@ -160,6 +165,7 @@ qt(0.975, 1000000000 - 1)
 
 qnorm(0.975, 0, 1)
 ```
+
 
 ## Example CI calculation
 
@@ -183,8 +189,9 @@ c(lower, undulation_mean, upper)
 
 ## *F* Distribution
 
-```{r fig.height = 3}
+```{r}
 #| echo: true
+#| fig-align: center
 
 shade_F(0.05, df1 = 2, df2 = 10)
 qf(0.05, df1 = 2, df2 = 10, lower.tail = FALSE)
@@ -195,6 +202,7 @@ qf(0.05, df1 = 2, df2 = 10, lower.tail = FALSE)
 
 ```{r fig.height = 3}
 #| echo: true
+#| fig-align: center
 
 shade_chisq(0.05, df = 2)
 qchisq(0.05, df = 2, lower.tail = FALSE)
@@ -209,20 +217,22 @@ qchisq(0.05, df = 2, lower.tail = FALSE)
 
 ::: {.column width="50%"}
 
-```{r, fig.height=4,fig.width=4.5}
-#| echo: false
+```{r}
+#| fig-height: 7
 
-shade_normal(0.025, tail = "both")
+shade_normal(0.025, tail = "both") +
+  theme(text = element_text(size = 24))
 ```
 
 :::
 
 ::: {.column width="50%"}
 
-```{r, fig.height=4,fig.width=4.5}
-#| echo: false
+```{r}
+#| fig-height: 7
 
-shade_normal(0.05, tail = "upper")
+shade_normal(0.05, tail = "upper") +
+  theme(text = element_text(size = 24))
 ```
 
 :::
@@ -233,10 +243,10 @@ shade_normal(0.05, tail = "upper")
 
 ```{r}
 #| echo: true
+#| fig-align: center
 
-shade_normal(0.34, tail='upper')
+shade_normal(0.34, tail = "upper")
 ```
-
 
 
 ## The `r`, `d`, `p`, and `q` functions for distributions {.smaller}
@@ -264,13 +274,13 @@ RR <- tibble("values" = rnorm(50,0,1))
 ```
 
 
-
 :::: {.columns}
 
 ::: {.column width="40%"}
 
-```{r, fig.height=4,fig.width=4.5}
+```{r}
 #| echo: false
+
 shade_normal(0, tail = "both")
 
 ```
@@ -286,19 +296,16 @@ RR
 
 ```
 
-
 :::
 
 ::: {.column width="40%"}
 
-```{r, fig.height=4,fig.width=4.5}
-#| echo: false
+```{r}
 
 ggplot(RR, aes(values)) + 
 geom_dotplot() +
 scale_y_continuous(NULL, breaks = NULL) +
-xlim(c(-4,4))
-
+xlim(c(-4, 4))
 
 ```
 
@@ -307,17 +314,15 @@ xlim(c(-4,4))
 ::::
 
 
-## `dnorm(x = 1, mean = 0, sd = 1)`
-
+## `dnorm(x=1, mean=0, sd=1)`
 
 ```{r}
 #| echo: true
+
 dnorm(x = 1, mean = 0, sd = 1)
 ```
 
 ```{r}
-#| echo: false
-
 M <- tibble(x = seq(-4, 4, length = 200),
             y = dnorm(x))
 
@@ -333,12 +338,13 @@ p
 
 ```
 
+
 ## `pnorm(q=1, mean=0, sd=1)`
 
 ```{r}
 #| echo: true
 
-pnorm(q=1, mean=0, sd=1)
+pnorm(q = 1, mean = 0, sd = 1)
 
 ```
 
@@ -349,13 +355,14 @@ shade_normal(0.8413447, tail = "lower")
 
 ```
 
+
 ## `qnorm(p=0.841, mean=0, sd=1)`
 
 
 ```{r}
 #| echo: true
 
-qnorm(p=0.841, mean=0, sd=1)
+qnorm(p = 0.841, mean = 0, sd = 1)
 
 ```
 
@@ -370,8 +377,3 @@ pp
   
 ```
 
-
-## References
-
-::: {#refs}
-:::
