@@ -1,5 +1,5 @@
 ---
-title: "Model Synonyms"
+title: "Connections among Linear Models"
 author:
   - Elizabeth King
   - Kevin Middleton
@@ -37,7 +37,7 @@ $$\mbox{Outcome variable} \sim \mbox{Predictor variable(s)} + \mbox{Error}$$
 
 ## Horned Lizards
 
-$$Horn Length = \theta_0 + \theta_1 Group$$
+$$\mbox{Horn Length} = \theta_0 + \theta_1 \mbox{Group}$$
 
 ```{r}
 
@@ -55,17 +55,19 @@ HL <- tibble(Horn_Length = c(Alive, Dead),
 
 This same model can be implemented via:
 
-- t-test (`t.test()`)
-- linear regression model (`lm()`)
-- ANOVA `aov()` or `anova(lm())`
+- *t*-test: `t.test()`
+- Linear regression model: `lm()`
+- ANOVA: `anova(lm())` and `aov()`
 
-## t-test
+
+## *t*-test
 
 ```{r}
 #| echo: true
 
 t.test(Horn_Length ~ Group, data = HL, var.equal = TRUE)
 ```
+
 
 ## Linear regression model 
 
@@ -76,7 +78,10 @@ fm <- lm(Horn_Length ~ Group, data = HL)
 summary(fm)
 ```
 
+
 ## ANOVA 
+
+- `anova()` generates an ANOVA table from an `lm()` object
 
 ```{r}
 #| echo: true
@@ -86,14 +91,18 @@ anova(fm)
 
 ```
 
+
 ## Categorical variables as numbers
+
+- `lm()` calls `model.matrix()` internally to convert factors to 0 and 1:
 
 ```{r}
 #| echo: true
 
-model.matrix(fm)[145:155,]
+model.matrix(fm)[145:155, ]
 
 ```
+
 
 ## Categorical variables coded as 0/1
 
@@ -107,6 +116,7 @@ HL
 
 ```
 
+
 ## Categorical variables coded as 0/1
 
 ```{r}
@@ -115,14 +125,13 @@ HL
 fm <- lm(Horn_Length ~ Group_num, data = HL)
 summary(fm)
 
-
 ```
 
 
 ## Named tests
 
 - `lm()` is always applicable for a simple linear model
-- `t.test` and ANOVA functions 
+- `t.test()` and ANOVA functions (`aov()`, `anova()`)
     - apply to a subset of models
         - e.g., categorical predictor
     - are shorthand for a particular subset of results
