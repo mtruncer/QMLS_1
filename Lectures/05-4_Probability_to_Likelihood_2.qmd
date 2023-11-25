@@ -31,7 +31,6 @@ library(plotly)
 library(cmdstanr)
 library(bayesplot)
 library(posterior)
-library(qs)
 
 theme_set(theme_cowplot())
 
@@ -535,7 +534,7 @@ model <- "
 if (FALSE) {
   # Only run this interactively to avoid needing to refit the model
   # each time you render the slides. Posterior samples are saved out
-  # to a qs file to save space. Only saving mu and sigma without
+  # to a rds file to save space. Only saving mu and sigma without
   # any diagnostics, etc.
   bayes_model <- cmdstan_model(stan_file = write_stan_file(model))
   fm_bayes <- bayes_model$sample(
@@ -546,11 +545,11 @@ if (FALSE) {
     seed = 2236726,
     chains = 4)
   samples <- fm_bayes$draws(variables = c("mu", "sigma"))
-  qsave(x = samples, file = "../data/bayes_model_means.qs")
+  write_rds(x = samples, file = "../data/bayes_model_means.rds")
 }
 
-# Read the posterior samples from the saved qs file.
-post <- qread("../data/bayes_model_means.qs")
+# Read the posterior samples from the saved rds file.
+post <- read_rds("../data/bayes_model_means.rds")
 
 mcmc_trace(post)
 ```
