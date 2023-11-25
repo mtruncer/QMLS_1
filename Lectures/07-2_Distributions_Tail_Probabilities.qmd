@@ -177,12 +177,20 @@ undulation_rate <- c(0.9, 1.2, 1.2, 1.3, 1.4, 1.4, 1.6, 2.0)
 undulation_mean <- mean(undulation_rate)
 undulation_SEM <- sd(undulation_rate) / sqrt(length(undulation_rate))
 
+
+lower_approx <- undulation_mean - 2 * undulation_SEM
+upper_approx <- undulation_mean + 2 * undulation_SEM
+
+c(lower_approx, undulation_mean, upper_approx)
+
+
 crit <- qt(0.025, df = 8 - 1, lower.tail = FALSE)
 
 lower <- undulation_mean - crit * undulation_SEM
 upper <- undulation_mean + crit * undulation_SEM
 
 c(lower, undulation_mean, upper)
+
 
 ```
 
