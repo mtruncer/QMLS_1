@@ -571,11 +571,11 @@ is a general equation that can be used to test any null hypothesized parameter e
 
 Type I error occurs when:
 
-- You decide there is an important effect when in reality there isn't one.
+- You decide there is a meaningful effect when in reality there isn't one.
 
 Type II error occurs when:
 
-- You decide there is not an important effect when in reality there is one.
+- You decide there is not a meaningful effect when in reality there is one.
 
 
 ## Power

@@ -105,19 +105,6 @@ shade_t(0.025, df = 5)
 qt(0.025, df = 5)
 ```
 
-
-## Calculating exact confidence intervals
-
-```{r}
-#| echo: false
-
-shade_t(0.025, 5) +
-  ggtitle(TeX("$t$-distribution with df = 5"))
-```
-
-Need the critical value that marks the 2.5% cutoff at each tail.
-
-
 ## Calculating exact confidence intervals
 
 Multiply the *SEM* by the *t*-value encompassing 95% for a *t* distribution with a given degrees of freedom (e.g., *n*-1).
@@ -165,6 +152,18 @@ qt(0.975, 1000000000 - 1)
 
 qnorm(0.975, 0, 1)
 ```
+
+
+## Calculating exact confidence intervals
+
+```{r}
+#| echo: false
+
+shade_t(0.025, 5) +
+  ggtitle(TeX("$t$-distribution with df = 5"))
+```
+
+Need the critical value that marks the 2.5% cutoff at each tail.
 
 
 ## Example CI calculation

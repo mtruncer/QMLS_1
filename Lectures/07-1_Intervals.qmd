@@ -98,14 +98,17 @@ The 95% confidence interval for a mean can be estimated by the sample mean ± ~ 
 - This is a reasonable approximation
 
 
-## Calculating exact confidence intervals
+## Estimating confidence intervals
 
 :::: {.columns}
 
 ::: {.column width="50%"}
 
 ```{r}
-shade_normal(p = 0.025)
+#| fig-height: 10
+shade_normal(p = 0.025) +
+    theme(text = element_text(size = 24))
+
 ```
 
 :::
@@ -132,7 +135,7 @@ DD |>
   stat_summary(fun = mean, geom = "point", size = 3, color = "red") + 
   stat_summary(fun.data = mean_cl_normal, geom = "errorbar", width = 0.1,
                color = "red", linewidth = 1) +
-  facet_wrap(vars(DataSet), nrow=2, scales = "free_y")
+  facet_wrap(vars(DataSet), nrow=2)
 
 ```
 
