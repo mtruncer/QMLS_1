@@ -1,0 +1,231 @@
+---
+title: "Adding Complexity to Linear Models"
+author:
+  - Elizabeth King
+  - Kevin Middleton
+format:
+  revealjs:
+    theme: [default, custom.scss]
+    standalone: true
+    self-contained: true
+    logo: QMLS_Logo.png
+    slide-number: true
+    show-slide-number: all
+code-annotations: hover
+bibliography: QMLS_Bibliography.bib
+csl: evolution.csl
+---
+
+```{r}
+#| label: setup
+#| echo: false
+
+library(tidyverse)
+library(cowplot)
+theme_set(theme_cowplot())
+
+```
+
+## Analysis workflow
+
+![](../images/Workflow.drawio.png){fig-align="center"}
+
+
+## Complex linear models
+
+- One predictor is common
+- More than one predictor is common
+    - "Multiple regression"
+
+Similarities to models we have studied and new concerns
+
+
+## Red Deer on the Isle of Rum
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+![](https://i.imgur.com/5Y8u3wP.png){fig-align="center"}
+:::
+
+::: {.column width="50%"}
+![](https://i.imgur.com/mUi9ker.png){fig-align="center"}
+:::
+
+::::
+
+
+## How will the population change over time?
+
+![](https://i.imgur.com/bIRba8Q.jpg){fig-align="center" width="100%"}
+
+
+## How will the population change over time?
+
+:::: {.columns}
+
+::: {.column width="60%"}
+![](https://i.imgur.com/JFdrljB.png){fig-align="center"}
+:::
+  
+::: {.column width="40%"}
+- What factors influence juvenile survival?
+- Changing climate
+- Changing timing of reproduction
+:::
+  
+::::
+
+  
+## Prediction
+
+$$Yearling~Survival \sim Date~of~Birth$$
+
+```{r}
+#| fig-align: center
+
+tx <- "
+x, y
+1.0305064815074054, 0.8733454777138653
+1.3630764061931293, 0.8624783509965273
+1.7373967578464038, 0.8534867234401501
+2.050211383934821, 0.843848990909662
+2.356709690063555, 0.8350727316779885
+2.6403169359128706, 0.825735617434066
+2.9256712489850774, 0.8171343449662141
+3.215863594366828, 0.8099733481698179
+3.4913178598426517, 0.7998465500686487
+3.753557129658146, 0.7898184624496352
+4.0944144245037375, 0.7758823371052703
+4.401450289777976, 0.7641223292084317
+4.735408908922922, 0.7505361773917101
+5.036531623596606, 0.7394536823496685
+5.363457177254529, 0.7238349919685563
+5.696385474703923, 0.711262866013981
+5.976229806534703, 0.697999766684315
+6.299571632555925, 0.6815106293241922
+6.517955035417308, 0.6713299891418469
+6.7557353641123274, 0.6583361002180604
+7.0701178710418, 0.6444044617137934
+7.3157376039421, 0.6296068630706139
+7.528252652798387, 0.6187666573938638
+7.761822101520284, 0.6048664267702828
+7.998034549374247, 0.5929897610308964
+8.234023014250916, 0.5808124770049445
+8.455810958367163, 0.567782693360374
+8.674821513564968, 0.5548920017588413
+9.010168827169135, 0.5334808008112207"
+
+DD <- read_csv(file = tx, show_col_types = FALSE) |> 
+  rename(Date = x, Survival = y)
+
+fm <- lm(Survival ~ poly(Date, degree = 2), data = DD)
+Pred <- tibble(Date = seq(min(DD$Date),
+                          max(DD$Date), length.out = 100))
+Pred <- Pred |> 
+  mutate(Pred = predict(fm, newdata = Pred))
+
+date_labs <- seq(ymd('2012-05-25'),
+                                  ymd('2012-07-20'),
+                                  by = '1 week') |> 
+  str_remove("2012-")
+
+ggplot() +
+  geom_line(data = Pred, aes(Date, Pred),
+            linewidth = 1.5, color = "steelblue") +
+  scale_y_continuous(limits = c(0.5, 1)) +
+  scale_x_continuous(limits = c(1, 9),
+                     breaks = 1:9,
+                     labels = date_labs) +
+  labs(x = "Date of Birth",
+       y = "Yearling Survival") +
+  theme(axis.title = element_text(face = "bold"))
+```
+
+
+## Possible additional predictors
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+- Birth date  
+- Birth mass
+- Year
+- Sex
+- Maternal fecundity
+- Maternal reproductive status
+:::
+  
+::: {.column width="50%"}
+- Maternal age
+- Population size
+- Temperature (min, max, mean, etc.)
+- Rainfall
+- Wind speed
+- ...
+:::
+  
+::::
+
+
+## Issues with multiple predictors
+
+1. How are my predictors related to *each other*?
+    - Correlations *between* predictors
+    - Predictors masking the effects of one another
+2. How many predictors should I include?
+    - Model too specific
+    - Model too general
+    - Model just right
+
+We will learn how to address all these concerns
+
+
+## General form for linear models
+
+Multiple predictors:
+
+$$Y = \theta_0 + \theta_1 X_1 + \theta_2 X_2 + \dots + \theta_k X_k$$
+
+- $X_k$  are some combination of continuous and categorical predictors.
+- $\theta_0$ is the intercept term (optional), the value when all other $\theta_k = 0$.
+- $\theta_k$ are the parameter estimates for the $X$.
+
+
+## No kitchen sink approach to modeling
+
+Don't put everything in the model and see what falls out
+
+- Model will be too specific
+- Predictors modify each others' effect on the outcome
+- "Causal Salad" (Richard McElreath)
+
+![](https://bigthink.com/wp-content/uploads/2018/08/origin-137.jpg){fig-align="center"}
+
+
+
+## Degrees of freedom
+
+- How many independent "things" are there?
+    - Constraints remove degrees of freedom
+- $\theta$s for predictors are constraints
+
+[Video explanation](https://www.youtube.com/watch?v=-4aiKmPC994)
+
+. . .
+
+5 observations = 5 df
+
+- Estimate the mean = 4 df
+- If you know 4 points and the mean, you can figure out the other
+
+
+## Losing degrees of freedom
+
+- One mean: *n - 1*
+- Two group means: *n - 2*
+- 1 slope, 1 intercept: *n - 2*
+
+Be careful with many predictors and few observations
