@@ -33,6 +33,8 @@ theme_set(theme_cowplot())
 
 ## Complex linear models
 
+$$\mbox{Outcome variable} \sim \mbox{Predictor variable(s)} + \mbox{Error}$$
+
 - One predictor is common
 - More than one predictor is common
     - "Multiple regression"
@@ -174,13 +176,12 @@ ggplot() +
 
 1. How are my predictors related to *each other*?
     - Correlations *between* predictors
+    - Predictors interacting with one another
     - Predictors masking the effects of one another
-2. How many predictors should I include?
+2. Which predictors should I include?
     - Model too specific
     - Model too general
     - Model just right
-
-We will learn how to address all these concerns
 
 
 ## General form for linear models
@@ -229,3 +230,14 @@ Don't put everything in the model and see what falls out
 - 1 slope, 1 intercept: *n - 2*
 
 Be careful with many predictors and few observations
+
+
+## This unit
+
+- Multiple levels
+    - One categorical variable with 3 or more levels
+- Multiple continuous predictors
+- Mixed categorical and continuous predictors
+
+$$Y = \theta_0 + \theta_1 X_1 + \theta_2 X_2 + \dots + \theta_k X_k$$
+
