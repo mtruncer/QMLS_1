@@ -1,68 +1,33 @@
 ---
 title: "Linear Models: Mixed Predictors"
-subtitle: "Quantitative Methods in Life Sciences"
-author: 'Elizabeth King, Kevin Middleton and Lauren Sullivan'
-output:
-  ioslides_presentation:
-    fig_width: 8
-    css: styles.css
+author:
+  - Elizabeth King
+  - Kevin Middleton
+format:
+  revealjs:
+    theme: [default, custom.scss]
+    standalone: true
+    self-contained: true
+    logo: QMLS_Logo.png
+    slide-number: true
+    show-slide-number: all
+code-annotations: hover
+bibliography: QMLS_Bibliography.bib
 csl: evolution.csl
-bibliography: Multivariate.bib
 ---
 
-```{r setup, echo=FALSE, message=FALSE, warning=FALSE}
+```{r}
+#| label: setup
+#| echo: false
+#| message: false
+#| warning: false
+
 library(tidyverse)
 library(cowplot)
 theme_set(theme_cowplot())
+
 library(wesanderson)
-library(knitr)
-knitr::opts_chunk$set(cache = TRUE)
-#library(rethinking)
 ```
-
-<!--
-Datasets
-  Molerats.csv
--->
-
-
-## Hierarchy of GLMs
-
-<center>
-<img src="https://i.imgur.com/sdx4fMz.png" width="100%" />
-</center>
-
-## Problem
-
-<center>
-<img src="https://i.imgur.com/GsL12KL.jpg" width="90%" />
-</center>
-
-## Prediction
-
-> Outcome: Juvenile Survival
-
-<div class="columns-2">
-
-Possible predictors:
-
-- Birth date  
-- Birth mass
-- Year
-- Sex
-- Maternal fecundity
-- Maternal reproductive status
-
-<br />
-
-- Maternal age
-- Population size
-- Temperature (min, max, ave...)
-- Rainfall
-- Wind speed
-- ...
-
-</div>
 
 ## Mixed predictors
 
@@ -76,19 +41,19 @@ For now:
 - One categorical predictor
 - One continuous predictor ("covariate")
 
-## Energy expenditure in naked mole rats
-
-<center>
-<img src="https://i.imgur.com/ZzV5LNp.jpg" width="80%" />
-</center>
 
 ## Energy expenditure in naked mole rats
 
-```{r echo=FALSE}
-M <- read_csv("../data/Molerats.csv", col_types = c("cdd")) %>% 
+![](https://i.imgur.com/ZzV5LNp.jpg){fig-align="center"}
+
+
+## Energy expenditure in naked mole rats
+
+```{r}
+M <- read_csv("../data/Molerats.csv", col_types = c("cdd")) |> 
   rename(Caste = caste,
          Mass = ln.mass,
-         Energy= ln.energy) %>% 
+         Energy= ln.energy) |> 
   mutate(Caste = if_else(Caste == "worker", "Worker", "Non-worker"),
          Caste = factor(Caste))
 
@@ -97,15 +62,17 @@ ggplot(M, aes(x = Mass, y = Energy)) +
   labs(x = "ln Body Mass (g)", y = "ln Daily Energy Expenditure (kJ)")
 ```
 
+
 ## Energy expenditure in naked mole rats
 
-```{r echo=FALSE}
+```{r}
 ggplot(M, aes(x = Mass, y = Energy, color = Caste)) +
   geom_point(size = 4) +
   scale_color_manual(values = wes_palette("Cavalcanti1")) +
   theme(legend.justification = c(0, 1), legend.position = c(0, 1)) +
   labs(x = "ln Body Mass (g)", y = "ln Daily Energy Expenditure (kJ)")
 ```
+
 
 ## Energy expenditure in naked mole rats
 
@@ -121,10 +88,12 @@ ggplot(M, aes(x = Mass, y = Energy, color = Caste)) +
 
 **Account for *both* body mass and caste in predicting energy expenditure**
 
-## Analysis of covariance
+
+## Analysis of covariance (ANCOVA)
 
 1. One categorical predictor
 1. One continuous predictor (the *covariate*): allowed to covary with the response variable
+
 
 ## Fit different models to these data
 
@@ -133,14 +102,17 @@ ggplot(M, aes(x = Mass, y = Energy, color = Caste)) +
 1. OLS regression (body mass only, no grouping)
 1. ANCOVA, intercepts varying
 
+
 ## 1: Mean
 
 ```{r}
+#| echo: true
+
 fm1 <- lm(Energy ~ 1, data = M)
 ```
 
-```{r echo=FALSE}
-M <- M %>% mutate(pred1 = predict(fm1))
+```{r}
+M <- M |> mutate(pred1 = predict(fm1))
 ggplot(M, aes(x = Mass, y = Energy, color = Caste)) +
   geom_point(size = 4) +
   geom_line(aes(x = Mass, y = pred1), lwd = 2,
@@ -150,20 +122,26 @@ ggplot(M, aes(x = Mass, y = Energy, color = Caste)) +
   labs(x = "ln Body Mass (g)", y = "ln Daily Energy Expenditure (kJ)")
 ```
 
+
 ## 1: Mean
 
 ```{r}
+#| echo: true
+
 summary(fm1)
 ```
+
 
 ## 2: ANOVA
 
 ```{r}
+#| echo: true
+
 fm2 <- lm(Energy ~ Caste, data = M)
 ```
 
 ```{r echo=FALSE}
-M <- M %>% mutate(pred2 = predict(fm2))
+M <- M |> mutate(pred2 = predict(fm2))
 ggplot(M, aes(x = Mass, y = Energy, color = Caste)) +
   geom_point(size = 4) +
   geom_line(aes(x = Mass, y = pred2, color = Caste), lwd = 2) +
@@ -172,20 +150,26 @@ ggplot(M, aes(x = Mass, y = Energy, color = Caste)) +
   labs(x = "ln Body Mass (g)", y = "ln Daily Energy Expenditure (kJ)")
 ```
 
-## 2: ANOVA {.smaller}
+
+## 2: ANOVA
 
 ```{r}
+#| echo: true
+
 summary(fm2)
 ```
+
 
 ## 3: OLS regression
 
 ```{r}
+#| echo: true
+
 fm3 <- lm(Energy ~ Mass, data = M)
 ```
 
-```{r echo=FALSE}
-M <- M %>% mutate(pred3 = predict(fm3))
+```{r}
+M <- M |> mutate(pred3 = predict(fm3))
 ggplot(M, aes(x = Mass, y = Energy, color = Caste)) +
   geom_point(size = 4) +
   geom_line(aes(x = Mass, y = pred3, group = 1), lwd = 2,
@@ -195,20 +179,26 @@ ggplot(M, aes(x = Mass, y = Energy, color = Caste)) +
   labs(x = "ln Body Mass (g)", y = "ln Daily Energy Expenditure (kJ)")
 ```
 
-## 3: OLS regression {.smaller}
+
+## 3: OLS regression
 
 ```{r}
+#| echo: true
+
 summary(fm3)
 ```
+
 
 ## 4: ANCOVA, intercepts varying
 
 ```{r}
+#| echo: true
+
 fm4 <- lm(Energy ~ Mass + Caste, data = M)
 ```
 
 ```{r echo=FALSE}
-M <- M %>% mutate(pred4 = predict(fm4))
+M <- M |> mutate(pred4 = predict(fm4))
 ggplot(M, aes(x = Mass, y = Energy, color = Caste)) +
   geom_point(size = 4) +
   geom_line(aes(x = Mass, y = pred4, color = Caste), lwd = 2) +
@@ -217,11 +207,15 @@ ggplot(M, aes(x = Mass, y = Energy, color = Caste)) +
   labs(x = "ln Body Mass (g)", y = "ln Daily Energy Expenditure (kJ)")
 ```
 
-## 4: ANCOVA, intercepts varying {.smaller}
+
+## 4: ANCOVA, intercepts varying
 
 ```{r}
+#| echo: true
+
 summary(fm4)
 ```
+
 
 ## 4: ANCOVA, intercepts varying
 
@@ -236,6 +230,7 @@ CasteWorker  0.39334    0.14611   2.692   0.0112
 - `(Intercept)`: Intercept for non-workers
 - `Mass`: Slope for both groups
 - `CasteWorker`: *Offset* for the Worker group (difference in intercepts)
+
 
 ## Fit different models to these data
 
