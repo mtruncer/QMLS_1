@@ -47,7 +47,7 @@ For now:
 ![](https://i.imgur.com/ZzV5LNp.jpg){fig-align="center"}
 
 
-## Energy expenditure in naked mole rats
+## Modeling energy expenditure
 
 ```{r}
 M <- read_csv("../data/Molerats.csv", col_types = c("cdd")) |> 
@@ -63,47 +63,38 @@ ggplot(M, aes(x = Mass, y = Energy)) +
 ```
 
 
-## Energy expenditure in naked mole rats
+## Modeling energy expenditure
 
 ```{r}
 ggplot(M, aes(x = Mass, y = Energy, color = Caste)) +
   geom_point(size = 4) +
   scale_color_manual(values = wes_palette("Cavalcanti1")) +
-  theme(legend.justification = c(0, 1), legend.position = c(0, 1)) +
+  theme(legend.justification = c(0, 1), legend.position = c(0.05, 1)) +
   labs(x = "ln Body Mass (g)", y = "ln Daily Energy Expenditure (kJ)")
 ```
 
 
-## Energy expenditure in naked mole rats
+## Modeling energy expenditure
 
-*ANOVA*:
+*Only Categorical*:
 
 - Compare mean energy expenditure for non-workers vs. workers
 - Ignores the linear relationships with body mass
 
-*Linear regression*:
+*Only Continuous*:
 
 - Predicts energy expenditure from body mass alone
 - Ignores castes, which appear to have different mass-specific energy expenditure
 
-**Account for *both* body mass and caste in predicting energy expenditure**
-
-
-## Analysis of covariance (ANCOVA)
-
-1. One categorical predictor
-1. One continuous predictor (the *covariate*): allowed to covary with the response variable
-
-
 ## Fit different models to these data
 
-1. Mean (overall mean, no body mass)
-1. ANOVA (group mean, no body mass)
-1. OLS regression (body mass only, no grouping)
-1. ANCOVA, intercepts varying
+1. Grand Mean (overall mean, no body mass)
+1. Categorical Only (group mean, no body mass)
+1. Continuous Only (body mass only, no grouping)
+1. Mixed predictors, intercepts varying
 
 
-## 1: Mean
+## 1: Grand Mean
 
 ```{r}
 #| echo: true
@@ -118,12 +109,12 @@ ggplot(M, aes(x = Mass, y = Energy, color = Caste)) +
   geom_line(aes(x = Mass, y = pred1), lwd = 2,
             color = wes_palette("Cavalcanti1")[5]) +
   scale_color_manual(values = wes_palette("Cavalcanti1")) +
-  theme(legend.justification = c(0, 1), legend.position = c(0, 1)) +
+  theme(legend.justification = c(0, 1), legend.position = c(0.05, 1)) +
   labs(x = "ln Body Mass (g)", y = "ln Daily Energy Expenditure (kJ)")
 ```
 
 
-## 1: Mean
+## 1: Grand Mean
 
 ```{r}
 #| echo: true
@@ -132,7 +123,7 @@ summary(fm1)
 ```
 
 
-## 2: ANOVA
+## 2: Categorical Only
 
 ```{r}
 #| echo: true
@@ -146,12 +137,12 @@ ggplot(M, aes(x = Mass, y = Energy, color = Caste)) +
   geom_point(size = 4) +
   geom_line(aes(x = Mass, y = pred2, color = Caste), lwd = 2) +
   scale_color_manual(values = wes_palette("Cavalcanti1")) +
-  theme(legend.justification = c(0, 1), legend.position = c(0, 1)) +
+  theme(legend.justification = c(0, 1), legend.position = c(0.05, 1)) +
   labs(x = "ln Body Mass (g)", y = "ln Daily Energy Expenditure (kJ)")
 ```
 
 
-## 2: ANOVA
+## 2: Categorical Only
 
 ```{r}
 #| echo: true
@@ -160,7 +151,7 @@ summary(fm2)
 ```
 
 
-## 3: OLS regression
+## 3: Continuous Only
 
 ```{r}
 #| echo: true
@@ -175,12 +166,12 @@ ggplot(M, aes(x = Mass, y = Energy, color = Caste)) +
   geom_line(aes(x = Mass, y = pred3, group = 1), lwd = 2,
             color = wes_palette("Cavalcanti1")[5]) +
   scale_color_manual(values = wes_palette("Cavalcanti1")) +
-  theme(legend.justification = c(0, 1), legend.position = c(0, 1)) +
+  theme(legend.justification = c(0, 1), legend.position = c(0.05, 1)) +
   labs(x = "ln Body Mass (g)", y = "ln Daily Energy Expenditure (kJ)")
 ```
 
 
-## 3: OLS regression
+## 3: Continuous Only
 
 ```{r}
 #| echo: true
@@ -189,7 +180,7 @@ summary(fm3)
 ```
 
 
-## 4: ANCOVA, intercepts varying
+## 4: Mixed Predictors
 
 ```{r}
 #| echo: true
@@ -203,12 +194,12 @@ ggplot(M, aes(x = Mass, y = Energy, color = Caste)) +
   geom_point(size = 4) +
   geom_line(aes(x = Mass, y = pred4, color = Caste), lwd = 2) +
   scale_color_manual(values = wes_palette("Cavalcanti1")) +
-  theme(legend.justification = c(0, 1), legend.position = c(0, 1)) +
+  theme(legend.justification = c(0, 1), legend.position = c(0.05, 1)) +
   labs(x = "ln Body Mass (g)", y = "ln Daily Energy Expenditure (kJ)")
 ```
 
 
-## 4: ANCOVA, intercepts varying
+## 4: Mixed Predictors
 
 ```{r}
 #| echo: true
@@ -217,7 +208,7 @@ summary(fm4)
 ```
 
 
-## 4: ANCOVA, intercepts varying
+## 4: Mixed Predictors
 
 ```
 Coefficients:
@@ -234,10 +225,10 @@ CasteWorker  0.39334    0.14611   2.692   0.0112
 
 ## Fit different models to these data
 
-1. Mean (overall mean, no body mass)
-1. ANOVA (group mean, no body mass)
-1. OLS regression (body mass only, no grouping)
-1. ANCOVA, intercepts varying
+1. Grand Mean (overall mean, no body mass)
+1. Categorical Only (group mean, no body mass)
+1. Continuous Only (body mass only, no grouping)
+1. Mixed predictors, intercepts varying
 
 **Which model is best?**
 

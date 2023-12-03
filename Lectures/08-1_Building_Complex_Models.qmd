@@ -1,5 +1,5 @@
 ---
-title: "Adding Complexity to Linear Models"
+title: "Building More Complex Linear Models"
 author:
   - Elizabeth King
   - Kevin Middleton
@@ -209,23 +209,37 @@ Don't put everything in the model and see what falls out
 
 ## Degrees of freedom
 
+:::: {.columns}
+
+::: {.column width="50%"}
+
 - How many independent "things" are there?
     - Constraints remove degrees of freedom
 - $\theta$s for predictors are constraints
 
-[Video explanation](https://www.youtube.com/watch?v=-4aiKmPC994)
+:::
 
-. . .
+::: {.column width="50%"}
+
+- Resources
+    - [Video explanation part 1](https://www.youtube.com/watch?v=-4aiKmPC994)
+    - [Video explanation part 2](https://www.youtube.com/watch?v=iA2KZHHZmmg)
+    - [Stack overflow discussion](https://math.stackexchange.com/questions/237790/what-is-degree-of-freedom-in-statistics)
+    
+:::
+
+::::
+
+
+## Losing degrees of freedom
 
 5 observations = 5 df
 
 - Estimate the mean = 4 df
 - If you know 4 points and the mean, you can figure out the other
 
+For example:
 
-## Losing degrees of freedom
-
-- One mean: *n - 1*
 - Two group means: *n - 2*
 - 1 slope, 1 intercept: *n - 2*
 

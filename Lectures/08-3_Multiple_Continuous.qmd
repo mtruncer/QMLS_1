@@ -511,8 +511,6 @@ ggplot(Milk, aes(log_Mass, Neocortex)) +
 
 ## Milk Energy vs. Residual Neocortex
 
-**CHECK THIS AXIS LABEL**
-
 ```{r}
 Milk$resid_Neo <- residuals(lm(Neocortex ~ log_Mass, data = Milk))
 ggplot(Milk, aes(resid_Neo, Milk_Energy)) +

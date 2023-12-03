@@ -67,7 +67,7 @@ Now predict with *three or more* groups
 ::::
 
 
-## Analysis of Variance (ANOVA)
+## Linear Model: Multiple Categories
 
 A more general version of the two means comparison:
 
@@ -77,7 +77,7 @@ A more general version of the two means comparison:
 - "One-way ANOVA": a single categorical variable
 
 
-## "Analysis of *Variance*"
+## "Analysis of *Variance* (ANOVA)"
 
 Given the total observed variability in *Y*:
 
@@ -87,15 +87,15 @@ Given the total observed variability in *Y*:
 The test statistic (*F*) is the ratio of the two.
 
 
-## Assumptions of ANOVA (IID)
+## Assumptions
 
 1. The measurements in every group represent a random, independent sample
 1. The variable is normally distributed in each group 
 1. The variance is the same in all groups
 
-- ANOVA is robust to minor violations of these assumptions
+- Linear models are robust to minor violations of these assumptions
 - Equal sample sizes helps with violations of equal variances
-- ANOVA is the *maximum likelihood estimate* given these assumptions
+- Given these assumptions, the model will give the *maximum likelihood estimate* 
 
 
 ## Does bright light treatment alleviate jet lag symptoms?
@@ -246,41 +246,6 @@ anova(fm)
 
 - *P* = 0.004 for the overall ANOVA.
 - It is possible (but uncommon) to have a significant parameter estimate but a non-significant overall ANOVA.
-
-
-## Visualizing ANOVA
-
-```{r}
-#| eval: false
-
-Grand_mean <- mean(JL$Shift)
-Control <- JL |> 
-  filter(Treatment == "control") |> 
-  mutate(Resid_total = Shift - Grand_mean,
-         Resid_group = mean(Shift) - Grand_mean,
-         Resid_error = Shift - mean(Shift),
-         Treatment = "control")
-Knee <- JL |> 
-  filter(Treatment == "knee") |> 
-  mutate(Resid_total = Shift - Grand_mean,
-         Resid_group = mean(Shift) - Grand_mean,
-         Resid_error = Shift - mean(Shift),
-         Treatment = "knee")
-Eyes <- JL |> 
-  filter(Treatment == "control") |> 
-  mutate(Resid_total = Shift - Grand_mean,
-         Resid_group = mean(Shift) - Grand_mean,
-         Resid_error = Shift - mean(Shift),
-         Treatment = "eyes")
-JL_summary <- bind_rows(Control, Knee, Eyes)
-
-ggplot() +
-  geom_segment(data = JL_summary,
-               aes(x = Treatment))
-  geom_point(data = JL_summary,
-             aes(x = Treatment, y = Shift, color = Treatment),
-             position = position_jitter(width = 0.2, seed = 1121))
-```
 
 
 ## Where do Sum of Squares and Mean Squares come from? 
