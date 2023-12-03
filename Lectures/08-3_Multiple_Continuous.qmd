@@ -117,7 +117,7 @@ Ignore that these are comparative species-level data.
 
 ## Visualizing data
 
-```{r}
+```{r, fig.height = 6}
 fig <- plot_ly() |>
   add_markers(data = Milk,
               x = ~ Fat,
@@ -342,7 +342,7 @@ How?
 
 ## Visualizing multiple regression
 
-```{r}
+```{r, fig.height=6}
 #| warning: false
 
 # https://stackoverflow.com/questions/38331198/add-regression-plane-to-3d-scatter-plot-in-plotly
@@ -395,7 +395,7 @@ ggscatmat(Milk, columns = 2:4)
     - Tu et al. [-@Tu2004-va]
     - Vatcheva et al. [-@Vatcheva2016-tr]
 - Correlation (*r*) > 0.8 should get a closer look (some say 0.5)
-- Variance inflation factor (VIF): inflation of the parameter estimate variances due to shaared variance
+- Variance inflation factor (VIF): inflation of the parameter estimate variances due to shared variance
 
 
 ## Diagnostics
@@ -476,7 +476,7 @@ summary(fm_Mass)
 ```
 
 
-## Multivariate model
+## Multiple predictors model
 
 ```{r}
 #| echo: true
