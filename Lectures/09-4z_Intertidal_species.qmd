@@ -1,0 +1,248 @@
+---
+title: "Introduction to Multilevel Models"
+author:
+  - Elizabeth King
+  - Kevin Middleton
+format:
+  revealjs:
+    theme: [default, custom.scss]
+    standalone: true
+    self-contained: true
+    logo: QMLS_Logo.png
+    slide-number: true
+    show-slide-number: all
+code-annotations: hover
+bibliography: QMLS_Bibliography.bib
+csl: evolution.csl
+---
+
+
+```{r}
+#| label: setup
+#| echo: false
+#| message: false
+#| warning: false
+
+library(tidyverse)
+library(cowplot)
+theme_set(theme_cowplot(font_size = 18))
+
+library(readxl)
+library(car)
+library(glmmTMB)
+
+# Datasets
+#   RIKZ.xlsx
+#   Ortho.xlsx
+```
+
+
+## Intertidal species richness
+
+Collected by National Institute for Coastal and Marine Management (RIKZ)
+
+![](https://i.imgur.com/4YGDggA.jpg){fig-align="center"}
+
+
+## Intertidal data
+
+```{r}
+RIKZ <- read_excel("../data/RIKZ.xlsx") |> 
+  mutate(Beach = factor(Beach))
+glimpse(RIKZ)
+```
+
+- `Richness`: Number of species
+- `NAP`: Height above mean tidal level
+- `Exposure`: Index composed of wave action, length of the surf zone, slope, grain size, and the depth of the anaerobic layer
+- `Beach`: Factor denoting which beach
+
+
+## Sampling structure
+
+![](https://i.imgur.com/HY6P6GF.jpg){fig-align="center"}
+
+
+Sites are the level of the observation.
+
+
+## Sampling structure
+
+```{r}
+RIKZ |> count(Beach)
+```
+
+5 observation sites at each of 9 beaches
+
+
+## Visualizing `NAP`
+
+```{r}
+#| echo: false
+
+ggplot(RIKZ, aes(NAP, Richness)) +
+  geom_point() +
+  facet_wrap("Beach", nrow = 3)
+```
+
+
+## Visualizing `Exposure`
+
+```{r}
+ggplot(RIKZ, aes(Exposure, Richness)) +
+  geom_point() +
+  facet_wrap("Beach", nrow = 3)
+```
+
+Each `Beach` only has 1 value of `Exposure`.
+
+
+## Naive multiple regression model
+
+```{r}
+#| echo: true
+
+fm1 <- lm(Richness ~ NAP + Beach, data = RIKZ)
+Anova(fm1, type = "III")
+```
+
+
+## Naive multiple regression model
+
+```{r}
+#| echo: true
+
+plot(fm1, which = 1)
+```
+
+Maybe we are not interested in knowing the exact nature of the beach effect.
+
+
+## Multilevel model
+
+Allow a different mean richness per beach, while pooling information about other beaches:
+
+```{r}
+#| echo: true
+
+library(glmmTMB)
+
+fm2 <- glmmTMB(Richness ~ 1 + NAP + (1 | Beach), data = RIKZ)
+```
+
+
+## Summary
+
+```{r}
+#| echo: true
+
+summary(fm2)
+```
+
+
+## Visualizing the model
+
+Generate predicted values for overall population level estimates and within beach estimates.
+
+```{r}
+#| echo: true
+
+Preds <- crossing(NAP = c(min(RIKZ$NAP), max(RIKZ$NAP)),
+                  Beach = unique(RIKZ$Beach))
+
+# Overall (set random effects to zero)
+Preds$Pred0 <- predict(fm2, newdata = Preds, re.form = ~ 0)
+
+# Within beach
+Preds$Pred1 <- predict(fm2, newdata = Preds)
+```
+
+
+## Visualizing the model
+
+```{r}
+#| echo: true
+#| output-location: slide
+
+ggplot() +
+  geom_point(data = RIKZ, aes(x = NAP, y = Richness, color = Beach)) +
+  geom_line(data = Preds, aes(x = NAP, y = Pred0), lwd = 2) +
+  geom_line(data = Preds, aes(x = NAP, y = Pred1, color = Beach)) +
+  labs(x = "NAP", y = "Richness")
+```
+
+
+## Does the relationship differ per beach?
+
+Allow each `Beach` to have its own `NAP` to `Richness` linear relationship:
+
+```{r}
+#| echo: true
+
+fm3 <- glmmTMB(Richness ~ 1 + NAP + (1 + NAP | Beach),
+               data = RIKZ,
+               control = glmmTMBControl(optimizer = optim,
+                                        optArgs = list(method = "BFGS")))
+```
+
+`NAP` to `Richness` relationship varies for each `Beach`.
+
+
+## Summary
+
+```{r}
+#| echo: true
+
+summary(fm3)
+```
+
+
+## Visualizing the model
+
+Generate predicted values for overall population level estimates and within beach estimates.
+
+```{r}
+#| echo: true
+
+Preds <- crossing(NAP = c(min(RIKZ$NAP), max(RIKZ$NAP)),
+                  Beach = unique(RIKZ$Beach))
+
+# Overall (set random effects to zero)
+Preds$Pred0 <- predict(fm3, newdata = Preds, re.form = ~ 0)
+
+# Within beach
+Preds$Pred1 <- predict(fm3, newdata = Preds)
+```
+
+
+## Visualizing the model
+
+```{r}
+ggplot() +
+  geom_point(data = RIKZ, aes(x = NAP, y = Richness, color = Beach)) +
+  geom_line(data = Preds, aes(x = NAP, y = Pred0), lwd = 2) +
+  geom_line(data = Preds, aes(x = NAP, y = Pred1, color = Beach)) +
+  labs(x = "NAP", y = "Richness")
+```
+
+
+## Compare fixed effects
+
+```{r}
+#| echo: true
+
+fixef(fm2)
+fixef(fm3)
+```
+
+
+## Compare random effects
+
+```{r}
+#| echo: true
+
+ranef(fm2)
+ranef(fm3)
+```
+
+
