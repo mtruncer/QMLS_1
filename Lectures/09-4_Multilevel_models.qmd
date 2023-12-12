@@ -1,5 +1,5 @@
 ---
-title: "Multilevel Models"
+title: "Introduction to Multilevel Models"
 author:
   - Elizabeth King
   - Kevin Middleton
@@ -30,6 +30,7 @@ theme_set(theme_cowplot(font_size = 18))
 library(readxl)
 library(car)
 library(glmmTMB)
+library(gt)
 
 # Datasets
 #   RIKZ.xlsx
@@ -37,50 +38,50 @@ library(glmmTMB)
 ```
 
 
-## Goals for multilevel models
+## Goals
 
-*Very Important*:
+*High Importance*:
 
-- Understand the nature of the problems we are trying to solve
+- Understand the nature of the problems
 - Understand the value in solving them
 
-*Moderately Important*:
+*Moderate Importance*:
 
-- Understand some of the technical aspects of multilevel model fitting and interpretation
+- Begin to understand some model fitting procedures and interpretation
 
-*Minimally Important*:
+*Least Importance*:
 
 - Understand the math involved
 
 
-## Assumptions of linear regression
+## Assumptions of linear models
 
-1. Normality (check pooled residuals)
-1. Homogeneity (check pooled residuals, transformation?)
-1. Fixed explanatory variables (plan sampling)
-1. Independence (observations often correlated)
-1. Correct model
+1. Linearity
+2. Independence
+3. Equal variance
+4. (Approximately) normal residuals
+
+2 and 3: "Independent and identically distributed" (IID)
 
 
-## Non-independence: The main challenge
+## The challenge of non-independence
 
-Our tests (so far) assume independence of samples.
+- Our tests (so far) assume independence of samples.
+- Many datasets have structure at additional levels beyond the main variable(s) of interest
+    - Error in these levels is correlated (making the data non-independent)
 
-Lots of data have structure at additional levels beyond the main variable(s) of interest
-
-- Error in these levels is correlated (making the data non-independent)
-
-We need a method to model that correlation structure.
+We need a method to model the correlation structure.
 
 
 ## *Explicitly* correlated data
 
-By design:
+Via experimental design:
 
 - Grouping 
     - Leaves within plants within treatments within fields
     - Treatments within plots within blocks 
-- Repeated measurements of the same individual (time or space)
+- Repeated measurements of the same individual or unit (time, replicates)
+- Spatial sampling
 
 
 ## *Implicitly* correlated data
@@ -97,7 +98,7 @@ As a side effect:
 
 *Multilevel / hierarchical / mixed / repeated measures models*
 
-- All refer to the same class of models, which contain both fixed and random variables.
+- All refer to the same class of models, which contain both *fixed* and *random* variables.
 - Some will further subdivide and draw fine distinctions between models.
 
 
@@ -105,8 +106,12 @@ As a side effect:
 
 *Fixed effects*:
 
-- Explanatory variables of primary interest, which would be used again if the experiment were repeated
-- Sex, treatment groups, etc.
+- Explanatory variables of primary interest
+- Would be used again if the experiment were repeated
+- Think of all the predictors we have used so far
+    - Alive / dead horned lizards
+    - Control / knees / eyes treatments
+    - Naked mole rat caste
 
 
 ## Some terminology
@@ -117,7 +122,7 @@ As a side effect:
 - Subject, block, etc.
 - "Random" does not necessarily mean "not of interest."
 
-Also see: http://andrewgelman.com/2005/01/25/why_i_dont_use/
+Also see: [Why I don’t use the term "fixed and random effects"](http://andrewgelman.com/2005/01/25/why_i_dont_use/)
 
 
 ## Fundamental idea of multilevel models
@@ -125,77 +130,25 @@ Also see: http://andrewgelman.com/2005/01/25/why_i_dont_use/
 Units are *grouped* at different levels.
 
 - Grouping takes different forms
+- Groups provide a structure and make observations non-independent
 
 
 ## General multilevel model formula
 
-$$Y = \beta_0 + \beta_1 X_1 + ... + \beta_n X_n + \mbox{Random}$$
+$$Y = \beta_0 + \beta_1 X_1 + ... + \beta_n X_n + \mbox{Random} + \epsilon$$
 
 Where $\mbox{Random}$ can be:
 
-- Random noise ($\epsilon$)
-- Heterogeneity of variance
-- Nesting structure
-- Temporal correlation (autocorrelation)
-- Spatial correlation
-- Phylogenetic correlation
-- Genetic correlation
+- Groups are nested
+- Groups have different variances
+- Observations are correlated
+    - across time or space
+    - phylogenetically or genetically
 
 
-## Turning flight in hummingbirds
+## Visualization of Hierarchical Modeling
 
-
-![](https://i.imgur.com/Sacnb48.png){fig-align="center"}
-
-
-## Turning flight in hummingbirds
-
-![](https://i.imgur.com/Z144W14.png){fig-align="center"}
-
-
-## Turning flight in hummingbirds
-
-![](https://i.imgur.com/iFspGbe.png){fig-align="center"}
-
-
-## Turning flight in hummingbirds
-
-![](https://i.imgur.com/gWAgxud.png){fig-align="center"}
-
-
-## Turning flight in hummingbirds
-
-![](https://i.imgur.com/7tQutuc.png){fig-align="center"}
-
-
-## Turning flight in hummingbirds
-
-![](https://i.imgur.com/D0o9y6J.png){fig-align="center"}
-
-
-## Hierarchical structure
-
-- Maneuver (hover vs. clockwise, hover vs. counterclockwise)
-    - Bird (4)
-        - Trial (5)
-            - Wingbeat (mean of 16 $\rightarrow$ 1)
-
-1. Maneuver is the variable of interest ("fixed")
-1. Birds are a representative sample of all birds ("random")
-1. Trials are repeated measures of each bird ("random")
-1. Wingbeats are the observation level
-
-
-## What we did
-
-1. Calculate means of 16 wingbeats for each bird for each trial
-    - Loss of information, but...
-1. Five trials per bird
-1. Multilevel ANOVA
-    - Bird and trial nested within bird as random effects
-    - Maneuver as the fixed effect
-
-Each bird gets its own mean value for a maneuver (across 5 trials). Maneuver is analyzed as the mean difference between each maneuver.
+[An Introduction to Hierarchical Modeling](http://mfviz.com/hierarchical-models/) by Michael Freeman
 
 
 ## Challenges to multilevel models
@@ -208,20 +161,84 @@ Each bird gets its own mean value for a maneuver (across 5 trials). Maneuver is 
 
 **Computational complexity**
 
-- Many methods fit by likelihood
-- MCMC can be slow, difficult to tune
+- Maximum likelihood can fail to converge
+- MCMC can be slow, difficult to implement
 - Bayesian requires defining priors
 
 
-## Visualization of Hierarchical Modeling
+## Technical replicates
 
-http://mfviz.com/hierarchical-models/
+```{r}
+set.seed(123)  # Set seed for reproducibility
+
+# Number of samples per group
+num_samples_per_group <- 4
+
+# Number of replicate measurements per group
+num_replicates_per_sample <- 3
+
+# Generate data for Group 1
+group1 <- matrix(rnorm(num_samples_per_group * num_replicates_per_sample,
+                       mean = 10, sd = 1.5),
+                 nrow = num_samples_per_group,
+                 ncol = num_replicates_per_sample) |> 
+  as.data.frame() |> 
+  rename(Rep1 = V1, Rep2 = V2, Rep3 = V3) |> 
+  mutate(Sample = paste0("S", 1:4),
+         Group = "Control")
+
+# Generate data for Group 2
+group2 <- matrix(rnorm(num_samples_per_group * num_replicates_per_sample,
+                       mean = 22, sd = 4),
+                 nrow = num_samples_per_group,
+                 ncol = num_replicates_per_sample) |> 
+  as.data.frame() |> 
+  rename(Rep1 = V1, Rep2 = V2, Rep3 = V3) |> 
+  mutate(Sample = paste0("S", 5:8),
+         Group = "Treatment")
+
+# Combine the data for both groups
+all_data <- bind_rows(group1, group2) |> 
+  relocate(Sample) |> 
+  relocate(Group)
+
+all_data_long <- all_data |> 
+         pivot_longer(cols = -c(Sample, Group),
+                      names_to = "Replicate", values_to = "Absorbance")
+
+ggplot(all_data_long,
+       aes(x = Group, y = Absorbance, group = Sample, color = Replicate)) +
+  geom_point(position = position_dodge(width = 0.75),
+             size = 4) +
+  paletteer::scale_color_paletteer_d(palette = "nbapalettes::suns_00s") +
+  theme(axis.title.x = element_blank(),
+        legend.position = "none")
+```
+
+
+## Model considerations
+
+- Comparison of means
+- Account for
+    - Multiple technical replicates per Sample
+    - Different variances per group
+
+```{r}
+all_data_long |> 
+  summarise(Mean = mean(Absorbance),
+            SD = sd(Absorbance),
+            .by = c(Group, Sample)) |> 
+  gt() |> 
+  fmt_number() |> 
+  tab_style(style = cell_text(weight = "bold"),
+            locations = cells_column_labels())
+```
 
 
 ## Multilevel models in R: many options
 
 - `nlme`: Restricted to a subset of models (linear and non-linear Gaussian)
-- `lme4`: More complex models with crossed random effects, pedigrees, non-Gaussian response, etc., more flexible distributions of response variables
+- `lme4`: More complex models with flexible distributions of response variables
 - `glmmTMB`: Might replace `lme4` eventually, lots of flexibility in distributions of response variables
 - `MCMCglmm`, `rstan`, `brms`: Bayesian multilevel models
 
@@ -236,266 +253,78 @@ http://mfviz.com/hierarchical-models/
     - We will cover a few common ones here
 
 
-## Example data
-
-Imagine:
-
-- `y`: Numeric response with a Gaussian distribution
-- `A`: Factor with 5 levels
-- `x`: Continuous predictor
-
-5 `y` samples from each level of `A` and predictor `x`
-
-
 ## Simple block design
 
-`y ~ 1 + (1 | A)`
+`Absorbance ~ Group + (1 | Sample)`
 
-- Fit an overall mean (`1`) of `y`
-- Each level of `A` has a mean estimated as a deviation from the overall mean
-- Each observation in each `A` is represented as a deviation from the group mean
+- Estimate a mean for each level of `Group` (main effect)
+- Each `Sample` within group has it's own mean: `(1 | Sample)`
+- Replicates don't appear explicitly in the model
 
-
-## Block design with a continuous predictor 1
-
-`y ~ 1 + x + (1 | A)`
-
-- Fit an overall mean (`1`) of `y`
-- Fit the overall slope of `x`
-- Each level of `A` has a mean estimated as a deviation from the overall mean
-- Each observation in each `A` is represented as a deviation from the group mean
-
-
-## Block design with a continuous predictor 2
-
-`y ~ 1 + x + (1 + x | A)`
-
-- Fit an overall mean (`1`) of `y`
-- Fit the overall slope of `x`
-- Each level of `A` has a slope estimated as a deviation from the overall slope
-- Each level of `A` has a mean estimated as a deviation from the overall mean
-- Each observation in each `A` is represented as a deviation from the group mean
+```{r}
+all_data_long |> 
+  count(Group, Sample) |> 
+  gt() |> 
+  tab_style(style = cell_text(weight = "bold"),
+            locations = cells_column_labels())
+```
 
 
 ## Block designs and nested data
 
-Data with hierarchical structure:
+Why not calculate a mean for each sample and use those data for a "regular" linear model instead?
 
-- *i* samples within *n* blocks
-
-We could just calculate a mean for each block and use those data for ANOVA.
-
-- Lose all the information about variability within blocks
+- Lose all the information about variability within replicates
 - Might increase apparent variation
 
 
-## Intertidal species richness
+## Experimental design
 
-Collected by National Institute for Coastal and Marine Management (RIKZ)
-
-![](https://i.imgur.com/4YGDggA.jpg){fig-align="center"}
+![](https://www.sare.org/wp-content/uploads/Figure-4-Paired-Comparison-Experimental-Design-768x349.jpg){fig-align="center"}
 
 
-## Intertidal data
+## Experimental design
 
-```{r}
-RIKZ <- read_excel("../data/RIKZ.xlsx") |> 
-  mutate(Beach = factor(Beach))
-glimpse(RIKZ)
-```
-
-- `Richness`: Number of species
-- `NAP`: Height above mean tidal level
-- `Exposure`: Index composed of wave action, length of the surf zone, slope, grain size, and the depth of the anaerobic layer
-- `Beach`: Factor denoting which beach
+![](https://www.sare.org/wp-content/uploads/Figure-6-Split-Plot-Experimental-Design-768x394.jpg){fig-align="center"}
 
 
-## Sampling structure
+## Organizing the data
 
-![](https://i.imgur.com/HY6P6GF.jpg){fig-align="center"}
-
-
-Sites are the level of the observation.
-
-
-## Sampling structure
+Wide format (how the data is collected):
 
 ```{r}
-RIKZ |> count(Beach)
+all_data
 ```
 
-5 observation sites at each of 9 beaches
+## Organizing the data
 
-
-## Visualizing `NAP`
-
-```{r}
-#| echo: false
-
-ggplot(RIKZ, aes(NAP, Richness)) +
-  geom_point() +
-  facet_wrap("Beach", nrow = 3)
-```
-
-
-## Visualizing `Exposure`
-
-```{r}
-ggplot(RIKZ, aes(Exposure, Richness)) +
-  geom_point() +
-  facet_wrap("Beach", nrow = 3)
-```
-
-Each `Beach` only has 1 value of `Exposure`.
-
-
-## Naive multiple regression model
+Long format (one row per observation):
 
 ```{r}
 #| echo: true
-
-fm1 <- lm(Richness ~ NAP + Beach, data = RIKZ)
-Anova(fm1, type = "III")
+all_data_long <- all_data |> 
+  pivot_longer(cols = -c(Sample, Group),
+               names_to = "Replicate", values_to = "Absorbance")
+all_data_long
 ```
 
 
-## Naive multiple regression model
-
-```{r}
-#| echo: true
-
-plot(fm1, which = 1)
-```
-
-Maybe we are not interested in knowing the exact nature of the beach effect.
-
-
-## Multilevel model
-
-Allow a different mean richness per beach, while pooling information about other beaches:
-
-```{r}
-#| echo: true
-
-library(glmmTMB)
-
-fm2 <- glmmTMB(Richness ~ 1 + NAP + (1 | Beach), data = RIKZ)
-```
-
-
-## Summary
-
-```{r}
-#| echo: true
-
-summary(fm2)
-```
-
-
-## Visualizing the model
-
-Generate predicted values for overall population level estimates and within beach estimates.
-
-```{r}
-#| echo: true
-
-Preds <- crossing(NAP = c(min(RIKZ$NAP), max(RIKZ$NAP)),
-                  Beach = unique(RIKZ$Beach))
-
-# Overall (set random effects to zero)
-Preds$Pred0 <- predict(fm2, newdata = Preds, re.form = ~ 0)
-
-# Within beach
-Preds$Pred1 <- predict(fm2, newdata = Preds)
-```
-
-
-## Visualizing the model
+## Fitting a multilevel model
 
 ```{r}
 #| echo: true
 #| output-location: slide
 
-ggplot() +
-  geom_point(data = RIKZ, aes(x = NAP, y = Richness, color = Beach)) +
-  geom_line(data = Preds, aes(x = NAP, y = Pred0), lwd = 2) +
-  geom_line(data = Preds, aes(x = NAP, y = Pred1, color = Beach)) +
-  labs(x = "NAP", y = "Richness")
+library(glmmTMB)
+
+fm <- glmmTMB(Absorbance ~ Group + (1 | Sample),
+              data = all_data_long)
+summary(fm)
 ```
 
+`Absorbance ~ Group + (1 | Sample)` is very similar to the two-means model: `Absorbance ~ Group`
 
-## Does the relationship differ per beach?
-
-Allow each `Beach` to have its own `NAP` to `Richness` linear relationship:
-
-```{r}
-#| echo: true
-
-fm3 <- glmmTMB(Richness ~ 1 + NAP + (1 + NAP | Beach),
-               data = RIKZ,
-               control = glmmTMBControl(optimizer = optim,
-                                        optArgs = list(method = "BFGS")))
-```
-
-`NAP` to `Richness` relationship varies for each `Beach`.
-
-
-## Summary
-
-```{r}
-#| echo: true
-
-summary(fm3)
-```
-
-
-## Visualizing the model
-
-Generate predicted values for overall population level estimates and within beach estimates.
-
-```{r}
-#| echo: true
-
-Preds <- crossing(NAP = c(min(RIKZ$NAP), max(RIKZ$NAP)),
-                  Beach = unique(RIKZ$Beach))
-
-# Overall (set random effects to zero)
-Preds$Pred0 <- predict(fm3, newdata = Preds, re.form = ~ 0)
-
-# Within beach
-Preds$Pred1 <- predict(fm3, newdata = Preds)
-```
-
-
-## Visualizing the model
-
-```{r}
-ggplot() +
-  geom_point(data = RIKZ, aes(x = NAP, y = Richness, color = Beach)) +
-  geom_line(data = Preds, aes(x = NAP, y = Pred0), lwd = 2) +
-  geom_line(data = Preds, aes(x = NAP, y = Pred1, color = Beach)) +
-  labs(x = "NAP", y = "Richness")
-```
-
-
-## Compare fixed effects
-
-```{r}
-#| echo: true
-
-fixef(fm2)
-fixef(fm3)
-```
-
-
-## Compare random effects
-
-```{r}
-#| echo: true
-
-ranef(fm2)
-ranef(fm3)
-```
+- `+ (1 | Sample)` fits a model where `Absorbance`s for each `Sample` are included in the model
 
 
 ## Longitudinal studies and repeated measures
@@ -562,14 +391,37 @@ ggplot(Or, aes(Age, Distance, color = Subject)) +
 
 ## What are the growth patterns of the head in boys and girls?
 
-- Main effects of `Age` and `Sex` (like an ANCOVA model).
-- Random effects allow the `Age` by `Distance` relationship (slope) to vary for each `Subject`, which is also allowed to have its own mean.
+"Naive" linear model:
 
 ```{r}
 #| echo: true
 
-fm2 <- glmmTMB(Distance ~ 1 + Sex + Age + (1 + Age | Subject),
+fm <- lm(Distance ~ 1 + Sex + Age, data = Or)
+coef(fm)
+```
+
+- All observations are pooled for each individual
+
+What should we do instead?
+
+
+## Multilevel model
+
+- Main effects of `Sex` and `Age` (like the naked mole rats model).
+- Random effects allow the `Distance` relationship ("intercept") to vary for each `Subject`
+
+```{r}
+#| echo: true
+
+fm2 <- glmmTMB(Distance ~ 1 + Sex + Age + (1 | Subject),
                data = Or)
+```
+
+
+## Model summary
+
+```{r}
+summary(fm2)
 ```
 
 
@@ -609,15 +461,6 @@ ggplot() +
 ```
 
 
-## Summary
-
-```{r}
-#| echo: false
-
-summary(fm2)
-```
-
-
 ## ANOVA table
 
 ```{r}
@@ -627,14 +470,31 @@ Anova(fm2, type = "III")
 ```
 
 
-## Reasons to use multilevel models {.smaller}
+## Is there a "better" model?
+
+1. Fit a common growth rate for all individuals, regardless of sex (this lecture)
+1. Fit different growth rates by sex (multilevel interaction model)
+1. Allow individual longitudinal growth rates (multilevel model with per-individual rates)
+
+How can we decide which model fits the observed data "best"?
+
+- Coming soon...
+
+
+## Reasons to use multilevel models
 
 Adapted from McElreath [-@McElreath2015-no]
 
-1. *To adjust estimates for repeat sampling*. When more than one observation arises from the same individual, location, or time, then traditional, single-level models may mislead us.
-2. *To adjust estimates for imbalance in sampling*. When some individuals, locations, or times are sampled more than others, we may also be misled by single-level models.
-3. *To study variation*. If research questions include variation among individuals or other groups within the data, multilevel models help, because they model variation explicitly.
-4. *To avoid averaging*. Avoid pre-average to construct variables for a regression analysis. Averaging removes variation. Multilevel models allow us to preserve the uncertainty in the original, pre-averaged values, while still using the average to make predictions.
+- *To adjust estimates for repeat sampling*. When more than one observation arises from the same individual, location, or time, then traditional, single-level models may mislead us.
+- *To adjust estimates for imbalance in sampling*. When some individuals, locations, or times are sampled more than others, we may also be misled by single-level models.
+
+
+## Reasons to use multilevel models
+
+Adapted from McElreath [-@McElreath2015-no]
+
+- *To study variation*. If research questions include variation among individuals or other groups within the data, multilevel models help, because they model variation explicitly.
+- *To avoid averaging*. Avoid pre-average to construct variables for a regression analysis. Averaging removes variation. Multilevel models allow us to preserve the uncertainty in the original, pre-averaged values, while still using the average to make predictions.
 
 
 ## Can poor experimental design be saved by multilevel models?
