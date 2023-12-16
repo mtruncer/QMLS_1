@@ -16,6 +16,7 @@ bibliography: QMLS_Bibliography.bib
 csl: evolution.csl
 ---
 
+## Interactions
 
 ```{r}
 #| label: setup
@@ -31,6 +32,8 @@ library(readxl)
 library(car)
 library(paletteer)
 library(ggsci)
+library(wesanderson)
+
 ```
 
 
@@ -39,6 +42,53 @@ Datasets
   biomass.csv
 -->
 
+What if the the effect of body mass on energy expenditure depends on caste? How do we model that?  
+
+```{r}
+
+MM <- read_csv("../data/Molerats.csv", col_types = c("cdd")) |> 
+  rename(Caste = caste,
+         Mass = ln.mass,
+         Energy= ln.energy) |> 
+  mutate(Caste = if_else(Caste == "worker", "Worker", "Non-worker"),
+         Caste = factor(Caste))
+
+ggplot(MM, aes(x = Mass, y = Energy, color = Caste)) +
+  geom_point(size = 4) +
+  scale_color_manual(values = wes_palette("Cavalcanti1")) +
+  theme(legend.justification = c(0, 1), legend.position = c(0.05, 1)) +
+  labs(x = "ln Body Mass (g)", y = "ln Daily Energy Expenditure (kJ)")
+
+```
+
+## Interactions
+
+```{r}
+fm5 <- lm(Energy ~ Mass * Caste, data = MM)
+```
+
+```{r echo=FALSE}
+MM <- MM %>% mutate(pred5 = predict(fm5))
+ggplot(MM, aes(x = Mass, y = Energy, color = Caste)) +
+  geom_point(size = 4) +
+  geom_line(aes(x = Mass, y = pred5, color = Caste), lwd = 2) +
+  scale_color_manual(values = wes_palette("Cavalcanti1")) +
+  theme(legend.justification = c(0, 1),
+        legend.position = c(0.05, 1)) +
+  labs(x = "ln Body Mass (g)",
+       y = "ln Daily Energy Expenditure (kJ)")
+```
+
+
+## Interaction model
+
+Add a new predictor ($\theta_3$) that is the product of $X_1$ and $X_2$:
+
+$$Y = \theta_0 + \theta_1 X_1 + \theta_2 X_2 + \theta_3 (X_1 X_2) + \epsilon$$
+
+The value of $X_1$ varies with change in the value of $X_2$ (and vice versa - these are not really separable).
+
+Example formula: `Energy ~ Mass + Caste + Mass:Caste`
 
 ## Factorial designs and interactions
 
@@ -48,14 +98,6 @@ Datasets
 
 If you have multiple categorical variables, you should *always* do factorial designs (unless you know why you aren't).
 
-
-## Interaction model
-
-Add a new predictor ($\beta_3$) that is the product of $X_1$ and $X_2$:
-
-$$Y = \beta_0 + \beta_1 X_1 + \beta_2 X_2 + \beta_3 (X_1 X_2) + \epsilon$$
-
-The value of $X_1$ varies with change in the value of $X_2$ (and vice versa - these are not really separable).
 
 
 ## Factorial data
@@ -70,6 +112,8 @@ Biomass gain in plants fertilized with either added nitrogen or phosphorous.
 Biomass gain in plants fertilized with either added nitrogen or phosphorous.
 
 ```{r}
+#| echo: true
+
 BM <- read_csv("../data/biomass.csv", show_col_types = FALSE)
 BM
 ```
@@ -80,6 +124,8 @@ BM
 Balanced data: Equal *n* in each group
 
 ```{r}
+#| echo: true
+
 BM |> count(Nitrogen, Phosphorous)
 ```
 
@@ -148,7 +194,7 @@ BM |>
 ```
 
 
-## Two-way factorial ANOVA
+## Linear model with an interaction
 
 ```{r}
 fm <- lm(Biomass ~ Nitrogen * Phosphorous, data = BM)
@@ -168,7 +214,7 @@ fm <- lm(Biomass ~ Nitrogen + Phosphorous + Nitrogen:Phosphorous,
 - Interaction term of `Nitrogen:Phosphorous` ("Nitrogen by Phosphorus")
 
 
-## Two-way factorial ANOVA
+## Linear model with an interaction
 
 ```{r}
 #| echo: true
@@ -182,6 +228,8 @@ summary(fm)
 If you have a significant interaction, the main effects not interpretable **without** clarification.
 
 ```{r}
+#| echo: true
+
 fm <- lm(Biomass ~ Phosphorous * Nitrogen, data = BM)
 anova(fm)
 ```
@@ -228,10 +276,10 @@ BM$interact <- BM$n_num * BM$p_num
 
 ## 4 parameters define 4 groups
 
-1. $\beta_0$ = `(Intercept)` = "N-" & "P-" group mean
-1. $\beta_1$ = `n_num` = "N-" & "P+" addition
-1. $\beta_2$ = `p_num` = "N+" & "P-" addition
-1. $\beta_3$ = `interact` = #2 + #3 + "N+" & "P+" addition
+1. $\theta_0$ = `(Intercept)` = "N-" & "P-" group mean
+1. $\theta_1$ = `n_num` = "N-" & "P+" addition
+1. $\theta_2$ = `p_num` = "N+" & "P-" addition
+1. $\theta_3$ = `interact` = #2 + #3 + "N+" & "P+" addition
 
 
 ## 4 parameters define 4 groups
@@ -263,139 +311,29 @@ mm <- model.matrix(Biomass ~ Nitrogen * Phosphorous, data = BM)
 mm[15:25,]
 ```
 
+## 0/1 variables are like switches
 
-## Unbalanced interactions are complicated
+$$Y = \theta_0 + \theta_1 N + \theta_2 P + \theta_3 (N \times P ) + \epsilon$$
 
-ANOVA tables, sums of squares, and hypothesis tests are all impacted
+- Turn on or off group membership
 
-- As soon as there are interactions with an unbalanced design, variables can share variance.
+## Continuous interactions
 
+$$Y = \theta_0 + \theta_1 X_1 + \theta_2 X_2 + \theta_3 (X_1 X_2) + \epsilon$$
 
-## Questions get complicated:
-
-1. What is the effect of variable 1 on y, ignoring variable 2?
-2. What is the effect of variable 2 on y, ignoring variable 1?
-3. What is the effect of variable 1 on y, controlling for variable 2?
-4. What is the effect of variable 2 on y, controlling for variable 1?
-
-
-## Partitioning variance
-
-Different ways to partition variance has a cascading effect:
-
-- Determines sums of squares, which
-- Determines mean squares, which
-- Determines *P* values
-
-Thus you should be aware of how your ANOVA table is calculated.
-
-
-## Types of sums of squares
-
-**Type I**: "sequential", "unweighted", ordering of factors in the model matters, the R default, probably **not** what you want *if you have unbalanced sample sizes*
-
-**Type II**: main effects allowed to overlap with their interaction terms, useful if interaction is weak
-
-**Type III**: "weighted", each reported effect controls for all the others (including interactions)
-
-
-## Types of sums of squares
-
-Each type tests subtly different hypotheses.
-
-- Use Type I if you have balanced data
-- Type I == Type III if the groups are balanced (ideal situation - you don't have to choose)
-- Type III matches the output of `summary(lm())` (so that's nice)
-
-
-** CHECKME**
-
-
-## Unbalanced groups
-
-Randomly drop 20 rows:
-
-```{r}
-#| echo: true
-
-set.seed(15)
-BM_ub <- BM |> slice_sample(prop = 0.75)
-BM_ub |> count(Nitrogen, Phosphorous)
-```
-
-
-## ANOVA Model 1
-
-```{r}
-#| echo: true
-
-fm1 <- lm(Biomass ~ Nitrogen * Phosphorous, data = BM_ub)
-anova(fm1)
-```
-
-
-## ANOVA Model 2
-
-```{r}
-#| echo: true
-
-fm2 <- lm(Biomass ~ Phosphorous * Nitrogen, data = BM_ub)
-anova(fm2)
-```
-
-
-## Type III sums of squares
-
-```{r}
-#| echo: true
-
-library(car)
-Anova(fm1, type = "III")
-```
-
-
-## Type III sums of squares
-
-```{r}
-#| echo: true
-
-Anova(fm2, type = "III")
-```
-
-
-## Key points
-
-1. Check your sample sizes within groups
-1. Pay attention when you have interaction terms
-1. Think about your sums of squares
-1. Type II or Type III is likely what you want
-
+- Mathematically the same
+- Multiply X1 & X2
+- Simply not all either 0 or 1
 
 ## Higher order interaction terms
 
-It is difficult enough to interpret an interaction in a 2 X 2 ANOVA model.
+It is difficult enough to interpret a 2-way interaction in a linear model.
 
 - Higher order terms multiply and become virtually impossible to comprehend
 
-$$Biomass = \beta_0 + ... + \beta_k (N \times P \times  K)$$
+$$Biomass = \theta_0 + ... + \theta_k (N \times P \times  K)$$
 
 - What does a significant Nitrogen X Phosphorus X Potassium interaction mean?
-
-Split your data and carry out two analyses unless you really must.
-
-
-## I really want to know more about these Type III sums of squares
-
-Check the Canvas resources.
-
-
-## These disagreements are all specific to sums of squares and variance component estimation.
-
-Alternatives:
-
-- Model Comparisons & Likelihood
-- Bayesian Analyses
-
 
 ## References
 

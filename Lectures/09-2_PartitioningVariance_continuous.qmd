@@ -16,6 +16,16 @@ bibliography: QMLS_Bibliography.bib
 csl: evolution.csl
 ---
 
+## outline
+
+- show variance figure
+- explain r2
+- review plane id
+- semi partial r2
+- 
+
+## Linear Models and Variance 
+
 
 ```{r}
 #| label: setup
@@ -38,11 +48,8 @@ Datasets
 -->
 
 
-## GLMs and Variance 
-
 > How much of the variation in the outcome variable is explained by the predictor variables?
 
-![](https://i.imgur.com/E2Gu7ke.png){fig-align="center"}
 
 
 ## Multiple Regression Makes a Composite Variable
