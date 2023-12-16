@@ -16,7 +16,6 @@ bibliography: QMLS_Bibliography.bib
 csl: evolution.csl
 ---
 
-## Interactions
 
 ```{r}
 #| label: setup
@@ -41,6 +40,78 @@ library(wesanderson)
 Datasets
   biomass.csv
 -->
+
+## "Analysis of Variance"
+
+Some total variability in $y$:
+
+1. Part explained by group membership
+1. Part remains unexplained ("error" or "residual")
+
+$F$-statistic is the ratio of the two.
+
+
+## Visualizing ANOVA
+
+![](https://i.imgur.com/dNF4ph0.png){fig-align="center"}
+
+$$F = \frac{\mbox{Between Group Variation}}{\mbox{Within Group Variation}}$$
+
+
+## Parts of an ANOVA table
+
+```{r}
+#| echo: true
+JL <- read_csv("../data/JetLag.csv", show_col_types = FALSE) |> 
+  mutate(Treatment = factor(Treatment))
+fm_lm <- lm(Shift ~ Treatment, data = JL)
+
+anova(fm_lm)
+```
+
+
+## How much variation is explained by group membership: $R^{2}$?
+
+```{r}
+anova(fm_lm)
+```
+
+- `Sum Sq`: Variability accounted for by that part of the ANOVA
+- `Mean Sq`: `Sum Sq` / `Df`
+- `F value`: `Mean Sq` Treatment / `Mean Sq` Residual
+- `Pr(>F)`: *P*-value for the *F*-test of that variable
+
+
+## How much variation is explained by group membership: $R^{2}$?
+
+$$R^{2} = \frac{\mbox{Variation accounted for by group membership}}{\mbox{Total variation}}$$
+<br />
+
+$$R^{2} = \frac{\mbox{Sum Sq Group}}{\mbox{(Sum Sq Group + Sum Sq Residuals)}}$$
+
+
+## How much variation is explained by group membership: $R^{2}$?
+
+```{r}
+anova(fm_lm)
+```
+
+```{r}
+#| echo: true
+anova(fm_lm)$`Sum Sq`[1]/sum(anova(fm_lm)$`Sum Sq`)
+
+7.224492/(7.224492 + 9.415345)
+```
+
+
+## How much variation is explained by group membership: $R^{2}$?
+
+```{r}
+summary(fm_lm)
+```
+
+
+## Interactions
 
 
 
