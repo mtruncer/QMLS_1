@@ -16,7 +16,7 @@ bibliography: QMLS_Bibliography.bib
 csl: evolution.csl
 ---
 
-## Interactions
+## Additive model for categorical and continuous predictors
 
 ```{r}
 #| label: setup
@@ -42,8 +42,6 @@ Datasets
   biomass.csv
 -->
 
-What if the the effect of body mass on energy expenditure depends on caste? How do we model that?  
-
 ```{r}
 
 MM <- read_csv("../data/Molerats.csv", col_types = c("cdd")) |> 
@@ -53,13 +51,29 @@ MM <- read_csv("../data/Molerats.csv", col_types = c("cdd")) |>
   mutate(Caste = if_else(Caste == "worker", "Worker", "Non-worker"),
          Caste = factor(Caste))
 
+fm4 <- lm(Energy ~ Mass + Caste, data = MM)
+
+MM <- MM |> mutate(pred4 = predict(fm4))
 ggplot(MM, aes(x = Mass, y = Energy, color = Caste)) +
   geom_point(size = 4) +
+  geom_line(aes(x = Mass, y = pred4, color = Caste), lwd = 2) +
   scale_color_manual(values = wes_palette("Cavalcanti1")) +
   theme(legend.justification = c(0, 1), legend.position = c(0.05, 1)) +
   labs(x = "ln Body Mass (g)", y = "ln Daily Energy Expenditure (kJ)")
 
 ```
+
+
+## Interactions
+
+
+What if the the effect of body mass on energy expenditure depends on caste?
+
+- Different body mass to energy relationship for each caste
+
+How do we model that?  
+
+
 
 ## Interactions
 
@@ -67,8 +81,8 @@ ggplot(MM, aes(x = Mass, y = Energy, color = Caste)) +
 fm5 <- lm(Energy ~ Mass * Caste, data = MM)
 ```
 
-```{r echo=FALSE}
-MM <- MM %>% mutate(pred5 = predict(fm5))
+```{r}
+MM <- MM |> mutate(pred5 = predict(fm5))
 ggplot(MM, aes(x = Mass, y = Energy, color = Caste)) +
   geom_point(size = 4) +
   geom_line(aes(x = Mass, y = pred5, color = Caste), lwd = 2) +
@@ -86,9 +100,10 @@ Add a new predictor ($\theta_3$) that is the product of $X_1$ and $X_2$:
 
 $$Y = \theta_0 + \theta_1 X_1 + \theta_2 X_2 + \theta_3 (X_1 X_2) + \epsilon$$
 
-The value of $X_1$ varies with change in the value of $X_2$ (and vice versa - these are not really separable).
+The value of $X_1$ varies with change in the value of $X_2$ and vice versa (these are not really separable).
 
 Example formula: `Energy ~ Mass + Caste + Mass:Caste`
+
 
 ## Factorial designs and interactions
 
@@ -97,7 +112,6 @@ Example formula: `Energy ~ Mass + Caste + Mass:Caste`
 - Allow you to explore *interactions* (multiplicative effects)
 
 If you have multiple categorical variables, you should *always* do factorial designs (unless you know why you aren't).
-
 
 
 ## Factorial data
@@ -145,11 +159,10 @@ ggplot(BM, aes(x = Nitrogen, y = Biomass, color = Phosphorous)) +
 ## Interaction plot
 
 ```{r}
-#| label: int_plot1
 #| echo: true
 #| output-location: slide
 
-ggplot(BM, aes(x = Nitrogen,
+int_plot1 <- ggplot(BM, aes(x = Nitrogen,
                y = Biomass,
                color = Phosphorous,
                group = Phosphorous)) +
@@ -158,13 +171,14 @@ ggplot(BM, aes(x = Nitrogen,
   stat_summary(fun = mean, geom = "line", linewidth = 1.5) +
   scale_color_paletteer_d("ggsci::default_jco") +
   theme(legend.position = "bottom")
+int_plot1
 ```
 
 
 ## Interaction plot
 
 ```{r}
-ggplot(BM, aes(x = Phosphorous,
+int_plot2 <- ggplot(BM, aes(x = Phosphorous,
                y = Biomass,
                color = Nitrogen,
                group = Nitrogen)) +
@@ -173,6 +187,14 @@ ggplot(BM, aes(x = Phosphorous,
   stat_summary(fun = mean, geom = "line", linewidth = 1.5) +
   scale_color_paletteer_d("ggsci::default_jco") +
   theme(legend.position = "bottom")
+int_plot1
+```
+
+
+## Interaction plot
+
+```{r}
+cowplot::plot_grid(int_plot1, int_plot2)
 ```
 
 
@@ -237,8 +259,8 @@ anova(fm)
 
 ## Interpretations
 
-```{r ref.label="int_plot1", echo=FALSE, eval=TRUE}
-
+```{r}
+int_plot1
 ```
 
 
@@ -322,8 +344,10 @@ $$Y = \theta_0 + \theta_1 N + \theta_2 P + \theta_3 (N \times P ) + \epsilon$$
 $$Y = \theta_0 + \theta_1 X_1 + \theta_2 X_2 + \theta_3 (X_1 X_2) + \epsilon$$
 
 - Mathematically the same
-- Multiply X1 & X2
-- Simply not all either 0 or 1
+- Multiply $X_1$ and $X_2$
+    - Use for prediction
+- Not all either 0 or 1
+
 
 ## Higher order interaction terms
 
@@ -334,6 +358,7 @@ It is difficult enough to interpret a 2-way interaction in a linear model.
 $$Biomass = \theta_0 + ... + \theta_k (N \times P \times  K)$$
 
 - What does a significant Nitrogen X Phosphorus X Potassium interaction mean?
+
 
 ## References
 

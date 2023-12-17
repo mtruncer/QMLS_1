@@ -19,7 +19,6 @@ csl: evolution.csl
 
 ## Linear Models and Variance 
 
-
 ```{r}
 #| label: setup
 #| echo: false
@@ -47,8 +46,9 @@ Datasets
 
 ::: {.column width="50%"}
 
-![](../images/TF_variance_fig.png){fig-align="center" width="80%"}
-cite
+![](../images/TF_variance_fig.png){fig-align="center" width="65%"}
+
+<span style="font-size:50%;">Adapted from Tabachnick and Fidell [-@Tabachnick2018-tl]</span>
 
 :::
 
@@ -148,7 +148,7 @@ fig2
 
 ## Multiple Regression Makes a Composite Variable
 
-$$\hat{Y} = \theta_0 + \theta_1 X_1 + \theta_2 X_2$$
+$$\hat{Y} = \theta_0 + \theta_1 Fat + \theta_2 Lactose$$
 
 ```{r}
 #| echo: true
@@ -165,15 +165,15 @@ y_hat <- fm_Multi$fitted.values
 ```
 
 
-
-## $R^{2}$
+## Calculating $R^{2}$
 
 ```{r}
 
 ggplot(Milk, aes(x = y_hat, y = Milk_Energy)) +
   geom_abline(slope = 1, intercept = 0, color = "blue") +
   geom_point(size = 3) +
-  geom_point(data = Milk[1,], aes(x = y_hat[1], y = Milk_Energy), color = "coral", size = 3) +
+  geom_point(data = Milk[1,], aes(x = y_hat[1], y = Milk_Energy),
+             color = "coral", size = 3) +
   labs(y = 'Milk Energy', x = 'Predicted Milk Energy') +
   xlim(c(0.3, 1)) +
   ylim(c(0.3, 1)) +
@@ -181,21 +181,30 @@ ggplot(Milk, aes(x = y_hat, y = Milk_Energy)) +
 ```
 
 
-## $R^{2}$
+## Calculating $R^{2}$
+
+Squared correlation of the observed and predicted values:
 
 ```{r}
 #| echo: true
 
 cor(y_hat, Milk$Milk_Energy)^2
+```
+
+From the model summary:
+
+```{r}
+#| echo: true
 summary(fm_Multi)$r.squared
 ```
 
 ## $R^{2}$
 
 
-Multiple $R^{2}$ = (a + b + c) / (a + b + c + d)  
+$$Multiple~R^{2} = \frac{(a + b + c)}{(a + b + c + d)}$$
 
 ![](../images/TF_variance_fig.png){fig-align="center" width="80%"}
+
 
 ## Variance explained by individual predictors
 
@@ -203,9 +212,10 @@ Multiple $R^{2}$ = (a + b + c) / (a + b + c + d)
 
 ::: {.column width="50%"}
 
-- only the portion of variance in y independently explained by each predictor
-- for x1:
-    - a/(a + b + c + d)
+- Only the portion of variance in $y$ independently explained by each predictor
+- For x1:
+
+$$\frac{a}{(a + b + c + d)}$$
     
 :::
 
@@ -299,4 +309,10 @@ sum_Multi$r.squared - sum_v1$r.squared
 sum_Multi$r.squared - sum_v2$r.squared
 
 ```
+
+
+## References
+
+::: {#refs}
+:::
 

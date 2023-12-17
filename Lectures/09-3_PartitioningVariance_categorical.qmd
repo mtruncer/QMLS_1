@@ -17,8 +17,8 @@ bibliography: QMLS_Bibliography.bib
 csl: evolution.csl
 ---
 
-## "Analysis of Variance"
 
+## "Analysis of Variance"
 
 ```{r}
 #| label: setup
@@ -47,7 +47,7 @@ Datasets
 Some total variability in $y$:
 
 1. Part explained by group membership
-1. Part remains unexplained ("error" or "residual")
+1. Part remains unexplained: "error" or "residual"
 
 $F$-statistic is the ratio of the two.
 
@@ -196,16 +196,18 @@ Different ways to partition variance has a cascading effect:
 - Determines mean squares, which
 - Determines *P* values
 
-Thus you should be aware of how your ANOVA table is calculated.
+Be aware of how your ANOVA table is calculated.
 
 
 ## Types of sums of squares
 
-**Type I**: "sequential", "unweighted", ordering of factors in the model matters, the R default, probably **not** what you want *if you have unbalanced sample sizes*
-
-**Type II**: main effects allowed to overlap with their interaction terms, useful if interaction is weak
-
-**Type III**: "weighted", each reported effect controls for all the others (including interactions)
+- **Type I**: "sequential", "unweighted" (R's default)
+    - ordering of factors in the model matters
+    - probably **not** what you want *if you have unbalanced sample sizes*
+- **Type II**: main effects allowed to overlap with their interaction terms  (`car::Anova()`)
+    - useful if interaction is weak
+- **Type III**: "weighted" (`car::Anova()`)
+    - each reported effect controls for all the others (including interactions)
 
 
 ## Types of sums of squares
@@ -215,6 +217,7 @@ Each type tests subtly different hypotheses.
 - Use Type I if you have balanced data
 - Type I == Type III if the groups are balanced (ideal situation - you don't have to choose)
 - Type III matches the output of `summary(lm())` (so that's nice)
+    - The most conservative
 
 
 ## Factorial data
