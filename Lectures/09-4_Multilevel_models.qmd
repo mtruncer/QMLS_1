@@ -135,7 +135,7 @@ Units are *grouped* at different levels.
 
 ## General multilevel model formula
 
-$$Y = \beta_0 + \beta_1 X_1 + ... + \beta_n X_n + \mbox{Random} + \epsilon$$
+$$Y = \theta_0 + \theta_1 X_1 + ... + \theta_n X_n + \mbox{Random} + \epsilon$$
 
 Where $\mbox{Random}$ can be:
 
@@ -207,10 +207,9 @@ all_data_long <- all_data |>
                       names_to = "Replicate", values_to = "Absorbance")
 
 ggplot(all_data_long,
-       aes(x = Group, y = Absorbance, group = Sample, color = Replicate)) +
+       aes(x = Group, y = Absorbance, group = Sample)) +
   geom_point(position = position_dodge(width = 0.75),
              size = 4) +
-  paletteer::scale_color_paletteer_d(palette = "nbapalettes::suns_00s") +
   theme(axis.title.x = element_blank(),
         legend.position = "none")
 ```

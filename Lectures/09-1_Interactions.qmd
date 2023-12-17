@@ -158,9 +158,8 @@ ggplot(BM, aes(x = Nitrogen, y = Biomass, color = Phosphorous)) +
 
 ## Interaction plot
 
-```{r}
+```{r fig.width = 10, fig.height=5, fig.align='center'}
 #| echo: true
-#| output-location: slide
 
 int_plot1 <- ggplot(BM, aes(x = Nitrogen,
                y = Biomass,
@@ -171,13 +170,19 @@ int_plot1 <- ggplot(BM, aes(x = Nitrogen,
   stat_summary(fun = mean, geom = "line", linewidth = 1.5) +
   scale_color_paletteer_d("ggsci::default_jco") +
   theme(legend.position = "bottom")
+```
+
+
+## Interaction plot
+
+```{r fig.width = 10, fig.height=5, fig.align='center'}
 int_plot1
 ```
 
 
 ## Interaction plot
 
-```{r}
+```{r fig.width = 10, fig.height=5, fig.align='center'}
 int_plot2 <- ggplot(BM, aes(x = Phosphorous,
                y = Biomass,
                color = Nitrogen,
@@ -187,7 +192,7 @@ int_plot2 <- ggplot(BM, aes(x = Phosphorous,
   stat_summary(fun = mean, geom = "line", linewidth = 1.5) +
   scale_color_paletteer_d("ggsci::default_jco") +
   theme(legend.position = "bottom")
-int_plot1
+int_plot2
 ```
 
 
@@ -299,8 +304,8 @@ BM$interact <- BM$n_num * BM$p_num
 ## 4 parameters define 4 groups
 
 1. $\theta_0$ = `(Intercept)` = "N-" & "P-" group mean
-1. $\theta_1$ = `n_num` = "N-" & "P+" addition
-1. $\theta_2$ = `p_num` = "N+" & "P-" addition
+1. $\theta_1$ = `n_num` = "N+" & "P-" addition
+1. $\theta_2$ = `p_num` = "N-" & "P+" addition
 1. $\theta_3$ = `interact` = #2 + #3 + "N+" & "P+" addition
 
 

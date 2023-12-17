@@ -84,7 +84,7 @@ Milk
 
 ## Visualizing data
 
-```{r}
+```{r fig.height=6}
 fig <- plot_ly() |>
   add_markers(data = Milk,
               y = ~ Lactose,
@@ -101,7 +101,7 @@ fig
 ```
 
 
-## Multivariate model
+## Linear model
 
 ```{r}
 fm_Multi <- lm(Milk_Energy ~ Fat + Lactose, data = Milk)
@@ -111,7 +111,7 @@ summary(fm_Multi)
 
 ## Visualizing multiple regression
 
-```{r}
+```{r fig.height=6}
 #| warning: false
 
 # https://stackoverflow.com/questions/38331198/add-regression-plane-to-3d-scatter-plot-in-plotly
