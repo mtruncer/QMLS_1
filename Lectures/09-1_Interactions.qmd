@@ -339,6 +339,12 @@ $$Y = \theta_0 + \theta_1 N + \theta_2 P + \theta_3 (N \times P ) + \epsilon$$
 
 - Turn on or off group membership
 
+```{r}
+
+mm <- model.matrix(Biomass ~ Nitrogen * Phosphorous, data = BM)
+mm[15:25,]
+```
+
 ## Continuous interactions
 
 $$Y = \theta_0 + \theta_1 X_1 + \theta_2 X_2 + \theta_3 (X_1 X_2) + \epsilon$$
