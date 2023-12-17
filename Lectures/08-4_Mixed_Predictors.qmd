@@ -188,7 +188,7 @@ summary(fm3)
 fm4 <- lm(Energy ~ Mass + Caste, data = M)
 ```
 
-```{r echo=FALSE}
+```{r}
 M <- M |> mutate(pred4 = predict(fm4))
 ggplot(M, aes(x = Mass, y = Energy, color = Caste)) +
   geom_point(size = 4) +
