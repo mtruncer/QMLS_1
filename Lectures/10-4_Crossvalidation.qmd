@@ -363,7 +363,7 @@ for(ii in gg) {
 ```{r}
 preds <- M_test |> 
   select(-id_fold) |> 
-  mutate(`Caste` = pp1,
+  mutate(`Caste only` = pp1,
          `Mass + Caste` = pp2,
          `Mass * Caste` = pp3) |> 
   pivot_longer(cols = -c(Caste, Mass, Energy),
