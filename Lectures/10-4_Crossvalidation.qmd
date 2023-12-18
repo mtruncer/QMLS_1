@@ -1,0 +1,423 @@
+---
+title: "Cross Validation"
+author:
+  - Elizabeth King
+  - Kevin Middleton
+format:
+  revealjs:
+    theme: [default, custom.scss]
+    standalone: true
+    self-contained: true
+    logo: QMLS_Logo.png
+    slide-number: true
+    show-slide-number: all
+code-annotations: hover
+bibliography: QMLS_Bibliography.bib
+csl: evolution.csl
+---
+
+```{r}
+#| label: setup
+#| echo: false
+#| message: false
+#| warning: false
+
+library(tidyverse)
+library(cowplot)
+theme_set(theme_cowplot())
+library(latex2exp)
+library(wesanderson)
+library(broom)
+```
+
+## The Problem
+
+- Models maximize the amount of variation explained in the outcome variable by the predictor variables
+- Can produce results specific to the data set (i.e., overfitting)
+- More complex models = more specific, less general
+
+
+## Simulation
+
+Set up a data set where we know which variables are true predictors and which are not
+
+- Draw outcome variable from a normal distribution
+    - Two groups, differ in mean value
+- Predictor 1 is the grouping variable 
+- All other predictors are randomly generated and unrelated to the outcome variable
+
+
+## Simulation
+
+```{r}
+#| echo: true
+
+set.seed(29545)
+
+n_obs <- 20
+y <- c(rnorm(n_obs / 2, 0, 1), rnorm(n_obs / 2, 3, 1))
+x1 <- rep(c(0, 1), each = n_obs / 2)
+x2 <- rnorm(n_obs)
+x3 <- rnorm(n_obs)
+DD <- tibble(y, x1, x2, x3)
+DD
+```
+
+
+## Simulation
+
+```{r}
+ggplot(DD, aes(x = x1, y = y, color = x2)) +
+  geom_point(position = position_jitter(width = 0.1),
+             size = 4)
+```
+
+
+## Linear models
+
+Fit 3 models:
+
+```{r}
+mod1 <- lm(y ~ x1, data = DD)
+mod2 <- lm(y ~ x1 + x2, data = DD)
+mod3 <- lm(y ~ x1 + x2 + x3, data = DD)
+```
+
+- Compare fitted values to assess how well the model fits the data  
+- Remember $R^2$ = the squared correlation between the fitted and observed y values
+
+
+## Model 1: x1 only
+
+```{r}
+y_hat1 <- mod1$fitted.values
+data.frame('Yhat' = y_hat1, 'Yobs' = y) |>
+  ggplot(aes(x = Yhat, y = Yobs)) +
+  geom_point(size = 3, alpha = 1 / 3) +
+  labs(x = TeX("$\\hat{Y}$"),
+       title = TeX(paste0("R^2 = ",
+                          round(summary(mod1)$r.squared, 2),
+                          "; Correlation = ",
+                          round(sqrt(summary(mod1)$r.squared), 2))))
+```
+
+
+## Model 2: x1 + x2
+
+```{r}
+y_hat2 <- mod2$fitted.values
+data.frame('Yhat' = y_hat2, 'Yobs' = y) |>
+  ggplot(aes(x = Yhat, y = Yobs)) +
+  geom_point(size = 3, alpha = 1 / 3) +
+  labs(x = TeX("$\\hat{Y}$"),
+       title = TeX(paste0("R^2 = ",
+                          round(summary(mod2)$r.squared, 2),
+                          "; Correlation = ",
+                          round(sqrt(summary(mod2)$r.squared), 2))))
+```
+
+
+## Model 3: x1 + x2 + x3
+
+```{r}
+y_hat3 <- mod3$fitted.values
+data.frame('Yhat' = y_hat3, 'Yobs' = y) |>
+  ggplot(aes(x = Yhat, y = Yobs)) +
+  geom_point(size = 3, alpha = 1 / 3) +
+  labs(x = TeX("$\\hat{Y}$"),
+       title = TeX(paste0("R^2 = ",
+                          round(summary(mod3)$r.squared, 2),
+                          "; Correlation = ",
+                          round(sqrt(summary(mod3)$r.squared), 2))))
+```
+
+
+## How will our models perform with new data?
+
+```{r}
+#| echo: true
+
+set.seed(342646)
+newN <- 20
+newy <- c(rnorm(newN / 2, 0, 1), rnorm(newN / 2, 3, 1))
+newx <- data.frame('xx1' = rep(c(0, 1), each = newN / 2),
+                   'xx2' = rnorm(newN),
+                   'xx3' = rnorm(newN))
+
+y_hat_new1 <- predict.lm(object = mod1, newdata = newx)
+y_hat_new2 <- predict.lm(object = mod2, newdata = newx)
+y_hat_new3 <- predict.lm(object = mod3, newdata = newx)
+```
+
+
+## Model 1: x1 only
+
+```{r}
+miny <- min(c(newy, y))
+maxy <- max(c(newy, y))
+
+minx <- min(c(y_hat_new1, y_hat_new2, y_hat_new3,
+              y_hat1, y_hat2, y_hat3))
+maxx <- max(c(y_hat_new1, y_hat_new2, y_hat_new3,
+              y_hat1, y_hat2, y_hat3))
+
+new1 <- data.frame('Yhat' = y_hat_new1, 'Yobs' = newy)
+new2 <- data.frame('Yhat' = y_hat_new2, 'Yobs' = newy)
+new3 <- data.frame('Yhat' = y_hat_new3, 'Yobs' = newy)
+
+data.frame('Yhat' = y_hat1, 'Yobs' = y) |>
+  ggplot(aes(x = Yhat, y = Yobs)) +
+  geom_point(size = 3, alpha = 1 / 3) +
+  geom_point(data = new1, aes(x = Yhat, y = Yobs),
+             size = 3, alpha = 1 / 3, color = 'red') +
+  ylim(miny, maxy) +
+  xlim(minx, maxx) +
+  labs(x = TeX("$\\hat{Y}$"),
+       title = TeX(paste0("Correlation (new data vs. predicted values) = ",
+                          round(cor(y_hat_new1,newy), 2))))
+```
+
+
+## Model 2: x1 + x2
+
+```{r}
+data.frame('Yhat' = y_hat2, 'Yobs' = y) |>
+  ggplot(aes(x = Yhat, y = Yobs)) +
+  geom_point(size = 3, alpha = 1 / 3) +
+  geom_point(data = new2, aes(x = Yhat, y = Yobs),
+             size = 3, alpha = 1 / 3, color = 'red') +
+  ylim(miny, maxy) +
+  xlim(minx, maxx) +
+  labs(x = TeX("$\\hat{Y}$"),
+       title = TeX(paste0("Correlation (new data vs. predicted values) = ",
+                          round(cor(y_hat_new2,newy), 2))))
+```
+
+
+## Model 3: x1 + x2 + x3
+
+```{r}
+data.frame('Yhat' = y_hat3, 'Yobs' = y) |>
+  ggplot(aes(x = Yhat , y = Yobs)) +
+  geom_point(size = 3, alpha = 1 / 3) +
+  geom_point(data = new3, aes(x = Yhat, y = Yobs),
+             size = 3, alpha = 1 / 3, color = 'red') +
+  ylim(miny, maxy) +
+  xlim(minx, maxx) +
+  labs(x = TeX("$\\hat{Y}$"),
+       title = TeX(paste0("Correlation (new data vs. predicted values) = ",
+                          round(cor(y_hat_new3,newy), 2))))
+```
+
+
+## Cross Validation
+
+> When we don't know the true model (all cases but simulation), how do we know if a model is too specific to a given data set?
+
+- Cross validation is one technique to address this question
+
+
+## Approach
+
+- Split data into training and test sets
+- Use training set to build model
+- Use test set to evaluate model
+- Repeat to get average error
+- **Which Predictors?**
+- **What Parameter Values?**
+
+
+## Approaches
+
+- Random sub samples as test set
+    - Issue: reuse of data
+- K-fold cross validation
+    - Issue: need large data set
+- Leave-one-out
+    - Issue: small test set, can be slow
+
+
+## Energy expenditure in naked mole rats
+
+```{r}
+M <- read_csv("../data/Molerats.csv", col_types = c("cdd")) |> 
+  rename(Caste = caste,
+         Mass = ln.mass,
+         Energy= ln.energy) |> 
+  mutate(Caste = if_else(Caste == "worker", "Worker", "Non-worker"),
+         Caste = factor(Caste))
+
+ggplot(M, aes(x = Mass, y = Energy, color = Caste)) +
+  geom_point(size = 4) +
+  scale_color_manual(values = wes_palette("Cavalcanti1")) +
+  theme(legend.justification = c(0, 1),
+        legend.position = c(0.05, 1)) +
+  labs(x = "ln Body Mass (g)",
+       y = "ln Daily Energy Expenditure (kJ)")
+```
+
+
+## Fit different models to these data
+
+1. Categorical only (group mean, no body mass)
+1. Mixed predictors, intercepts varying
+1. Mixed predictors, slopes varying & intercepts varying
+
+```{r}
+mod1 <- lm(Energy ~ Caste, data = M)
+mod2 <- lm(Energy ~ Mass + Caste, data = M)
+mod3 <- lm(Energy ~ Mass * Caste, data = M)
+```
+
+
+## Fit different models to these data
+
+```{r}
+M_pred <- crossing(
+  Mass = seq(3.8, 5.3, length = 100),
+  Caste = levels(M$Caste))
+
+M_pred <- M_pred |> 
+  mutate(mod1 = predict(mod1, newdata = M_pred),
+         mod2 = predict(mod2, newdata = M_pred),
+         mod3 = predict(mod3, newdata = M_pred))
+
+p <- ggplot() +
+  geom_point(data = M, aes(x = Mass, y = Energy, color = Caste), size = 4,
+             alpha = 0.5) +
+  scale_color_manual(values = wes_palette("Cavalcanti1")) +
+  theme(legend.position = "none") +
+  labs(x = "ln Body Mass (g)",
+       y = "ln Daily Energy Expenditure (kJ)")
+
+p1 <- p +
+  geom_line(data = M_pred, aes(x = Mass, y = mod1, color = Caste),
+            linewidth = 1.5) +
+  labs(title = "Caste")
+
+p2 <- p +
+  geom_line(data = M_pred, aes(x = Mass, y = mod2, color = Caste),
+            linewidth = 1.5) +
+  labs(title = "Caste + Mass")
+
+p3 <- p +
+  geom_line(data = M_pred, aes(x = Mass, y = mod3, color = Caste),
+            linewidth = 1.5) +
+  labs(title = "Caste * Mass")
+
+plot_grid(p1, p2, p3, ncol = 3)
+```
+
+
+## Assess models with 10-fold cross validation
+
+1. Split data into 10 ~equal sets
+1. Use each set as the test set with the remaining data as the training set
+1. Quantify error 
+    - **Mean squared error**
+    - Correlation between predicted & observed values
+    - Categorical outcome: % misclassified
+
+
+## 10-fold cross validation
+    
+```{r}
+#| echo: true
+
+set.seed(533214)
+folds <- 10
+
+M$id_fold <- sample(c(rep(seq(1, folds), each = 3),
+                       sample(seq(1, folds), 5)))
+gg <- 1:folds
+err_out <- data.frame('mod1' = numeric(length = folds),
+                      'mod2' = numeric(length = folds),
+                      'mod3' = numeric(length = folds))
+head(err_out)
+```
+
+
+## 10-fold cross validation
+    
+```{r}
+#| echo: true
+
+for(ii in gg) {
+  M_train <- M[M$id_fold != ii, ]
+  mod1 <- lm(Energy ~ Caste, data = M_train)
+  mod2 <- lm(Energy ~ Mass + Caste, data = M_train)
+  mod3 <- lm(Energy ~ Mass * Caste, data = M_train)
+  M_test <- M[M$id_fold == ii, ]
+  pp1 <- predict(mod1, M_test)
+  pp2 <- predict(mod2, M_test)
+  pp3 <- predict(mod3, M_test)
+  err_out[ii, 'mod1'] <- mean((M_test$Energy - pp1) ^ 2)
+  err_out[ii, 'mod2'] <- mean((M_test$Energy - pp2) ^ 2)
+  err_out[ii, 'mod3'] <- mean((M_test$Energy - pp3) ^ 2)
+}
+```
+
+
+## Visualizing MSE of one "fold"
+
+```{r}
+preds <- M_test |> 
+  select(-id_fold) |> 
+  mutate(`Caste` = pp1,
+         `Mass + Caste` = pp2,
+         `Mass * Caste` = pp3) |> 
+  pivot_longer(cols = -c(Caste, Mass, Energy),
+               names_to = "Model", values_to = "value")
+
+ggplot() +
+  geom_vline(xintercept = M_test$Mass, color = "gray60",
+             linetype = "dotted") +
+  geom_point(data = M_train, aes(x = Mass, y = Energy, color = Caste),
+             size = 2) +
+  scale_color_manual(values = wes_palette("Cavalcanti1")) +
+  theme(legend.justification = c(0.05, 1),
+        legend.position = c(0, 1)) +
+  labs(x = "ln Body Mass (g)",
+       y = "ln Daily Energy Expenditure (kJ)") +
+  geom_point(data = M_test, aes(x = Mass, y = Energy, color = Caste),
+             size = 4, pch = 16) +
+  geom_point(data = preds, aes(x = Mass, y = value, color = Caste,
+                               shape = Model), size = 6) +
+  scale_shape_manual(values = c(0, 1, 2))
+```
+
+
+## 10-fold cross validation {.smaller}
+    
+```{r}
+err_out
+
+colMeans(err_out)
+```
+
+
+## 10-fold cross validation
+
+```{r echo=FALSE}
+err_out |>
+  mutate(Fold = factor(1:folds)) |> 
+  gather(Model, MSE, -Fold) |> 
+  mutate(Model = factor(
+    Model,
+    labels = c("Caste only", "Mass + Caste", "Mass * Caste"))) |> 
+  ggplot(aes(Model, MSE, color = Fold)) +
+  geom_point(size = 3) +
+  labs(y = "Mean Squared Error") +
+  stat_summary(fun = "mean", geom = "point", color = "black",
+               size = 6)
+```
+
+
+## Notes & Resources
+
+- Training and Test sets must come from the same population
+- There is uncertainty in cross validation estimates
+- We've written our own code here but there are several R packages:
+    - `cvTools` package
+    - `boot` package
+

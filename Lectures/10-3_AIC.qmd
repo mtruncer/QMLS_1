@@ -1,0 +1,361 @@
+---
+title: "Akaike Information Criteria"
+author:
+  - Elizabeth King
+  - Kevin Middleton
+format:
+  revealjs:
+    theme: [default, custom.scss]
+    standalone: true
+    self-contained: true
+    logo: QMLS_Logo.png
+    slide-number: true
+    show-slide-number: all
+code-annotations: hover
+bibliography: QMLS_Bibliography.bib
+csl: evolution.csl
+---
+
+
+## Tradeoff in model specification
+
+```{r}
+#| label: setup
+#| echo: false
+#| message: false
+#| warning: false
+
+library(tidyverse)
+library(cowplot)
+theme_set(theme_cowplot())
+library(readxl)
+library(lmtest)
+library(glmmTMB)
+
+load("lrtmodels.Rda")
+```
+
+> "Overfitting: fitting is easy; prediction is hard. Future data will not be exactly like past data, and so any model that is unaware of this fact tends to make worse predictions than it could. So if we wish to make good predictions, we cannot judge our models simply on how well they fit our data. **Information criteria** provide estimates of predictive accuracy, rather than merely fit. So they compare models where it matters." [@McElreath2015-no]
+
+
+## Kullback-Leibler information
+
+**No model represents the true process that generated the outcomes.**
+
+**Information** is the distance between a proposed model and reality
+
+  - Information lost when trying to approximate the true model
+  - Amount of "surprise" when a model predicts new data
+
+K-L information doesn't aid directly in model evaluation (what is the true model?)
+
+
+## Estimation of K-L information
+
+Hirotugu Akaike ("Ah-ka-ee-kay") [-@Akaike1974-iw]
+
+- Maximized log-likelihood could be used to estimate the *expected* K-L divergence between the candidate model and the true model.
+
+![](https://i.imgur.com/WLVjbKW.jpg){fig-align="center"}
+
+
+## Akaike's Information Criterion
+
+"An Information Criterion": AIC is proportional to the *relative* K-L information of a model:
+
+$$\mbox{AIC} = -2 \log\left(\mathcal{L}[\theta | \mbox{data}]\right) + 2 k$$
+
+where $\log\left(\mathcal{L}[\theta | \mbox{data}]\right)$ is the maximized log-likelihood for the parameters $\theta$ given data.
+
+- $-2$ comes in "for historical reasons" having to do with the $\chi^2$ distribution.
+
+
+## Calculating AIC
+
+log-likelihood for the intercept only (overall mean) model for the naked mole rats data:
+
+```{r}
+#| echo: true
+
+logLik(fm1)
+-2 * as.numeric(logLik(fm1)) + 2 * 2
+AIC(fm1)
+```
+
+df = 2 because the mean and standard deviation are estimated.
+
+
+## AIC
+
+- AIC is a measure of the *lack* of model fit
+    - Smaller AIC is better
+- No notion of "significance".
+    - Comparison is the key
+
+
+## AIC
+
+- Negative twice the log-likelihood + 2 X *number of estimated parameters*
+    - Penalization of models with large number of estimated parameters, because they will always fit the observed data better
+    - Parsimony as a side-effect
+- AIC was defined for large sample sizes
+
+
+## AICc
+
+- AICc adapts AIC for small samples
+    - AICc is asymptotic with AIC for large samples but less biased for small *n*
+
+$$AICc = -2 \log\left(\mathcal{L}[\theta | data]\right) + 2 k + \frac{2k(k+1)}{n - k - 1}$$
+
+- Added "parameter" $\rightarrow$ 0 as $n \rightarrow \infty$
+- Use AICc except when n/k > ~40 [@Burnham2002-xt]
+
+
+## Comparing models with AIC (AICc)
+
+1. Fit a set of candidate models (hypotheses)
+1. Rank models according to AIC
+1. Find the model with the lowest AIC
+1. $\Delta$AIC is the value of AIC~lowest~ - AIC~model~
+
+
+## Comparing models with AIC (AICc)
+
+Rules of thumb:
+
+- $\Delta$AIC $\leq$ 2: Substantial support
+- $\leq$ 4 $\Delta$AIC $\leq$ 7: Considerably less support
+- $\Delta$AIC $\geq$ 10: very little support
+
+In practice:
+
+- $\Delta$AIC < 4: Equally well supported
+
+**This does not mean that the model you have ranked highest is a good model for the data in an absolute sense.**
+
+
+## Akaike weights: evidence ratios
+
+Back-transforming the logged likelihoods allows us to standardize AICs:
+
+$$w_i = \frac{e^{-\Delta_i / 2}}{\sum_{r = 1}^R e^{-\Delta_r / 2}}$$
+
+$w$ is a rescaled AIC on a scale of 0 $\rightarrow$ 1, giving the probability of a model actually being the best K-L model among *R* models.
+
+- Still conditional on the data and the models
+    - Maybe a better model is not in the sample of models
+
+
+## Working with AIC
+
+AIC is built-in to R:
+
+```{r}
+#| echo: true
+
+AIC(fm1)
+```
+
+AICc is not:
+
+```{r}
+#| echo: true
+
+library(AICcmodavg)
+AICc(fm1)
+```
+
+Get in the habit of using AICc.
+
+
+## AIC Tables
+
+`AICcmodavg::aictab()` for model comparison:
+
+```{r}
+#| echo: true
+
+aictab(cand.set = list(fm1, fm2, fm3, fm4, fm5, fm6))
+```
+
+
+## Return to some previous models
+
+Use AICc to compare:
+
+1. Maximum likelihood example
+1. Biomass
+1. Orthodontic growth
+
+
+## Maximum likelihood example
+
+```{r}
+#| echo: true
+
+set.seed(4)
+n <- 30
+X <- rnorm(n, mean = 10, sd = 1)
+Y <- 2.3 * X + rnorm(n, mean = 1, sd = 1)
+```
+
+Intercept (mean) only
+
+```{r}
+#| echo: true
+fm_0 <- lm(Y ~ 1)
+(ll_0 <- logLik(fm_0))
+```
+
+Intercept and slope
+
+```{r}
+fm_1 <- lm(Y ~ X)
+(ll_1 <- logLik(fm_1))
+```
+
+
+## Maximum likelihood example
+
+Likelihood ratio test:
+
+```{r}
+#| message: false
+#| echo: true
+
+library(lmtest)
+lrtest(fm_0, fm_1)
+```
+
+
+## Maximum likelihood example
+
+Intercept (mean) only
+
+```{r}
+#| echo: true
+
+AICc(fm_0) # Intercept only
+```
+
+Intercept and slope
+
+```{r}
+#| echo: true
+AICc(fm_1)
+```
+
+AICc Weights Table
+
+```{r}
+#| echo: true
+aictab(cand.set = list(fm_0, fm_1),
+       modnames = c("Intercept only", "Intercept and slope"))
+```
+
+
+
+## Nitrogen, phosphorus, and biomass
+
+```{r}
+#| echo: true
+
+biomass <- read_csv("../data/biomass.csv", col_types = c("cccddd")) |> 
+  mutate(Nitrogen = factor(Nitrogen),
+         Phosphorous = factor(Phosphorous))
+
+# Nitrogen only
+fm_N <- lm(Biomass ~ Nitrogen, data = biomass)
+
+# Phosphorous only
+fm_P <- lm(Biomass ~ Phosphorous, data = biomass)
+
+# Additive
+fm_N_P <- lm(Biomass ~ Nitrogen + Phosphorous, data = biomass)
+
+# Factorial with interaction
+fm_NxP <- lm(Biomass ~ Nitrogen * Phosphorous, data = biomass)
+```
+
+
+## Nitrogen, phosphorus, and biomass
+
+```{r}
+#| echo: true
+
+aictab(list(fm_N, fm_P, fm_N_P, fm_NxP),
+       modnames = c("Nitrogen",
+                    "Phosphorous",
+                    "Nitrogen + Phosphorous",
+                    "Nitrogen * Phosphorous"))
+```
+
+
+## Nitrogen, phosphorus, and biomass
+
+```{r}
+#| echo: true
+#| warning: false
+
+car::Anova(fm_NxP, type = "III")
+```
+
+
+## Orthodontic growth
+
+```{r}
+#| echo: true
+
+Or <- read_excel("../data/Ortho.xlsx") |>
+  mutate(Subject = factor(Subject),
+         Sex = factor(Sex))
+
+# Intercepts per Subject
+fm1 <- glmmTMB(Distance ~ Sex + Age + (1 | Subject), 
+           data = Or)
+
+# Intercepts and slopes per Subject
+fm2 <- glmmTMB(Distance ~ Sex + Age + (Age | Subject),
+           data = Or)
+
+# Intercepts and slopes per Subject, interaction
+fm3 <- glmmTMB(Distance ~ Sex * Age + (Age | Subject),
+           data = Or)
+```
+
+
+## Orthodontic growth
+
+```{r}
+#| echo: true
+
+aictab(list(fm1, fm2, fm3),
+       modnames = c("1 | Subject", "Age | Subject", "Interaction"))
+```
+
+
+## Note about model comparison with hierarchical models
+
+This is a nuanced business:
+
+- [http://glmm.wikidot.com/faq](http://glmm.wikidot.com/faq)
+
+
+## General approach
+
+1. Define hypotheses (models)
+1. Fit using maximum likelihood (not `REML` for hierarchical models)
+1. Calculate AICc for each. 
+1. Sort by AICc. Calculate $\Delta$AICc.
+1. Models with $\Delta$AICc within ~4 are all roughly equivalent
+1. Decide what to do.
+    - Describe multiple models
+    - Compare Akaike weights
+
+
+## References
+
+::: {#refs}
+:::
+

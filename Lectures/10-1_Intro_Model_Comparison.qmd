@@ -1,0 +1,302 @@
+---
+title: "Introduction to Model Comparison"
+author:
+  - Elizabeth King
+  - Kevin Middleton
+format:
+  revealjs:
+    theme: [default, custom.scss]
+    standalone: true
+    self-contained: true
+    logo: QMLS_Logo.png
+    slide-number: true
+    show-slide-number: all
+code-annotations: hover
+bibliography: QMLS_Bibliography.bib
+csl: evolution.csl
+---
+
+## Underfitting and overfitting
+
+
+```{r}
+#| label: setup
+#| echo: false
+#| message: false
+#| warning: false
+
+library(tidyverse)
+library(cowplot)
+theme_set(theme_cowplot())
+library(ggrepel)
+```
+
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+**Occam's Razor**: Models with fewer assumptions are preferred
+
+- How should we designate "preferred"?
+- How should we compare among them?
+- How good is good enough?
+
+:::
+
+::: {.column width="50%"}
+
+![](https://i.imgur.com/ilkU4eN.jpg){fig-align="center"}
+:::
+
+::::
+
+
+## Tradeoff in model specification
+
+**Underfitting** ("bias"):
+
+- Model doesn't describe the observed sample *well enough*.
+- Leads to poor prediction
+
+**Overfitting** ("variance")
+
+- Model describes the observed sample *too well*.
+- Leads to poor prediction
+
+
+## Balancing overfitting and underfitting
+
+- Think of models as "learning" about the observed data
+- Find a balance between *regular* features (what we want to model) and *irregular* features (noise we want to ignore).
+
+
+## Why do we make models?
+
+- Estimates of the magnitudes of parameters and/or differences between parameter estimates, *and* their relative precision
+- Hypothesis testing, etc.
+
+No model represents the true biological process
+
+- This is actually a good thing.
+- Which model comes *closest* to the true biological process from a *(small) set of working hypotheses*?
+
+
+## Brain volume and (estimated) body mass in hominins (*Homo*)
+
+```{r}
+Species <- c("afarensis", "africanus", "habilis", "boisei",
+             "rudolfensis", "ergaster", "sapiens")
+Brain_Vol <- c(438, 452, 612, 521, 752, 871, 1350)
+Mass <- c(37, 35.5, 34.5, 41.5, 55.5, 61, 53.3)
+M <- data.frame(Species, Brain_Vol, Mass)
+M
+```
+
+
+## Brain volume and body mass in hominins
+
+```{r}
+set.seed(29)
+ggplot(M, aes(Mass, Brain_Vol, label = Species)) +
+  geom_point(size = 2) +
+  geom_text_repel(size = 4, force = 15,
+                  fontface = "italic",
+                  box.padding = unit(0.5, "lines"),
+                  point.padding = unit(0.5, "lines")) +
+  labs(x = "Body Mass (kg)", y = "Brain Volume (cc)")
+```
+
+
+## 6 polynomial models {.smaller}
+
+1. $BV \sim \theta_0 + \theta_1 M$
+1. $BV \sim \theta_0 + \theta_1 M + \theta_2 M^2$
+1. $BV \sim \theta_0 + \theta_1 M + \theta_2 M^2 + \theta_3 M^3$
+1. $BV \sim \theta_0 + \theta_1 M + \theta_2 M^2 + \theta_3 M^3 + \theta_4 M^4$
+1. $BV \sim \theta_0 + \theta_1 M + \theta_2 M^2 + \theta_3 M^3 + \theta_4 M^4 + \theta_5 M^5$
+1. $BV \sim \theta_0 + \theta_1 M + \theta_2 M^2 + \theta_3 M^3 + \theta_4 M^4 + \theta_5 M^5 + \theta_6 M^6$
+
+Compare *R*^2^ among these models.
+
+
+## 1: $BV \sim \theta_0 + \theta_1 M$
+
+```{r}
+#| echo: true
+
+fm1 <- lm(Brain_Vol ~ Mass, data = M)
+coef(fm1)
+summary(fm1)$r.squared
+```
+
+
+## 1: $BV \sim \theta_0 + \theta_1 M$
+
+```{r}
+ggplot(M, aes(Mass, Brain_Vol, label = Species)) +
+  geom_point(size = 3) +
+  geom_smooth(formula = y ~ x, method = "lm", color = "firebrick4", lwd = 1.5) +
+  labs(x = "Body Mass (kg)", y = "Brain Volume (cc)")
+```
+
+
+## 2. $BV \sim \theta_0 + \theta_1 M + \theta_2 M^2$
+
+```{r}
+#| echo: true
+
+fm2 <- lm(Brain_Vol ~ Mass + I(Mass ^ 2), data = M)
+coef(fm2)
+summary(fm2)$r.squared
+```
+
+
+## 2. $BV \sim \theta_0 + \theta_1 M + \theta_2 M^2$
+
+```{r}
+ggplot(M, aes(Mass, Brain_Vol, label = Species)) +
+  geom_point(size = 3) +
+  geom_smooth(method = "lm", formula = 'y ~ poly(x, 2)',
+              color = "firebrick4", lwd = 1.5) +
+  labs(x = "Body Mass (kg)", y = "Brain Volume (cc)")
+```
+
+
+## 3. $BV \sim \theta_0 + ... + \theta_3 M^3$
+
+```{r}
+#| echo: true
+
+fm3 <- lm(Brain_Vol ~ Mass + I(Mass ^ 2) + I(Mass ^ 3), data = M)
+coef(fm3)
+summary(fm3)$r.squared
+```
+
+
+## 3. $BV \sim \theta_0 + ... + \theta_3 M^3$
+
+```{r}
+ggplot(M, aes(Mass, Brain_Vol, label = Species)) +
+  geom_point(size = 3) +
+  geom_smooth(method = "lm", formula = 'y ~ poly(x, 3)',
+              color = "firebrick4", lwd = 1.5) +
+  labs(x = "Body Mass (kg)", y = "Brain Volume (cc)")
+```
+
+
+## 4. $BV \sim \theta_0 + ... + \theta_4 M^4$
+
+```{r}
+#| echo: true
+
+fm4 <- lm(Brain_Vol ~ Mass + I(Mass ^ 2) + I(Mass ^ 3) +
+            I(Mass ^ 4), data = M)
+coef(fm4)
+summary(fm4)$r.squared
+```
+
+
+## 4. $BV \sim \theta_0 + ... + \theta_4 M^4$
+
+```{r}
+ggplot(M, aes(Mass, Brain_Vol, label = Species)) +
+  geom_point(size = 3) +
+  geom_smooth(method = "lm", formula = 'y ~ poly(x, 4)',
+              color = "firebrick4", lwd = 1.5) +
+  labs(x = "Body Mass (kg)", y = "Brain Volume (cc)")
+```
+
+
+## 5. $BV \sim \theta_0 + ... + \theta_5 M^5$
+
+```{r}
+#| echo: true
+
+fm5 <- lm(Brain_Vol ~ Mass + I(Mass ^ 2) + I(Mass ^ 3) +
+            I(Mass ^ 4) + I(Mass ^ 5), data = M)
+coef(fm5)
+summary(fm5)$r.squared
+```
+
+
+## 5. $BV \sim \theta_0 + ... + \theta_5 M^5$
+
+```{r}
+ggplot(M, aes(Mass, Brain_Vol, label = Species)) +
+  geom_point(size = 3) +
+  geom_smooth(method = "lm", formula = 'y ~ poly(x, 5)',
+              color = "firebrick4", lwd = 1.5) +
+  labs(x = "Body Mass (kg)", y = "Brain Volume (cc)")
+```
+
+
+## 6. $BV \sim \theta_0 + ... + \theta_6 M^6$
+
+```{r}
+#| echo: true
+
+fm6 <- lm(Brain_Vol ~ Mass + I(Mass ^ 2) + I(Mass ^ 3) +
+            I(Mass ^ 4) + I(Mass ^ 5) + I(Mass ^ 6), data = M)
+coef(fm6)
+summary(fm6)$r.squared
+```
+
+
+## 6. $BV \sim \theta_0 + ... + \theta_6 M^6$
+
+```{r echo=FALSE, warning=FALSE}
+ggplot(M, aes(Mass, Brain_Vol, label = Species)) +
+  geom_point(size = 3) +
+  geom_smooth(method = "lm", formula = 'y ~ poly(x, 6)',
+              color = "firebrick4", lwd = 1.5,
+              se = FALSE) +
+  labs(x = "Body Mass (kg)", y = "Brain Volume (cc)")
+```
+
+
+## Summary R^2^
+
+Polynomial Degree  | R^2^  |
+------------------:|------:|
+1                  | `r round(summary(fm1)$r.squared, 2)`
+2                  | `r round(summary(fm2)$r.squared, 2)`
+3                  | `r round(summary(fm3)$r.squared, 2)`
+4                  | `r round(summary(fm4)$r.squared, 2)`
+5                  | `r round(summary(fm5)$r.squared, 2)`
+6                  | `r round(summary(fm6)$r.squared, 2)`
+
+
+## Which model(s) balance under- vs. overfitting?
+
+Model 0: Mean only
+
+- Poor *in-sample* prediction
+- Poor *out-of-sample* prediction
+
+Model 1: Maybe enough information?
+
+Model 6: Clearly overfit
+
+- Perfect *in-sample* prediction
+- Poor *out-of-sample* prediction
+
+
+## Tradeoff in model specification
+
+> "Overfitting: **fitting is easy; prediction is hard**. Future data will not be exactly like past data, and so any model that is unaware of this fact tends to make worse predictions than it could. So if we wish to make good predictions, we cannot judge our models simply on how well they fit our data. Information criteria provide estimates of predictive accuracy, rather than merely fit. So they compare models where it matters." [@McElreath2015-no]
+
+
+## Methods for model comparison
+
+1. Likelihood ratio tests
+2. Information criteria
+3. Cross validation
+
+
+## References
+
+::: {#refs}
+:::
+
+

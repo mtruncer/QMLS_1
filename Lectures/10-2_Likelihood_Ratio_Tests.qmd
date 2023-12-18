@@ -1,0 +1,376 @@
+---
+title: "Likelihood Ratio Tests"
+author:
+  - Elizabeth King
+  - Kevin Middleton
+format:
+  revealjs:
+    theme: [default, custom.scss]
+    standalone: true
+    self-contained: true
+    logo: QMLS_Logo.png
+    slide-number: true
+    show-slide-number: all
+code-annotations: hover
+bibliography: QMLS_Bibliography.bib
+csl: evolution.csl
+---
+
+## Underfitting and overfitting
+
+
+```{r}
+#| label: setup
+#| echo: false
+#| message: false
+#| warning: false
+
+library(tidyverse)
+library(cowplot)
+theme_set(theme_cowplot())
+library(readxl)
+library(wesanderson)
+library(gt)
+```
+
+
+## Likelihoods and model comparison
+
+We have maximized likelihoods for single models
+
+Now maximize likelihoods for competing models
+
+- How to explicitly compare likelihoods?
+
+
+## Likelihood ratio tests
+
+- Nested models
+    - Mean only
+    - Mean for each group
+- Asymptotic assumptions
+- $\chi^2$ distribution
+
+```{r}
+source("QMLS_functions.R")
+shade_chisq(0.05, 1) +
+  labs(title = "df = 1")
+```
+
+
+## Energy expenditure in naked mole rats
+
+![](https://i.imgur.com/FMMAjpa.jpg){fig-align="center"}
+
+
+## Energy expenditure in naked mole rats
+
+```{r}
+M <- read_csv("../data/Molerats.csv", col_types = c("cdd")) |> 
+  rename(Caste = caste,
+         Mass = ln.mass,
+         Energy= ln.energy) |> 
+  mutate(Caste = if_else(Caste == "worker", "Worker", "Non-worker"),
+         Caste = factor(Caste))
+
+ggplot(M, aes(x = Mass, y = Energy, color = Caste)) +
+  geom_point(size = 4) +
+  scale_color_manual(values = wes_palette("Cavalcanti1")) +
+  theme(legend.justification = c(0, 1),
+        legend.position = c(0.025, 1)) +
+  labs(x = "ln Body Mass (g)",
+       y = "ln Daily Energy Expenditure (kJ)")
+```
+
+
+## Fit different models to these data
+
+1. Grand mean (overall mean, no body mass)
+1. Categorical only (group mean, no body mass)
+1. Continuous only (body mass only, no grouping)
+1. Mixed predictors, intercepts varying
+1. Mixed predictors, slopes varying & intercepts varying
+
+
+## 1: Grand Mean
+
+```{r}
+#| echo: true
+fm1 <- lm(Energy ~ 1, data = M)
+```
+
+```{r}
+M <- M |> mutate(pred1 = predict(fm1))
+ggplot(M, aes(x = Mass, y = Energy, color = Caste)) +
+  geom_point(size = 4) +
+  geom_line(aes(x = Mass, y = pred1), lwd = 2,
+            color = wes_palette("Cavalcanti1")[5]) +
+  scale_color_manual(values = wes_palette("Cavalcanti1")) +
+  theme(legend.justification = c(0, 1),
+        legend.position = c(0.025, 1)) +
+  labs(x = "ln Body Mass (g)",
+       y = "ln Daily Energy Expenditure (kJ)")
+```
+
+
+## 2: Categorical Only
+
+```{r}
+#| echo: true
+
+fm2 <- lm(Energy ~ Caste, data = M)
+```
+
+```{r}
+M <- M |> mutate(pred2 = predict(fm2))
+ggplot(M, aes(x = Mass, y = Energy, color = Caste)) +
+  geom_point(size = 4) +
+  geom_line(aes(x = Mass, y = pred2, color = Caste), lwd = 2) +
+  scale_color_manual(values = wes_palette("Cavalcanti1")) +
+  theme(legend.justification = c(0, 1),
+        legend.position = c(0.025, 1)) +
+  labs(x = "ln Body Mass (g)",
+       y = "ln Daily Energy Expenditure (kJ)")
+```
+
+
+## 3: Continuous Only
+
+```{r}
+#| echo: true
+
+fm3 <- lm(Energy ~ Mass, data = M)
+```
+
+```{r}
+M <- M |> mutate(pred3 = predict(fm3))
+ggplot(M, aes(x = Mass, y = Energy, color = Caste)) +
+  geom_point(size = 4) +
+  geom_line(aes(x = Mass, y = pred3, group = 1), lwd = 2,
+            color = wes_palette("Cavalcanti1")[5]) +
+  scale_color_manual(values = wes_palette("Cavalcanti1")) +
+  theme(legend.justification = c(0, 1),
+        legend.position = c(0.025, 1)) +
+  labs(x = "ln Body Mass (g)",
+       y = "ln Daily Energy Expenditure (kJ)")
+```
+
+
+## 4: Intercepts varying
+
+```{r}
+#| echo: true
+
+fm4 <- lm(Energy ~ Mass + Caste, data = M)
+```
+
+```{r}
+M <- M |> mutate(pred4 = predict(fm4))
+ggplot(M, aes(x = Mass, y = Energy, color = Caste)) +
+  geom_point(size = 4) +
+  geom_line(aes(x = Mass, y = pred4, color = Caste), lwd = 2) +
+  scale_color_manual(values = wes_palette("Cavalcanti1")) +
+  theme(legend.justification = c(0, 1),
+        legend.position = c(0.025, 1)) +
+  labs(x = "ln Body Mass (g)",
+       y = "ln Daily Energy Expenditure (kJ)")
+```
+
+
+## 5: Slopes and intercepts varying
+
+```{r}
+#|echo: true
+
+fm5 <- lm(Energy ~ Mass * Caste, data = M)
+```
+
+```{r}
+M <- M |> mutate(pred5 = predict(fm5))
+ggplot(M, aes(x = Mass, y = Energy, color = Caste)) +
+  geom_point(size = 4) +
+  geom_line(aes(x = Mass, y = pred5, color = Caste), lwd = 2) +
+  scale_color_manual(values = wes_palette("Cavalcanti1")) +
+  theme(legend.justification = c(0, 1),
+        legend.position = c(0.025, 1)) +
+  labs(x = "ln Body Mass (g)",
+       y = "ln Daily Energy Expenditure (kJ)")
+```
+
+
+## 5: Slopes and intercepts varying
+
+```{r}
+#| echo: true
+
+summary(fm5)
+```
+
+
+## Comparing likelihoods
+
+```{r}
+#| output: asis
+
+rll <- function(mod) {
+  logLik(mod) |> as.numeric()
+}
+
+lls <- tribble(
+  ~Model, ~`n Estimated Parameters`, ~`log-Likelihood`,
+  "Grand mean", 2, rll(fm1),
+  "Categorical only", 3, rll(fm2),
+  "Continuous only", 4, rll(fm3),
+  "Intercepts varying", 5, rll(fm4),
+  "Slopes & intercepts varying", 6, rll(fm5)
+  )
+
+lls |> 
+  gt(rowname_col = "Number") |> 
+  fmt_number(columns = 3) |> 
+  tab_style(style = cell_text(weight = "bold"),
+            locations = cells_column_labels()) |> 
+  tab_style(
+    style = cell_text(size = px(30)),
+    locations = list(cells_column_labels(),
+                     cells_body(
+                       columns = everything()))) |> 
+  as_raw_html()
+```
+
+
+## Adding predictors *can't decrease* model likelihood
+
+At worst, likelihood will be equal. It will probably go up.
+
+Add a column of random numbers between 0 and 1:
+
+```{r}
+#| echo: true
+
+set.seed(341)
+M <- M |> mutate(Noise = runif(nrow(M), 0, 1))
+```
+
+```{r}
+dplyr::select(M, Mass, Caste, Energy, Noise) |> head()
+```
+
+
+## 6: Slopes & intercepts varying + Noise
+
+```{r}
+#| echo: true
+
+fm6 <- lm(Energy ~ Mass * Caste + Noise, data = M)
+summary(fm6)
+```
+
+
+## Comparing likelihoods
+
+```{r}
+#| output: asis
+add_row(lls,
+        Model = "Slopes & intercepts varying + Noise",
+        `n Estimated Parameters` = 7,
+        `log-Likelihood` = rll(fm6)) |> 
+  gt(rowname_col = "Number") |> 
+  fmt_number(columns = 3) |> 
+  tab_style(style = cell_text(weight = "bold"),
+            locations = cells_column_labels()) |> 
+  tab_style(
+    style = cell_text(size = px(30)),
+    locations = list(cells_column_labels(),
+                     cells_body(
+                       columns = everything()))) |> 
+  as_raw_html()
+
+```
+
+
+## Comparing six nested models:
+
+1. Grand mean
+1. Categorical only
+1. Continuous only
+1. Intercepts varying
+1. Slopes & intercepts varying
+1. Slopes & intercepts varying + Noise
+
+What one(s) has/have the best support?
+
+
+## Likelihood ratio tests
+
+- Compare *nested* models
+    - Add or remove predictors
+    - Add or remove interactions
+    - **Outcome variable does not change**
+- $2 \times \Delta$log-Likelihood of the two models
+- Distributed as $\chi^2$ with *df* equal to difference in number of estimated parameters
+    - 1 more predictor, 1 less *df*
+
+
+## Grand mean vs. Categorical only
+
+```{r}
+#| echo: true
+#| message: false
+
+(chisq <- as.numeric(2 * (logLik(fm2) - logLik(fm1))))
+pchisq(chisq, df = 1, lower.tail = FALSE)
+
+library(lmtest)
+lrtest(fm1, fm2)
+```
+
+
+## Likelihood ratio tests
+
+- Compare sets of *nested* models.
+- Each compared to the one above with a $\chi^2$ test. 
+
+```{r}
+#| echo: true
+#| eval: false
+
+lrtest(fm1, fm2, fm3, fm4, fm5, fm6)
+```
+
+## Likelihood ratio tests
+
+`Energy ~ Mass + Caste` is not improved by adding an interaction term.
+
+```{r}
+lrtest(fm1, fm2, fm3, fm4, fm5, fm6)
+```
+
+
+## "Preferred" model
+
+The "preferred" model is the one that is not improved by increased complexity. Interpretations based on this model:
+
+```{r}
+summary(fm4)
+```
+
+```{r}
+# Save models for use in lecture 10-3
+save(fm1, fm2, fm3, fm4, fm5, fm6, file = "lrtmodels.Rda")
+```
+
+
+## "Preferred" model
+
+```{r}
+ggplot(M, aes(x = Mass, y = Energy, color = Caste)) +
+  geom_point(size = 4) +
+  geom_line(aes(x = Mass, y = pred4, color = Caste), lwd = 2) +
+  scale_color_manual(values = wes_palette("Cavalcanti1")) +
+  theme(legend.justification = c(0, 1),
+        legend.position = c(0.025, 1)) +
+  labs(x = "ln Body Mass (g)",
+       y = "ln Daily Energy Expenditure (kJ)")
+```
+
