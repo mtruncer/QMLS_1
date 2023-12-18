@@ -325,16 +325,20 @@ plot_grid(p1, p2, p3, ncol = 3)
 #| echo: true
 
 set.seed(533214)
-folds <- 10
+folds <- 10  # <1>
 
-M$id_fold <- sample(c(rep(seq(1, folds), each = 3),
-                       sample(seq(1, folds), 5)))
-gg <- 1:folds
-err_out <- data.frame('mod1' = numeric(length = folds),
+M$id_fold <- sample(cut(1:nrow(M), breaks = 10) |> # <2>
+                      as.factor() |> 
+                      as.integer())
+
+err_out <- data.frame('mod1' = numeric(length = folds), # <3>
                       'mod2' = numeric(length = folds),
                       'mod3' = numeric(length = folds))
 head(err_out)
 ```
+1. Set the number of folds
+2. Randomly assign each row to one of the folds.
+3. Create a `data.frame` to hold the MSE values for each of the three models
 
 
 ## 10-fold cross validation
@@ -342,20 +346,29 @@ head(err_out)
 ```{r}
 #| echo: true
 
-for(ii in gg) {
-  M_train <- M[M$id_fold != ii, ]
-  mod1 <- lm(Energy ~ Caste, data = M_train)
+for(ii in 1:folds) {
+  M_train <- M[M$id_fold != ii, ]  # <1>
+  
+  mod1 <- lm(Energy ~ Caste, data = M_train) # <2>
   mod2 <- lm(Energy ~ Mass + Caste, data = M_train)
   mod3 <- lm(Energy ~ Mass * Caste, data = M_train)
-  M_test <- M[M$id_fold == ii, ]
-  pp1 <- predict(mod1, M_test)
+  
+  M_test <- M[M$id_fold == ii, ] # <3>
+  
+  pp1 <- predict(mod1, M_test)  # <4>
   pp2 <- predict(mod2, M_test)
   pp3 <- predict(mod3, M_test)
-  err_out[ii, 'mod1'] <- mean((M_test$Energy - pp1) ^ 2)
+  
+  err_out[ii, 'mod1'] <- mean((M_test$Energy - pp1) ^ 2)  # <5>
   err_out[ii, 'mod2'] <- mean((M_test$Energy - pp2) ^ 2)
   err_out[ii, 'mod3'] <- mean((M_test$Energy - pp3) ^ 2)
 }
 ```
+1. Subset the data for the *ii*th fold to create the "training" set
+2. Fit three linear models using the training set
+3. Subset the data for the *ii*th fold to create the "test" set
+4. Predict the test data for each of the three models
+5. Assign the MSE to the `err_out` object
 
 
 ## Visualizing MSE of one "fold"
@@ -375,8 +388,8 @@ ggplot() +
   geom_point(data = M_train, aes(x = Mass, y = Energy, color = Caste),
              size = 2) +
   scale_color_manual(values = wes_palette("Cavalcanti1")) +
-  theme(legend.justification = c(0.05, 1),
-        legend.position = c(0, 1)) +
+  theme(legend.justification = c(0, 1),
+        legend.position = c(0.05, 1)) +
   labs(x = "ln Body Mass (g)",
        y = "ln Daily Energy Expenditure (kJ)") +
   geom_point(data = M_test, aes(x = Mass, y = Energy, color = Caste),
@@ -387,9 +400,11 @@ ggplot() +
 ```
 
 
-## 10-fold cross validation {.smaller}
+## 10-fold cross validation
     
 ```{r}
+#| echo: true
+
 err_out
 
 colMeans(err_out)
@@ -398,7 +413,7 @@ colMeans(err_out)
 
 ## 10-fold cross validation
 
-```{r echo=FALSE}
+```{r}
 err_out |>
   mutate(Fold = factor(1:folds)) |> 
   gather(Model, MSE, -Fold) |> 
@@ -417,7 +432,8 @@ err_out |>
 
 - Training and Test sets must come from the same population
 - There is uncertainty in cross validation estimates
-- We've written our own code here but there are several R packages:
+- Custom code here but several R packages automate this process:
     - `cvTools` package
     - `boot` package
+    - [tidymodels](https://www.tidymodels.org/) family of packages
 
