@@ -27,7 +27,6 @@ library(cowplot)
 theme_set(theme_cowplot())
 library(readxl)
 library(ggrepel)
-library(ICC)
 
 ```
 
@@ -52,8 +51,6 @@ How good are my observations?
 <img src="https://i.imgur.com/dNF4ph0.png" width="100%" />
 </center>
 
-<br />
-<br />
 
 $$F = \frac{\mbox{Between Group Variation}}{\mbox{Within Group Variation}}$$
 
@@ -73,7 +70,7 @@ Measured by Cohen's $\kappa$. See Fleiss [-@Fleiss1971-pa] for details.
 ## Scoring archosaur suture morphology
 
 <center>
-<img src="https://i.imgur.com/y9SByTR.png" width="80%" />
+<img src="https://i.imgur.com/y9SByTR.png" width="60%" />
 </center>
 
 From Bailleul et al. [-@Bailleul2016-tk]
@@ -82,8 +79,10 @@ From Bailleul et al. [-@Bailleul2016-tk]
 ## Characters {.smaller}
 
 ```{r}
-M <- read_excel("../data/GatorObs.xlsx")
-M %>% filter(Specimen == "MOR-OST-1645")
+#| echo: true
+
+MM <- read_excel("../data/GatorObs.xlsx")
+MM %>% filter(Specimen == "MOR-OST-1645")
 ```
 
 
@@ -92,12 +91,14 @@ M %>% filter(Specimen == "MOR-OST-1645")
 Extract observations as numeric vectors:
 
 ```{r}
-Obs1 <- M %>% 
+#| echo: true
+
+Obs1 <- MM %>% 
   select(-Specimen) %>% 
   filter(Observer == 1) %>%
   as.matrix() %>% 
   as.numeric()
-Obs2 <- M %>% 
+Obs2 <- MM %>% 
   select(-Specimen) %>% 
   filter(Observer == 2) %>%
   as.matrix() %>% 
@@ -110,6 +111,8 @@ Obs2 <- M %>%
 Extract observations as numeric vectors:
 
 ```{r}
+#| echo: true
+
 Obs1[1:20]
 Obs2[1:20]
 ```
@@ -117,7 +120,10 @@ Obs2[1:20]
 
 ## Calculating IRR with `CohenKappa()`
 
-```{r warning=FALSE}
+```{r}
+#| echo: true
+#| warning: false
+
 library(DescTools)
 CohenKappa(Obs1, Obs2, conf.level = 0.95)
 ```
@@ -132,12 +138,14 @@ Arbitrary categorizations:
 ## Additional diagnostics
 
 ```{r}
+#| echo: true
+
 cor.test(Obs1, Obs2, method = "spearman", exact = FALSE)
 sum(Obs1 != Obs2) / length(Obs1) # Percent disagreement
 ```
 
 
-## Intraclass Correlation Coefficient
+## Intraclass Correlation Coefficient {.smaller}
 
 For continuously varying measurements:
 
@@ -163,19 +171,22 @@ $$\mbox{Measurement} \sim \mbox{Specimen ID}$$
 
 What is the ICC of repeated measurements of lipid levels in fruit flies?
 
-```{r message = FALSE}
-M <- read_csv("../data/macromol_optim.csv") %>% 
+```{r}
+#| echo: true
+#| message: false
+
+MM <- read_csv("../data/macromol_optim.csv") %>% 
   mutate(replicate = rep(paste0("rep",c(1,2)),439),
          Line = factor(Line))
-glimpse(M)
+glimpse(MM)
 
 ```
 
 
 ## Pairs of measurements
 
-```{r echo=FALSE}
-wideM <- M %>%
+```{r}
+wideM <- MM %>%
   select(replicate,Line,Lipid.per.Fly) %>%
   pivot_wider(names_from = replicate, values_from = Lipid.per.Fly)
 
@@ -190,13 +201,14 @@ ggplot(wideM, aes(rep1, rep2)) +
 ## ICC via ANOVA
 
 ```{r}
-fm <- aov(Lipid.per.Fly ~ Line, data = M)
-print(summary(fm), digits = 5)
-```
+#| echo: true
 
-```{r}
+fm <- lm(Lipid.per.Fly ~ Line, data = MM)
+print(anova(fm), digits = 5)
+
 var_a <- (0.39597 - 0.10035) / 2
 var_a / (var_a + 0.10035)
+
 ```
 
 ICC is 0.60 for these measurements.
@@ -204,19 +216,17 @@ ICC is 0.60 for these measurements.
 
 ## With `ICCest()`
 
-```{r iccest, eval=FALSE}
+```{r iccest}
+#| echo: true
+
+library(ICC)
 
 ICCest(Line,
        Lipid.per.Fly,
-       data = M,
+       data = MM,
        alpha = 0.05,
        CI.type = "Smith")
-```
 
-
-## With `ICCest()`
-
-```{r ref.label="iccest", echo=FALSE}
 ```
 
 
