@@ -17,7 +17,7 @@ bibliography: QMLS_Bibliography.bib
 csl: evolution.csl
 ---
 
-## Subjectivity in data analysis
+## Why you should care about experimental design
 
 
 ```{r}
@@ -32,73 +32,53 @@ theme_set(theme_cowplot())
 
 ```
 
-
-> "None of this should be understood to mean that any statistical analysis is not inherently subjective, because of course it is--lots of little subjective decisions are involved in all parts of science. It's just that priors and Bayesian data analysis are no more inherently subjective than are likelihoods and the repeat sampling assumptions required for significance testing. Anyone who has visited a statistics help desk at a university has probably experienced this subjectivity--statisticians do not in general exactly agree on how to analyze anything but the simplest of problems." [@McElreath2015-no]
-
-
-## Why you should care about experimental design
-
 1. Ethics
 1. Time
 1. Money
 
-*More critical issues in the life sciences:*
+## Experimental Design Issues for Data Analysis
 
-1. Random variation
-1. Confounding factors
+- Challenges and limits of what we can learn from life sciences data
+- Repeatability
+    - How much error do we expect in our measurements?
+- Designing experiments to minimize decision errors/mistakes
+    - Mistake 1: Predictor(s) is important when it really isn't
+    - Mistake 2: Predictor(s) is not important when it really is
 
+## Do these first: 
 
-## Defining testable hypotheses
+- Define (and write down) your main question
+    - What do I want to learn?
+- Define useful models
 
-*More important*:
+Key questions to ask at every step:
 
-- Defining useful models
-
-**What biological processes could have produced the pattern I am observing?**
-
-- Although your analyses assume the opposite
-
+1. **What question am I trying to answer?**
+1. **What processes could have produced the pattern I am observing?**
 
 ## Planning
 
-- What do I want to learn?
 - What data will I collect?
-- Do I have sufficient experimental power?
 - How will I analyze the data?
     - What questions can and cannot be answered by my dataset? Consider all the possibilities.
 
 What other data can I collect at the same time that might be useful at some unknown time in the future?
 
+## Critical issues in the life sciences
 
-## Randomization and confounding factors
+1. Random variation
+    - Why do we need replication?
+1. Confounding factors
+    - Complexity and interdependence is a feature of most life sciences systems
 
-Independence is a critical assumption in (nearly) all your analyses
+## Random variation (a.k.a. sampling error)
 
-- Non-random sampling precludes independence
+**What processes could have produced the pattern I am observing?**
 
-Can we really expect samples to be completely independent?
+![](../images/fish_sample.jpg){fig-align="center" width="100%"}
+- Replication allows you to partition random variation and variation attributable to a predictor of interest
 
-- Museum specimens
-- Fossil record
-
-
-## Don't confound your groups
-
-Reviewer:
-
-> The authors are studying the osteohistological correlates of flight mode, yet the three adequately sampled species are completely confounded with both flight style and wing shape, because flight style and wing shape are uniquely associated with one another. Thus it is impossible to disentangle the role of one from the other.
-
-
-## Beware of batch effects
-
-"Normalization" methods can correct for batch effects statistically, *unless they are confounded with variables of interest!*
-
-<center>
-<img src="https://i.imgur.com/Y3ft8Fm.png" width="80%" />
-</center>
-
-
-## Replication and pseudoreplication
+## Replication & Pseudoreplication
 
 **Replication is needed to estimate variation within a group.**
 
@@ -111,23 +91,30 @@ Think about:
 - Repeated measures of a single individual
 - Measurements of genetically related units or related species
 
-Some (all?) issues can be addressed statistically.
+Many issues can be addressed statistically if you use an appropriate model.
 
+## What level needs replication?
 
-## Recognize limitations: what question can I really answer?
+**What question am I trying to answer?**
+
+- You cannot infer causation if you have not do not have **independent** replicates of the potential causal factor.
+
+## Replication & Pseudoreplication
 
 - Leaf area at one high rainfall and one low rainfall site (10 plots per site)
 
 <center>
-<img src="https://i.imgur.com/IT3QIvi.png" width="65%" />
+<img src="https://i.imgur.com/IT3QIvi.png" width="55%" />
 </center>
 
 
-## Recognize limitations: what question can I really answer? 
+## Replication & Pseudoreplication
 
-<div class="columns-2">
+:::: {.columns}
 
-```{r echo = FALSE, fig.height = 4, fig.width = 4}
+::: {.column width="70%"}
+
+```{r}
 set.seed(6239)
 LA <- tibble("LeafArea"= c(rnorm(10,4,1),rnorm(10,7,1)),
              "Rainfall" = rep(c("Low","High"),each=10))
@@ -141,16 +128,37 @@ ggplot(LA, aes(Rainfall, LeafArea)) +
 
 ```
 
+:::
+
+::: {.column width="30%"}
+
 What else might differ between these two individual sites besides rainfall?
 
-</div>
-## Recognize limitations: what question can I really answer?
+:::
+
+::::
+
+## Replication & Pseudoreplication
 
   - Any two groups are expected to differ for any number of reasons.
     - Replication within these groups will just reveal this difference, not show causality
   - You need replication at the level of your variable of interest 
 
-## Recognize limitations: what question can I really answer?
+
+## Random sampling and confounding factors
+
+Independence is a critical assumption in (nearly) all your analyses
+
+- Non-random sampling precludes independence
+
+Can we really expect samples to be completely independent?
+
+- Museum specimens
+- Fossil record
+
+**What processes could have produced the pattern I am observing?**
+
+## Confounding factors
 
 Marmots across altitudes & temperatures
 
@@ -171,7 +179,16 @@ ggscatmat(MM, columns = 2:4)
 
 ```
 
+## Examples?
+
+
+## Subjectivity in data analysis
+
+> "None of this should be understood to mean that any statistical analysis is not inherently subjective, because of course it is--lots of little subjective decisions are involved in all parts of science. It's just that priors and Bayesian data analysis are no more inherently subjective than are likelihoods and the repeat sampling assumptions required for significance testing. Anyone who has visited a statistics help desk at a university has probably experienced this subjectivity--statisticians do not in general exactly agree on how to analyze anything but the simplest of problems." [@McElreath2015-no]
 ## References
+
+
+
 
 ::: {#refs}
 :::

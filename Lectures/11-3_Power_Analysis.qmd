@@ -1,6 +1,6 @@
 ---
-title: "Template Title"
-subtitle: "Subtitle"
+title: "Decision Errors"
+subtitle: "Power"
 author:
   - Elizabeth King
   - Kevin Middleton
@@ -16,15 +16,426 @@ code-annotations: hover
 bibliography: QMLS_Bibliography.bib
 csl: evolution.csl
 ---
+## Types of errors and statistical power
 
 ```{r}
 #| label: setup
 #| echo: false
 
+library(tidyverse)
+library(cowplot)
+theme_set(theme_cowplot())
+library(readxl)
 
 ```
 
-## Slide
+
+|               | Reject H~0~    | Fail to reject H~0~   |
+|--------------:|:--------------:|:---------------------:|
+|H~0~ is true   | Type I error   | *Correct*             |
+|H~0~ is false  | *Correct*      | Type II error         |
+
+Type I error occurs when:
+
+- *P* is small by *random chance*, given that $\alpha$ is chosen ahead of the test
+
+Type II error probability depends on:
+
+- The value of $\alpha$
+- How "wrong" H~0~ is
+
+
+## Power
+
+- Given a true effect, the probability that a random sample will lead to a rejection of H~0~
+    - The proportion of times you **DO NOT** make a Type II error
+- Dependent on how different the truth is from the null hypothesis
+- Inversely related to type II errors
+    - High power $\rightarrow$ low type II errors
+    - Low power $\rightarrow$ high type II errors
+
+
+## Power depends on effect size
+
+*Effect size*: The magnitude of the deviation from H~0~.
+
+If we can estimate effect size *before we do the study*, we can estimate the power.
+
+- Use previous information
+    - Your own pilot studies
+    - Other similar studies
+- Determine how big a difference we *wan*t to be able to detect
+    - How small of a difference is not biologically meaningful?
+
+
+## Effect size
+
+> "An effect size is a standardized measure that quantifies the size of the difference between two groups or the strength of an association between two variables." [@Button2013-vg]
+
+Measures of effect size:
+
+1. Pearson's *r*
+1. *R*^2^: but note caveats of *R*^2^
+1. Cohen's *d*: *t*-tests [@Cohen1960-kq]
+1. Cohen's $f^2$, $\eta^2$: ANOVA-like [@Olejnik2003-km]
+1. Odds ratio (logistic regression)
+
+
+## Importance of effect size
+
+> "For example, if a sample size is 10 000, a significant *P* value is likely to be found even when the difference in outcomes between groups is negligible and may not justify an expensive or time-consuming intervention over another." [@Sullivan2012-rr]
+
+Consider an ordinary *t*-test:
+
+$$t=\frac{\bar{Y}_{1}-\bar{Y}_{2}}{SE_{Y_{1}-Y_{2}}}$$
+
+
+## Example calculation of effect size
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+M <- read_excel("../data/Mouse_Weaning_Data.xlsx", na = "NA") %>%
+  mutate(Sex = ifelse(Sex == 0, "Female", "Male"),
+         Sex = factor(Sex)) %>% 
+  select(Sex, WnMass) %>% 
+  drop_na()
+ggplot(M, aes(x = WnMass)) +
+  geom_histogram(bins=30) +
+  facet_grid(Sex ~ .)
+```
+
+
+## Cohen's *d*
+
+Standardized differences measured in standard deviations.
+
+General guide for *t*-tests [also see @Sullivan2012-rr]:
+
+- 0.2 = "Small"
+- 0.5 = "Medium"
+- 0.8 = "Large"
+
+What you do with "small", "medium", and "large" is up to you.
+
+
+## According to Cohen
+
+> "there is a certain risk inherent in offering conventional operational definitions for those terms for use in power analysis in as diverse a field of inquiry as behavioral science"
+
+
+## Cohen's *d* using the `DescTools` package
+
+$$ d = \frac{\bar{Y_F} - \bar{Y_M}}{s_{\mbox{pooled}}} $$
+
+```{r}
+library(DescTools)
+Females <- M %>% filter(Sex == "Female") %>% pull(WnMass)
+Males <- M %>% filter(Sex == "Male") %>% pull(WnMass)
+CohenD(Females, Males)
+```
+
+
+## $\eta^2$ for jet lag data with `EtaSq()`
+
+Also in `DescTools`:
+
+```{r}
+JL <- read_csv("../data/JetLag.csv", col_types = "cd") %>% 
+  mutate(Treatment = factor(Treatment))
+fm <- lm(Shift ~ Treatment, data = JL)
+EtaSq(fm)
+```
+
+
+## Power analysis is used for planning
+
+1. What sample size do I need for some level of power?
+1. What is my power for some sample size?
+1. How large of a difference can I detect for some power and sample size?
+
+How much power is enough power? Some say 0.8.
+
+
+## Post-analysis power calculations
+
+Hoenig and Heisey [-@Hoenig2001-hz]:
+
+> "There is a large literature advocating that power calculation be made whenever one performs a statistical test of a hypothesis and one obtains a statistically nonsignificant result. ... This approach, which appears in various forms, is fundamentally flawed."
+
+- "Observed power" (power of an observed *P* value from a post-hoc power analysis) is mathematically tied to the *P* value.
+
+
+## Power analysis in R
+
+1. `pwr` package
+    - `pwr.t.test()`
+    - `pwr.anova.test()`
+    - `pwr.r.test()`
+1. Do it yourself. For all but the simplest experimental designs, this is the only option.
+    - Simulate data across a range of sample sizes and effect sizes.
+
+
+## Commonalities
+
+1. *n* samples (*k* groups)
+1. *d* or *f* for hypothesized effect size (*r* hypothesized correlation)
+1. $\alpha$ level
+1. Power
+
+```{r}
+library(pwr)
+cohen.ES(test = "anov", size = "medium")
+```
+
+
+## Power analysis for a *t*-test
+
+Possible questions:
+
+1. What sample size do I need for a given effect size, $\alpha$, and power?
+1. What will my power be, for a given effect size, $\alpha$, and sample?
+1. What effect size will I be able to detect for a given sample, power, and $\alpha$? (This is difficult, because how do you know power?)
+
+
+## What sample size?
+
+```{r}
+pwr.t.test(d = 0.5, sig.level = 0.05, power = 0.80,
+           type = "two.sample")
+```
+
+
+## What is my power?
+
+```{r}
+pwr.t.test(d = 0.5, sig.level = 0.05, n = 15,
+           type = "two.sample")
+```
+
+
+## What effect size can I detect?
+
+```{r}
+pwr.t.test(power = 0.80, sig.level = 0.05, n = 1227,
+           type = "two.sample")
+```
+
+
+## Power analysis via simulation
+
+```{r}
+library(pwr)
+pwr.t.test(power = 0.8, d = 0.6)
+```
+
+
+## Power analysis via simulation
+
+Estimate power across a range of *d* and *n*:
+
+`d <- seq(0.1, 2, length.out = 50)`
+
+- Standardized mean differences from 0.1 to 2
+
+`n <- c(5, 10, 15, 20, 30, 50, 100)`
+
+- Sample sizes from 5 to 100
+
+
+## Power analysis via simulation
+
+```{r pwr_sim}
+d_seq <- seq(0.1, 2, length.out = 50)
+ns <- c(5, 10, 15, 20, 30, 50, 100)
+
+# All combinations on d_seq and ns
+power_t <- crossing(d_seq, ns)
+names(power_t) <- c("d", "n")
+
+# Column for calculated power
+power_t$power <- numeric(nrow(power_t))
+
+for (i in 1:nrow(power_t)) {
+  d <- power_t$d[i]
+  n <- power_t$n[i]
+  power_t$power[i] <- pwr.t.test(n, d)$power
+}
+```
+
+
+## Power analysis via simulation
+
+```{r echo=FALSE}
+ggplot(power_t, aes(d, power, color = factor(n))) +
+  geom_hline(yintercept = 0.8, color = "darkblue") +
+  geom_line(size = 2) +
+  geom_point(aes(x = 0.6, y = 0.8), color = "red", size = 3) +
+  ylim(c(0, 1)) +
+  scale_color_discrete(name = "n") +
+  theme(legend.justification = c(1, 0), legend.position = c(1, 0)) +
+  labs(x = "d", y = "Power")
+```
+
+
+## Power analysis via simulation
+
+Generalizing to any type of analysis:
+
+1. Specify parameters (e.g., *n*, *d*, means, slope, intercept) in a biologically realistic range (reasonable variances)
+1. Simulate data that your process produces
+1. Determine if *P* value is less than $\alpha$.
+1. Repeat
+
+
+## Power analysis via simulation
+
+```{r pwr_manual_sim}
+set.seed(20)
+
+nsims <- 1e4
+d <- 0.4
+n <- 15
+alpha <- 0.05
+sig <- logical(nsims)  # Vector of TRUE/FALSE
+
+for (i in 1:nsims) {
+  x1 <- rnorm(n, mean = 0, sd = 1)
+  x2 <- rnorm(n, mean = d, sd = 1)
+  p <- t.test(x1, x2, var.equal = TRUE)$p.value
+  sig[i] <- p < alpha
+}
+```
+
+
+## Power analysis via simulation
+
+```{r}
+head(sig)
+mean(sig)
+pwr.t.test(n = 15, d = 0.4)$power
+```
+
+
+## Power analysis via simulation
+
+Simulate data from a exponential process:
+
+$$\mbox{Femur Length} = a \mbox{Mass}^b$$
+
+$$\log \mbox{Femur Length} = \log a + b \log \mbox{Mass}$$
+
+What is the power to detect deviations from isometry?
+
+- Simulate across a range of *n*
+- Use a range of slopes from 1/3 - 0.2 to 1/3 + 0.2
+
+
+## Power analysis via simulation
+
+```{r}
+nsims <- 1e4
+alpha <- 0.05
+ns <- c(5, 10, 25, 50, 100, 200, 400)
+b_null <- 1/3
+b_devs <- seq(-0.2, 0.2, length.out = 100)
+
+# All combinations of ns and b_devs
+pwr_reg <- crossing(ns, b_devs)
+names(pwr_reg) <- c("n", "b_dev")
+pwr_reg$Power <- NA
+```
+
+
+## Power analysis via simulation  {.smaller}
+
+```{r pwr_sma, eval=FALSE}
+set.seed(912)
+# Iterate through the rows of `pwr_reg`
+for (i in 1:nrow(pwr_reg)) {
+  tic <- Sys.time()
+  message(i, " of ", nrow(pwr_reg))
+  n <- pwr_reg$n[i]
+  b_dev <- pwr_reg$b_dev[i]
+  sig <- logical(nsims)
+  
+  for (j in 1:nsims) {
+    log_Mass <- log(runif(n, 1, 1e3))
+    log_a <- rnorm(n, 1.31, 0.15)
+    log_Fem_Len <- log_a + (b_null + b_dev) * log_Mass
+    fm <- sma(log_Fem_Len ~ log_Mass, slope.test = b_null, method = "OLS")
+    sig[j] <- fm$slopetest[[1]]$p < alpha
+  }
+  pwr_reg$Power[i] <- mean(sig)
+  save(pwr_reg, file = "./data/pwr_reg_SMA.Rda")
+  message(Sys.time() - tic)
+}
+```
+
+- Mass uniformly distributed from 1 - 1000
+- $a$ normally distributed with a mean of 1.31
+- Calculate `log_Fem_Len`
+
+
+## Power analysis via simulation
+
+- 7,000,000 regressions
+- ~8 hours later...
+
+
+## Power analysis via simulation
+
+```{r echo=FALSE}
+load("../data/pwr_reg_SMA.Rda")
+p <- ggplot(pwr_reg, aes(b_dev, Power, color = as.factor(n))) +
+  geom_line() +
+  geom_line(size = 2) +
+  ylim(c(0, 1)) +
+  geom_hline(yintercept = 0.8, color = "blue", linetype = "dotted") +
+  geom_hline(yintercept = 0.05, color = "red", linetype = "dotted") +
+  scale_color_discrete(name = "n") +
+  labs(x = "Slope Deviation") +
+  theme(legend.justification = c(1, 0), legend.position = c(1, 0))
+p + theme(legend.background = element_rect(fill = "gray85", 
+    linetype = "solid"))
+```
+
+
+## Power in multi-parent genetic mapping populations (MPPs)
+
+<center>
+<img src="https://i.imgur.com/592FXMW.png" width="100%" />
+</center>
+
+
+## Power in MPPs {.smaller}
+
+```{r echo=FALSE}
+genos <- rbinom(10, 1, 0.5)
+```
+
+```{r}
+eff <- 0.05
+envs <- rnorm(length(genos),0,sqrt(((1/eff)-1)*var(genos)))
+phenos <- genos + envs
+
+print(cbind(genos, phenos))
+print(c(mean(phenos[genos==0]),mean(phenos[genos==1])))
+```
+
+
+## Power in MPPs
+
+<center>
+<img src="https://i.imgur.com/czRpqAD.png" width="100%" />
+</center>
+
+
+## Power in MPPs
+
+<center>
+<img src="https://i.imgur.com/qHWfIa6.png" width="60%" />
+</center>
+
+
 
 ## References
 
