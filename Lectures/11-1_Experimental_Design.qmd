@@ -17,7 +17,7 @@ bibliography: QMLS_Bibliography.bib
 csl: evolution.csl
 ---
 
-## Subjectivity in data analysis
+## Why you should care about experimental design
 
 
 ```{r}
@@ -32,45 +32,118 @@ theme_set(theme_cowplot())
 
 ```
 
-
-> "None of this should be understood to mean that any statistical analysis is not inherently subjective, because of course it is--lots of little subjective decisions are involved in all parts of science. It's just that priors and Bayesian data analysis are no more inherently subjective than are likelihoods and the repeat sampling assumptions required for significance testing. Anyone who has visited a statistics help desk at a university has probably experienced this subjectivity--statisticians do not in general exactly agree on how to analyze anything but the simplest of problems." [@McElreath2015-no]
-
-
-## Why you should care about experimental design
-
 1. Ethics
 1. Time
 1. Money
 
-*More critical issues in the life sciences:*
+## Experimental Design Issues for Data Analysis
 
-1. Random variation
-1. Confounding factors
+- Challenges and limits of what we can learn from life sciences data
+- Repeatability
+    - How much error do we expect in our measurements?
+- Designing experiments to minimize decision errors/mistakes
+    - Mistake 1: Predictor(s) is important when it really isn't
+    - Mistake 2: Predictor(s) is not important when it really is
 
+## Do these first: 
 
-## Defining testable hypotheses
+- Define (and write down) your main question
+    - What do I want to learn?
+- Define useful models
 
-*More important*:
+Key questions to ask at every step:
 
-- Defining useful models
-
-**What biological processes could have produced the pattern I am observing?**
-
-- Although your analyses assume the opposite
-
+1. **What question am I trying to answer?**
+1. **What processes could have produced the pattern I am observing?**
 
 ## Planning
 
-- What do I want to learn?
 - What data will I collect?
-- Do I have sufficient experimental power?
 - How will I analyze the data?
     - What questions can and cannot be answered by my dataset? Consider all the possibilities.
 
 What other data can I collect at the same time that might be useful at some unknown time in the future?
 
+## Critical issues in the life sciences
 
-## Randomization and confounding factors
+1. Random variation
+    - Why do we need replication?
+1. Confounding factors
+    - Complexity and interdependence is a feature of most life sciences systems
+
+## Random variation (a.k.a. sampling error)
+
+**What processes could have produced the pattern I am observing?**
+
+![](../images/fish_sample.jpg){fig-align="center" width="100%"}
+- Replication allows you to partition random variation and variation attributable to a predictor of interest
+
+## Replication
+
+**Replication is needed to estimate variation within a group.**
+
+- Replicates must be independent. Think about:
+    - Common field environments, shared enclosures
+    - Observations made in batches (days, months, years)
+    - Repeated measures of a single individual
+    - Measurements of genetically related units or related species
+
+Many issues can be addressed statistically if you use an appropriate model.
+
+## What level needs replication?
+
+**What question am I trying to answer?**
+
+- You cannot infer causation if you have not do not have **independent** replicates of the potential causal factor.
+
+## Pseudoreplication
+
+- Leaf area at one high rainfall and one low rainfall site (10 plots per site)
+
+<center>
+<img src="https://i.imgur.com/IT3QIvi.png" width="55%" />
+</center>
+
+
+## Pseudoreplication
+
+:::: {.columns}
+
+::: {.column width="70%"}
+
+```{r}
+set.seed(6239)
+LA <- tibble("LeafArea"= c(rnorm(10,4,1),rnorm(10,7,1)),
+             "Rainfall" = rep(c("Low","High"),each=10))
+
+ggplot(LA, aes(Rainfall, LeafArea)) +
+  geom_point(position = position_jitter(width = 0.05), alpha = 0.5, size = 3) +
+  stat_summary(fun = mean, geom = "point", size = 5, color = "red") +
+  stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.1,
+               color = "red", size = 2) +
+  labs(x = "Rainfall", y = "Leaf Area") +
+  theme(text = element_text(size = 20))
+
+```
+
+:::
+
+::: {.column width="30%"}
+
+What else might differ between these two individual sites besides rainfall?
+
+:::
+
+::::
+
+## Pseudoreplication
+
+  - Any two groups are expected to differ for any number of reasons.
+    - Replication within these groups will just reveal this difference, not show causality
+  - You need replication at the level of your variable of interest 
+
+
+## Random sampling and confounding factors
 
 Independence is a critical assumption in (nearly) all your analyses
 
@@ -81,76 +154,9 @@ Can we really expect samples to be completely independent?
 - Museum specimens
 - Fossil record
 
+**What processes could have produced the pattern I am observing?**
 
-## Don't confound your groups
-
-Reviewer:
-
-> The authors are studying the osteohistological correlates of flight mode, yet the three adequately sampled species are completely confounded with both flight style and wing shape, because flight style and wing shape are uniquely associated with one another. Thus it is impossible to disentangle the role of one from the other.
-
-
-## Beware of batch effects
-
-"Normalization" methods can correct for batch effects statistically, *unless they are confounded with variables of interest!*
-
-<center>
-<img src="https://i.imgur.com/Y3ft8Fm.png" width="80%" />
-</center>
-
-
-## Replication and pseudoreplication
-
-**Replication is needed to estimate variation within a group.**
-
-- Replicates must be independent
-
-Think about:
-
-- Common field environments, shared enclosures
-- Observations made in batches (days, months, years)
-- Repeated measures of a single individual
-- Measurements of genetically related units or related species
-
-Some (all?) issues can be addressed statistically.
-
-
-## Recognize limitations: what question can I really answer?
-
-- Leaf area at one high rainfall and one low rainfall site (10 plots per site)
-
-<center>
-<img src="https://i.imgur.com/IT3QIvi.png" width="65%" />
-</center>
-
-
-## Recognize limitations: what question can I really answer? 
-
-<div class="columns-2">
-
-```{r echo = FALSE, fig.height = 4, fig.width = 4}
-set.seed(6239)
-LA <- tibble("LeafArea"= c(rnorm(10,4,1),rnorm(10,7,1)),
-             "Rainfall" = rep(c("Low","High"),each=10))
-
-ggplot(LA, aes(Rainfall, LeafArea)) +
-  geom_point(position = position_jitter(width = 0.05), alpha = 0.5) +
-  stat_summary(fun = mean, geom = "point", size = 3, color = "red") +
-  stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.1,
-               color = "red", size = 0.7) +
-  labs(x = "Rainfall", y = "Leaf Area")
-
-```
-
-What else might differ between these two individual sites besides rainfall?
-
-</div>
-## Recognize limitations: what question can I really answer?
-
-  - Any two groups are expected to differ for any number of reasons.
-    - Replication within these groups will just reveal this difference, not show causality
-  - You need replication at the level of your variable of interest 
-
-## Recognize limitations: what question can I really answer?
+## Confounding factors
 
 Marmots across altitudes & temperatures
 
@@ -171,7 +177,152 @@ ggscatmat(MM, columns = 2:4)
 
 ```
 
-## References
+## Example: Wing Dimorphic Crickets
+
+> Do long-winged crickets have a higher resting metabolic rate than short-winged crickets?
+
+:::: {.columns}
+
+::: {.column width="40%"}
+![](https://i.imgur.com/kgPmw0b.jpg){fig-align="center"}
+:::
+
+::: {.column width="60%"}
+Controlling for body mass,
+
+- Metabolic rates do not differ
+- Average metabolic rate of long-wings is higher
+- Average  metabolic rate of long-wings is lower
+:::
+
+::::
+
+
+## Example: Genetics of Corn Oil Content
+
+> Which set of loci best predicts oil content in corn kernels?
+
+:::: {.columns}
+
+::: {.column width="40%"}
+![](https://i.imgur.com/w6z5m2e.jpg){fig-align="center"}
+:::
+
+::: {.column width="60%"}
+- Heritability of corn oil content is 0
+- Different possible combinations of SNPs
+- All additive
+- Dominance
+- Epistasis
+- Structural variants
+:::
+
+::::
+
+
+## Example: Species richness in Missouri lakes
+
+> Does the number of phytoplankton species change with agricultural intensity around lakes?
+
+:::: {.columns}
+
+::: {.column width="40%"}
+![](https://i.imgur.com/GoOM9bb.png){fig-align="center"}
+:::
+
+::: {.column width="60%"}
+- There is no relationship between species richness and agricultural intensity
+- There is a positive relationship
+- There is a negative relationship
+:::
+
+::::
+
+
+## Example: Canid relationships
+
+> What are the phylogenetic relationships between dog breeds & other canids?
+
+:::: {.columns}
+
+::: {.column width="60%"}
+![](https://i.imgur.com/spdaSkP.jpg){fig-align="center"}
+:::
+
+::: {.column width="40%"}
+- Star phylogeny
+- Single origin of dogs
+- Ancient breeds are monophyletic
+- Every possible tree....
+:::
+
+::::
+
+
+## Example: Predict the species of a fossil
+
+> Is this bone more like a chimpanzee, australopith, Neandertal, or modern human?
+
+:::: {.columns}
+
+::: {.column width="40%"}
+![](https://i.imgur.com/cQ1Kl1v.png){fig-align="center"}
+:::
+
+::: {.column width="60%"}
+- What is the percent correct classification of known fossils?
+- What are the relative probabilities of new fossil being in one of four taxonomic groups?
+:::
+
+::::
+
+
+## Example: Alligator growth
+
+> Do alligators exhibit determinate or indeterminate growth?
+
+:::: {.columns}
+
+::: {.column width="40%"}
+![](https://i.imgur.com/scZSjNE.png){fig-align="center"}
+:::
+
+::: {.column width="60%"}
+Determinate:
+
+$Length\left(Age\right) = \frac{\theta_1}{1 + \exp((\theta_2 - Age) / \theta_3)}$
+
+Indeterminate:
+
+$Length\left(Age\right) = \theta_1 + \theta_2 Age + \theta_3 Age^2$
+:::
+
+::::
+
+
+## Your Own Research
+
+> Your research question(s) here
+
+:::: {.columns}
+
+::: {.column width="50%"}
+![](https://i.imgur.com/ETBeDVR.jpg){fig-align="center"}
+:::
+
+::: {.column width="50%"}
+- Model 1
+- Model 2
+- Model 3
+- ...
+:::
+
+::::
+
+
+
+
+
 
 ::: {#refs}
 :::
