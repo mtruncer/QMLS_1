@@ -190,7 +190,7 @@ mpfr(1 - mpfr(((1 - alpha) ^ 1000), 128),128)
 ```
 
 
-## Probability of a Type I Error | from among a set of $k$ total tests
+## Probability of a Type I Error  
 
 ```{r FWER_figure}
 calcFWER <- function(k, alpha){
@@ -210,7 +210,7 @@ ggplot(FWERs, aes(x = k, y = FWER, color = alpha)) +
   xlab("k Tests") +
   scale_color_manual(values = wes_palette("Moonrise3"),
                      name = "Alpha",
-                     breaks = c("0.05", "0.01", "0.001"))
+                     breaks = c("0.05", "0.01", "0.001")) 
 ```
 
 ## A menu of MCPs {.smaller}
