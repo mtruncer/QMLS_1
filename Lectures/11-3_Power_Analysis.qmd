@@ -16,7 +16,7 @@ code-annotations: hover
 bibliography: QMLS_Bibliography.bib
 csl: evolution.csl
 ---
-## Types of errors and statistical power
+## Decision errors
 
 ```{r}
 #| label: setup
@@ -26,9 +26,48 @@ library(tidyverse)
 library(cowplot)
 theme_set(theme_cowplot())
 library(readxl)
+options(scipen = 999)
+
 
 ```
 
+
+Mistake #1: Concluding predictor(s) is important when it really isn't. 
+```{r}
+#| echo: true
+
+set.seed(10)
+nn <- 10
+group1.mean <- 6
+group2.mean <- 6
+yy <- c(rnorm(nn, group1.mean, 1),rnorm(nn, group2.mean, 1))
+gg <- c(rep('a',nn), rep('b',nn))
+summary(lm(yy ~ gg))$coefficients
+```
+
+This is a Type I error = A false positive = A false discovery
+
+
+## Decision errors
+
+Mistake #2: predictor(s) is not important when it really is. 
+
+```{r}
+#| echo: true
+
+set.seed(93)
+nn <- 10
+group1.mean <- 5
+group2.mean <- 6
+yy <- c(rnorm(nn, group1.mean, 1), rnorm(nn, group2.mean, 1))
+gg <- c(rep('a', nn), rep('b', nn))
+summary(lm(yy ~ gg))$coefficients
+```
+
+This is a Type II error = False Negative
+
+
+## Types of errors and statistical power {.smaller}
 
 |               | Reject H~0~    | Fail to reject H~0~   |
 |--------------:|:--------------:|:---------------------:|
@@ -68,7 +107,7 @@ If we can estimate effect size *before we do the study*, we can estimate the pow
     - How small of a difference is not biologically meaningful?
 
 
-## Effect size
+## Effect size {.smaller}
 
 > "An effect size is a standardized measure that quantifies the size of the difference between two groups or the strength of an association between two variables." [@Button2013-vg]
 
@@ -92,7 +131,10 @@ $$t=\frac{\bar{Y}_{1}-\bar{Y}_{2}}{SE_{Y_{1}-Y_{2}}}$$
 
 ## Example calculation of effect size
 
-```{r, echo=FALSE, warning=FALSE, message=FALSE}
+```{r}
+#| warning: false
+#| message: false
+
 M <- read_excel("../data/Mouse_Weaning_Data.xlsx", na = "NA") %>%
   mutate(Sex = ifelse(Sex == 0, "Female", "Male"),
          Sex = factor(Sex)) %>% 
@@ -127,6 +169,8 @@ What you do with "small", "medium", and "large" is up to you.
 $$ d = \frac{\bar{Y_F} - \bar{Y_M}}{s_{\mbox{pooled}}} $$
 
 ```{r}
+#| echo: true
+
 library(DescTools)
 Females <- M %>% filter(Sex == "Female") %>% pull(WnMass)
 Males <- M %>% filter(Sex == "Male") %>% pull(WnMass)
@@ -139,6 +183,8 @@ CohenD(Females, Males)
 Also in `DescTools`:
 
 ```{r}
+#| echo: true
+
 JL <- read_csv("../data/JetLag.csv", col_types = "cd") %>% 
   mutate(Treatment = factor(Treatment))
 fm <- lm(Shift ~ Treatment, data = JL)
@@ -182,6 +228,8 @@ Hoenig and Heisey [-@Hoenig2001-hz]:
 1. Power
 
 ```{r}
+#| echo: true
+
 library(pwr)
 cohen.ES(test = "anov", size = "medium")
 ```
@@ -199,6 +247,8 @@ Possible questions:
 ## What sample size?
 
 ```{r}
+#| echo: true
+
 pwr.t.test(d = 0.5, sig.level = 0.05, power = 0.80,
            type = "two.sample")
 ```
@@ -207,6 +257,8 @@ pwr.t.test(d = 0.5, sig.level = 0.05, power = 0.80,
 ## What is my power?
 
 ```{r}
+#| echo: true
+
 pwr.t.test(d = 0.5, sig.level = 0.05, n = 15,
            type = "two.sample")
 ```
@@ -215,6 +267,8 @@ pwr.t.test(d = 0.5, sig.level = 0.05, n = 15,
 ## What effect size can I detect?
 
 ```{r}
+#| echo: true
+
 pwr.t.test(power = 0.80, sig.level = 0.05, n = 1227,
            type = "two.sample")
 ```
@@ -223,6 +277,8 @@ pwr.t.test(power = 0.80, sig.level = 0.05, n = 1227,
 ## Power analysis via simulation
 
 ```{r}
+#| echo: true
+
 library(pwr)
 pwr.t.test(power = 0.8, d = 0.6)
 ```
@@ -244,6 +300,8 @@ Estimate power across a range of *d* and *n*:
 ## Power analysis via simulation
 
 ```{r pwr_sim}
+#| echo: true
+
 d_seq <- seq(0.1, 2, length.out = 50)
 ns <- c(5, 10, 15, 20, 30, 50, 100)
 
@@ -264,7 +322,7 @@ for (i in 1:nrow(power_t)) {
 
 ## Power analysis via simulation
 
-```{r echo=FALSE}
+```{r}
 ggplot(power_t, aes(d, power, color = factor(n))) +
   geom_hline(yintercept = 0.8, color = "darkblue") +
   geom_line(size = 2) +
@@ -289,6 +347,8 @@ Generalizing to any type of analysis:
 ## Power analysis via simulation
 
 ```{r pwr_manual_sim}
+#| echo: true
+
 set.seed(20)
 
 nsims <- 1e4
@@ -309,6 +369,8 @@ for (i in 1:nsims) {
 ## Power analysis via simulation
 
 ```{r}
+#| echo: true
+
 head(sig)
 mean(sig)
 pwr.t.test(n = 15, d = 0.4)$power
@@ -332,6 +394,8 @@ What is the power to detect deviations from isometry?
 ## Power analysis via simulation
 
 ```{r}
+#| echo: true
+
 nsims <- 1e4
 alpha <- 0.05
 ns <- c(5, 10, 25, 50, 100, 200, 400)
@@ -347,7 +411,9 @@ pwr_reg$Power <- NA
 
 ## Power analysis via simulation  {.smaller}
 
-```{r pwr_sma, eval=FALSE}
+```{r pwr_sma}
+#| eval: false
+
 set.seed(912)
 # Iterate through the rows of `pwr_reg`
 for (i in 1:nrow(pwr_reg)) {
@@ -383,7 +449,7 @@ for (i in 1:nrow(pwr_reg)) {
 
 ## Power analysis via simulation
 
-```{r echo=FALSE}
+```{r}
 load("../data/pwr_reg_SMA.Rda")
 p <- ggplot(pwr_reg, aes(b_dev, Power, color = as.factor(n))) +
   geom_line() +
@@ -408,11 +474,13 @@ p + theme(legend.background = element_rect(fill = "gray85",
 
 ## Power in MPPs {.smaller}
 
-```{r echo=FALSE}
+```{r}
 genos <- rbinom(10, 1, 0.5)
 ```
 
 ```{r}
+#| echo: true
+
 eff <- 0.05
 envs <- rnorm(length(genos),0,sqrt(((1/eff)-1)*var(genos)))
 phenos <- genos + envs

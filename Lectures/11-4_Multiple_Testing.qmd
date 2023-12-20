@@ -40,8 +40,10 @@ Datasets
 
 -->
 
-Mistake #1: Concluding there IS an effect when there IS NOT actually an effect. 
+Mistake #1: Concluding predictor(s) is important when it really isn't.  
 ```{r}
+#| echo: true
+
 set.seed(10)
 nn <- 10
 group1.mean <- 6
@@ -54,24 +56,8 @@ summary(lm(yy ~ gg))$coefficients
 This is a Type I error = A false positive = A false discovery
 
 
-## Significance Testing Mistakes
 
-Mistake #2: Concluding there IS NOT an effect when there IS actually an effect. 
-
-```{r}
-set.seed(93)
-nn <- 10
-group1.mean <- 5
-group2.mean <- 6
-yy <- c(rnorm(nn, group1.mean, 1), rnorm(nn, group2.mean, 1))
-gg <- c(rep('a', nn), rep('b', nn))
-summary(lm(yy ~ gg))$coefficients
-```
-
-This is a Type II error = False Negative
-
-
-## Types of errors and statistical power
+## Types of errors and statistical power {.smaller}
 
 |               | Reject H~0~    | Fail to reject H~0~   |
 |--------------:|:--------------:|:---------------------:|
@@ -100,6 +86,8 @@ If you set a Type I error rate ($\alpha$) of 0.05 for any one test and then perf
 ## Problems of Multiplicity
 
 ``` {r}
+#| echo: true
+
 set.seed(3210)
 nn <- 10
 group1.mean <- 6
@@ -123,6 +111,8 @@ for(ii in 1:niter) {
 What is the probability of a false positive for yy1?
 
 ```{r}
+#| echo: true
+
 mean(ps[, 'p1'] < 0.05)
 ```
 
@@ -132,6 +122,8 @@ mean(ps[, 'p1'] < 0.05)
 What is the probability of a false positive for yy2?
 
 ```{r}
+#| echo: true
+
 mean(ps[, 'p2'] < 0.05)
 ```
 
@@ -141,6 +133,8 @@ mean(ps[, 'p2'] < 0.05)
 What is the probability of a false positive for yy1 or yy2?
 
 ```{r}
+#| echo: true
+
 sm.set <- ps[c(8, 12, 13), ]
 sm.set$FP <- ifelse((sm.set[, 'p1'] < 0.05 | sm.set[, 'p2'] < 0.05),"Yes","No")
 
@@ -162,7 +156,7 @@ FWER is also sometimes termed
 We will use $\alpha$ = 0.05 throughout, but the general principles apply to any $\alpha$ (0.1, 0.05, 0.01, 0.001, etc.).
 
 
-## Calculating FWER
+## Calculating FWER {.smaller}
 
 For a family of $k$ tests, where $\alpha$ is the error rate for a single test:
 
@@ -181,7 +175,10 @@ $$\lim_{k \to \infty} \mbox{FWER} = 1$$
 
 ## Calculating FWER
 
-```{r message=FALSE}
+```{r}
+#| echo: true
+#| message: false
+
 library(Rmpfr)
 alpha <- 0.05
 1 - ((1 - alpha) ^ 20)
@@ -195,7 +192,7 @@ mpfr(1 - mpfr(((1 - alpha) ^ 1000), 128),128)
 
 ## Probability of a Type I Error | from among a set of $k$ total tests
 
-```{r FWER_figure, echo=FALSE, fig.width=8}
+```{r FWER_figure}
 calcFWER <- function(k, alpha){
   return(round(1 - (1 - alpha) ^ k, 3))
 }
@@ -216,7 +213,7 @@ ggplot(FWERs, aes(x = k, y = FWER, color = alpha)) +
                      breaks = c("0.05", "0.01", "0.001"))
 ```
 
-## A menu of MCPs
+## A menu of MCPs {.smaller}
 
 1. <s>Do nothing</s>
     - Not an option 
@@ -282,7 +279,10 @@ Note: False Positive Rate = $\frac{\mbox{n False Positives}}{\mbox{n All Tests}}
 
 *P* values resulting from chance alone have a uniform distribution
 
-```{r echo=FALSE, message=FALSE, cache=TRUE}
+```{r }
+#| message: true
+#| cache: true
+
 set.seed(3210)
 nn <- 10
 group1.mean <- 6
@@ -308,7 +308,9 @@ ggplot(ps, aes(x = p1)) +
 
 *P* values resulting from chance alone have a uniform distribution
 
-```{r echo=FALSE, message=FALSE}
+```{r}
+#| message: false
+
 Ps <- ps %>% arrange(-log10(p1))
 Pp <- data.frame("P"= -log10(Ps$p1),
                  "X" = sort(-log10(runif(nrow(ps), 0, 1)))) 
@@ -324,7 +326,9 @@ ggplot(Pp, aes(x = X, y = P)) +
 
 *P* values resulting from chance alone have a uniform distribution
 
-```{r echo=FALSE, message = FALSE}
+```{r }
+#| message: false
+
 require(latex2exp, quietly = TRUE)
 
 df1 <- 3
@@ -363,6 +367,8 @@ p
 ## Example *P* values to work with | Turning kinematics in hummingbirds
 
 ```{r}
+#| echo: true
+
 Ps <- read_excel("../data/P_values.xlsx")
 glimpse(Ps)
 range(Ps$P)
@@ -373,7 +379,7 @@ range(Ps$P)
 
 ## Example *P* values to work with | Turning kinematics in hummingbirds
 
-```{r, echo=FALSE, fig.height = 3.5}
+```{r}
 ggplot(Ps, aes(P)) + geom_histogram(bins = 20)
 ```
 
@@ -381,7 +387,9 @@ We have disproportionately more nominally significant tests. Otherwise relativel
 
 ## Distribution of *P* values
 
-```{r echo=FALSE, message = FALSE}
+```{r}
+#| message: false
+
 Ps <- Ps %>% arrange(-log10(P))
 Pp <- data.frame("P"= -log10(Ps$P), "X"=sort(-log10(runif(nrow(Ps),0,1)))) 
 ggplot(Pp, aes(x=X, y=P)) + 
@@ -398,6 +406,8 @@ ggplot(Pp, aes(x=X, y=P)) +
 It will be easier to follow the procedures if the rows are sorted smallest to largest:
 
 ```{r}
+#| echo: true
+
 Ps <- Ps %>% arrange(P)
 head(Ps)
 ```
@@ -421,6 +431,8 @@ $$p_i \leq \frac{\alpha}{k - i + 1}$$
 - At each step, the test value increases:
 
 ```{r}
+#| echo: true
+
 0.05 / 203
 0.05 / 202
 ```
@@ -444,13 +456,15 @@ This and standard Bonferroni are "step-up" methods (start at the smallest and wo
 `p.adjust()` can do some multiple comparisons procedures, given a vector of *P*.
 
 ```{r}
+#| echo: true
+
 Ps$Seq_Bonf <- p.adjust(Ps$P, "holm") < 0.05   # Sequential Bonferroni
 sum(Ps$Seq_Bonf)
 ```
 
 Only 33 of the original 62 significant tests remain.
 
-## False discovery rate
+## False discovery rate {.smaller}
 
 - Sort the *P* values from largest ($p_k$) to smallest ($p_1$)
 - Starting at the *largest* *P* value ($p_k$), calculate the critical significance level ($d_k^*$) for that *P* value:
@@ -464,7 +478,7 @@ Where $q^*$ is the desired false discovery rate (e.g., 0.05).
     - Rarely will the largest *P* value be less than $q^*$.
 
 
-## False discovery rate
+## False discovery rate {.smaller}
 
 - Move to the 2nd largest *P* value and calculate the critical significance level
 
@@ -480,6 +494,8 @@ $$d_k^* = q^* \frac{k - 1}{k}$$
 ## False discovery rate
 
 ```{r}
+#| echo: true
+
 Ps$FDR <- p.adjust(Ps$P, "fdr") < 0.05
 sum(Ps$FDR)
 ```
@@ -490,6 +506,8 @@ sum(Ps$FDR)
 ## False discovery rate {.smaller}
 
 ```{r}
+#| echo: true
+
 Ps %>% slice(32:47)
 ```
 
@@ -510,7 +528,7 @@ Seek a balance between false positives and true positives
 - We will accept a pFDR of 0.05 or 0.10, meaning that 5% or 10% of the tests we call true (nominally statistically significant) are actually false.
 
 
-## Positive false discovery rate
+## Positive false discovery rate {.smaller}
 
 Estimate $\pi_0$ (ratio of true null tests to total tests) *from the distribution of P values*
 
@@ -528,7 +546,10 @@ $$\pi_0 = \frac{\mbox{n True Null Tests}}{\mbox{n Total Tests}}$$
 
 pFDR is implemented in `qvalue`. Installation is a little different, because it is not in CRAN.
 
-```{r eval = FALSE}
+```{r}
+#| echo: true
+#| eval: false
+
 source("https://bioconductor.org/biocLite.R")
 biocLite("qvalue")
 library(qvalue)
@@ -537,7 +558,9 @@ library(qvalue)
 
 ## $\pi_0 = 1$
 
-```{r echo=FALSE, message = FALSE}
+```{r }
+#| message: false
+
 ggplot(Ps, aes(P)) +
   geom_histogram(aes(y = ..density..), fill = "gray", bins = 20) +
   geom_hline(yintercept = 1, color = "blue")
@@ -588,12 +611,17 @@ For large numbers of *P* values (hundreds?, thousands?), the default settings in
 Just pass a vector of *P* values to `qvalue()`:
 
 ```{r}
+#| echo: true
+
 qobj <- qvalue(Ps$P)
 ```
 
 Explicitly:
 
-```{r eval = FALSE}
+```{r}
+#| echo: true
+#| eval: false
+
 qobj <- qvalue(Ps$P, fdr.level = 0.05, pi0.method = "smoother")
 ```
 
@@ -601,13 +629,15 @@ qobj <- qvalue(Ps$P, fdr.level = 0.05, pi0.method = "smoother")
 ## pFDR in practice
 
 ```{r}
+#| echo: true
+
 summary(qobj)
 ```
 
 
 ## Visualizing $\pi_0 = `r round(qobj$pi0, 3)`$
 
-```{r echo=FALSE}
+```{r}
 ggplot(Ps, aes(P)) +
   geom_histogram(aes(y = ..density..), fill = "gray", bins = 20) +
   geom_hline(yintercept = 1, color = "blue") +
@@ -620,6 +650,8 @@ Blue: All H~0~ are true. Red: Only 32% of H~0~ are true.
 ## Calculating an adjusted $\alpha$ level
 
 ```{r}
+#| echo: true
+
 max(qobj$pvalues[qobj$qvalues <= 0.05])
 ```
 
@@ -631,6 +663,8 @@ Include unadjusted *P* values and adjust $\alpha$. Discuss results with respect 
 ## Positive false discovery rate
 
 ```{r}
+#| echo: true
+
 Ps$pFDR <- qobj$qvalues < 0.05
 sum(Ps$pFDR)
 ```
@@ -640,10 +674,12 @@ sum(Ps$pFDR)
 ## Positive false discovery rate {.smaller}
 
 ```{r}
+#| echo: true
+
 Ps %>% slice(32:47)
 ```
 
-## A menu of MCPs
+## A menu of MCPs {.smaller}
 
 1. <s>Do nothing</s>
     - Not an option 
