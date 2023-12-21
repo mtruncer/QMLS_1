@@ -16,8 +16,8 @@ bibliography: QMLS_Bibliography.bib
 csl: evolution.csl
 ---
 
-## Underfitting and overfitting
 
+## Likelihoods and model comparison
 
 ```{r}
 #| label: setup
@@ -32,9 +32,6 @@ library(readxl)
 library(wesanderson)
 library(gt)
 ```
-
-
-## Likelihoods and model comparison
 
 We have maximized likelihoods for single models
 
