@@ -177,7 +177,7 @@ ggplot(M, aes(x = Mass, y = Energy, color = Caste)) +
 ## 5: Slopes and intercepts varying
 
 ```{r}
-#|echo: true
+#| echo: true
 
 fm5 <- lm(Energy ~ Mass * Caste, data = M)
 ```
@@ -217,7 +217,7 @@ lls <- tribble(
   ~Model, ~`n Estimated Parameters`, ~`log-Likelihood`,
   "Grand mean", 2, rll(fm1),
   "Categorical only", 3, rll(fm2),
-  "Continuous only", 4, rll(fm3),
+  "Continuous only", 3, rll(fm3),
   "Intercepts varying", 5, rll(fm4),
   "Slopes & intercepts varying", 6, rll(fm5)
   )
@@ -268,6 +268,7 @@ summary(fm6)
 
 ```{r}
 #| output: asis
+
 add_row(lls,
         Model = "Slopes & intercepts varying + Noise",
         `n Estimated Parameters` = 7,
@@ -286,11 +287,10 @@ add_row(lls,
 ```
 
 
-## Comparing six nested models:
+## Comparing nested models:
 
 1. Grand mean
-1. Categorical only
-1. Continuous only
+1. Categorical only / Continuous only
 1. Intercepts varying
 1. Slopes & intercepts varying
 1. Slopes & intercepts varying + Noise
@@ -330,17 +330,26 @@ lrtest(fm1, fm2)
 
 ```{r}
 #| echo: true
-#| eval: false
 
-lrtest(fm1, fm2, fm3, fm4, fm5, fm6)
+lrtest(fm1, fm2, fm4, fm5, fm6)
 ```
+
+
+## Likelihood ratio tests
+
+```{r}
+#| echo: true
+
+lrtest(fm1, fm3, fm4, fm5, fm6)
+```
+
 
 ## Likelihood ratio tests
 
 `Energy ~ Mass + Caste` is not improved by adding an interaction term.
 
 ```{r}
-lrtest(fm1, fm2, fm3, fm4, fm5, fm6)
+lrtest(fm1, fm3, fm4, fm5, fm6)
 ```
 
 
