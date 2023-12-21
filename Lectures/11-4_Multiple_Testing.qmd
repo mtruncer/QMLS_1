@@ -332,48 +332,6 @@ ggplot(Pp, aes(x = X, y = P)) +
 ```
 
 
-## Distribution of *P* values 
-
-*P* values resulting from chance alone have a uniform distribution
-
-```{r}
-#| message: false
-
-require(latex2exp, quietly = TRUE)
-
-df1 <- 3
-df2 <- 10
-q <- 0.05
-vline <- NULL
-
-
-p1 <- c(1, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1)
-p2 <- p1 - 0.1
-
-F1 <- qf(p = p1, df1, df2, lower.tail = FALSE)
-F2 <- qf(p = p2, df1, df2, lower.tail = FALSE)
-
-x_max <- max(F1) * 2
-M <- tibble(x = seq(0.001, x_max, length = 20000),
-               y = df(x, df1, df2))
-p <- ggplot(M, aes(x, y)) +
- geom_line() +
- ylim(c(0, 1.1 * max(M$y))) +
- labs(x = TeX("$F_{3, 10}$"),
-      y = "Relative Likelihood")
-ccs <- c("steelblue", "coral", "steelblue", "coral",
-         "steelblue", "coral", "steelblue", "coral",
-         "steelblue", "coral")
-for (ii in 1:length(p1)) {
- p <- p +
-   geom_ribbon(data = subset(M, x > F1[ii] & x < F2[ii]),
-               aes(ymax = y), ymin = 0,
-               fill = ccs[ii])
-}
-p
-```
-
-
 ## Example *P* values to work with 
 
 Turning kinematics in hummingbirds
