@@ -308,7 +308,7 @@ ggplot(ps, aes(x = p1)) +
 
 *P* values resulting from chance alone have a uniform distribution
 
-```{r}
+```{r fig.align='center'}
 #| message: false
 
 Ps <- ps %>% arrange(-log10(p1))
@@ -319,7 +319,8 @@ ggplot(Pp, aes(x = X, y = P)) +
   geom_abline(intercept = 0, slope = 1) +
   xlim(c(0, 5)) +
   ylab("Observed -log10 P values") +
-  xlab("Expected -log10 P values")
+  xlab("Expected -log10 P values") +
+  coord_equal()
 ```
 
 ## Distribution of *P* values 
@@ -387,7 +388,7 @@ We have disproportionately more nominally significant tests. Otherwise relativel
 
 ## Distribution of *P* values
 
-```{r}
+```{r fig.align='center'}
 #| message: false
 
 Ps <- Ps %>% arrange(-log10(P))
@@ -398,7 +399,8 @@ ggplot(Pp, aes(x=X, y=P)) +
   xlim(c(0,9)) +
   ylim(c(0,18)) +
   ylab("Observed -log10 P values") +
-  xlab("Expected -log10 P values")
+  xlab("Expected -log10 P values") +
+  coord_equal()
 ```
 
 ## Sort *P* values

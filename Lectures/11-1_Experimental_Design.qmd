@@ -177,6 +177,18 @@ ggscatmat(MM, columns = 2:4)
 
 ```
 
+## Examples
+
+- Define (and write down) your main question
+    - What do I want to learn?
+- Define useful models
+
+Key questions to ask at every step:
+
+1. **What question am I trying to answer?**
+1. **What processes could have produced the pattern I am observing?**
+
+
 ## Example: Wing Dimorphic Crickets
 
 > Do long-winged crickets have a higher resting metabolic rate than short-winged crickets?

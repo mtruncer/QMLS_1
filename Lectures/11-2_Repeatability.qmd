@@ -42,8 +42,8 @@ Parsing real variation vs. measurement error
 
 How good are my observations?
 
-1. Discrete measurements: **interrater reliability**
 1. Continuous measurements: **intraclass correlation coefficient**
+1. Discrete measurements: **interrater reliability**
 
 ## Visualizing ANOVA
 
@@ -54,6 +54,101 @@ How good are my observations?
 
 $$F = \frac{\mbox{Between Group Variation}}{\mbox{Within Group Variation}}$$
 
+
+
+## Intraclass Correlation Coefficient {.smaller}
+
+For continuously varying measurements:
+
+$$\mbox{ICC} =\frac{\sigma_{A}^{2}}{\sigma_{A}^{2}+MS_{error}}$$
+
+$$\sigma_{A}^{2}=\frac{MS_{group}-MS_{error}}{n}$$
+
+- $n$ = Number of measurements per specimen (*not the sample size*).
+
+Uses the results of the linear model (ANOVA):
+
+$$\mbox{Measurement} \sim \mbox{Specimen ID}$$
+
+
+## Repeatability of lipid levels in the same sample
+
+<center>
+<img src="https://imgur.com/6nkJATA.png" width="30%" />
+</center>
+
+
+## Calculation of ICC {.smaller}
+
+What is the ICC of repeated measurements of lipid levels in fruit flies?
+
+```{r}
+#| echo: true
+#| message: false
+
+MM <- read_csv("../data/macromol_optim.csv") %>% 
+  mutate(replicate = rep(paste0("rep",c(1,2)),439),
+         Line = factor(Line))
+glimpse(MM)
+
+```
+
+
+## Pairs of measurements
+
+```{r fig.height=8, fig.width=8, fig.align='center'}
+wideM <- MM %>%
+  select(replicate,Line,Lipid.per.Fly) %>%
+  pivot_wider(names_from = replicate, values_from = Lipid.per.Fly)
+
+ggplot(wideM, aes(rep1, rep2)) +
+  geom_abline(slope = 1, intercept = 0) +
+  geom_point() +
+  xlab("Lipid Level #1") +
+  ylab("Lipid Level #2") +
+  coord_equal() +
+  theme(text = element_text(size = 20))
+
+```
+
+
+## ICC via ANOVA
+
+```{r}
+#| echo: true
+
+fm <- lm(Lipid.per.Fly ~ Line, data = MM)
+print(anova(fm), digits = 5)
+
+var_a <- (0.39597 - 0.10035) / 2
+var_a / (var_a + 0.10035)
+
+```
+
+ICC is 0.60 for these measurements.
+
+
+## With `ICCest()`
+
+```{r iccest}
+#| echo: true
+
+library(ICC)
+
+ICCest(Line,
+       Lipid.per.Fly,
+       data = MM,
+       alpha = 0.05,
+       CI.type = "Smith")
+
+```
+
+
+## Additional utility functions in `ICC` package
+
+`Nest()`: Given a predicted ICC and *k* measures per individual/group, this function will calculate the *N* individuals/groups required to obtain a desired confidence interval
+
+`effort()`: Given a fixed researcher effort (e.g., total number of assays able to be run), this function plots the optimum *k* measurements per individual to use in order to obtain the smallest confidence interval at an expected intraclass correlation coefficient (ICC) estimate.
 
 ## Interrater reliability
 
@@ -143,98 +238,6 @@ Arbitrary categorizations:
 cor.test(Obs1, Obs2, method = "spearman", exact = FALSE)
 sum(Obs1 != Obs2) / length(Obs1) # Percent disagreement
 ```
-
-
-## Intraclass Correlation Coefficient {.smaller}
-
-For continuously varying measurements:
-
-$$\mbox{ICC} =\frac{\sigma_{A}^{2}}{\sigma_{A}^{2}+MS_{error}}$$
-
-$$\sigma_{A}^{2}=\frac{MS_{group}-MS_{error}}{n}$$
-
-- $n$ = Number of measurements per specimen (*not the sample size*).
-
-Uses the results of the linear model (ANOVA):
-
-$$\mbox{Measurement} \sim \mbox{Specimen ID}$$
-
-
-## Repeatability of lipid levels in the same sample
-
-<center>
-<img src="https://imgur.com/6nkJATA.png" width="30%" />
-</center>
-
-
-## Calculation of ICC {.smaller}
-
-What is the ICC of repeated measurements of lipid levels in fruit flies?
-
-```{r}
-#| echo: true
-#| message: false
-
-MM <- read_csv("../data/macromol_optim.csv") %>% 
-  mutate(replicate = rep(paste0("rep",c(1,2)),439),
-         Line = factor(Line))
-glimpse(MM)
-
-```
-
-
-## Pairs of measurements
-
-```{r}
-wideM <- MM %>%
-  select(replicate,Line,Lipid.per.Fly) %>%
-  pivot_wider(names_from = replicate, values_from = Lipid.per.Fly)
-
-ggplot(wideM, aes(rep1, rep2)) +
-  geom_abline(slope = 1, intercept = 0) +
-  geom_point() +
-  xlab("Lipid Level #1") +
-  ylab("Lipid Level #2")
-```
-
-
-## ICC via ANOVA
-
-```{r}
-#| echo: true
-
-fm <- lm(Lipid.per.Fly ~ Line, data = MM)
-print(anova(fm), digits = 5)
-
-var_a <- (0.39597 - 0.10035) / 2
-var_a / (var_a + 0.10035)
-
-```
-
-ICC is 0.60 for these measurements.
-
-
-## With `ICCest()`
-
-```{r iccest}
-#| echo: true
-
-library(ICC)
-
-ICCest(Line,
-       Lipid.per.Fly,
-       data = MM,
-       alpha = 0.05,
-       CI.type = "Smith")
-
-```
-
-
-## Additional utility functions in `ICC` package
-
-`Nest()`: Given a predicted ICC and *k* measures per individual/group, this function will calculate the *N* individuals/groups required to obtain a desired confidence interval
-
-`effort()`: Given a fixed researcher effort (e.g., total number of assays able to be run), this function plots the optimum *k* measurements per individual to use in order to obtain the smallest confidence interval at an expected intraclass correlation coefficient (ICC) estimate.
 
 
 ## References
