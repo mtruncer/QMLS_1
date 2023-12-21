@@ -41,6 +41,7 @@ Datasets
 -->
 
 Mistake #1: Concluding predictor(s) is important when it really isn't.  
+
 ```{r}
 #| echo: true
 
@@ -54,7 +55,6 @@ summary(lm(yy ~ gg))$coefficients
 ```
 
 This is a Type I error = A false positive = A false discovery
-
 
 
 ## Types of errors and statistical power {.smaller}
@@ -143,6 +143,7 @@ length(which(ps[, 'p1'] < 0.05 | ps[, 'p2'] < 0.05)) / niter
 
 The overall error rate = the family-wise error rate (FWER).
 
+
 ## Familywise Error Rate (FWER)
 
 FWER is the probability that at least one test will reject a true null hypothesis, i.e., committing *at least one* type I error.
@@ -199,8 +200,9 @@ calcFWER <- function(k, alpha){
 
 k <- seq(1, 200, by = 1)
 alpha <- c(0.05, 0.01, 0.001)
-FWERs <- crossing(k, alpha) %>%
-  mutate(FWER = pmap_dbl(.l = ., .f = calcFWER),
+FWERs <- crossing(k, alpha)
+FWERs <- FWERs |> 
+  mutate(FWER = pmap_dbl(.l = FWERs, .f = calcFWER),
          alpha = factor(alpha))
 
 ggplot(FWERs, aes(x = k, y = FWER, color = alpha)) +
@@ -212,6 +214,7 @@ ggplot(FWERs, aes(x = k, y = FWER, color = alpha)) +
                      name = "Alpha",
                      breaks = c("0.05", "0.01", "0.001")) 
 ```
+
 
 ## A menu of MCPs {.smaller}
 
@@ -226,6 +229,7 @@ ggplot(FWERs, aes(x = k, y = FWER, color = alpha)) +
 6. Methods to control the False Discovery Rate (FDR)
     - False Discovery Rate Methods
     - _Positive_ False Discovery Rate Methods
+
 
 ## Goals of multiple comparisons procedures
 
@@ -249,6 +253,7 @@ Type I and Type II errors will trade-off.
 1. Collect the resulting *P* values into a single vector or `data.frame`.
 1. Perform a multiple comparisons procedure (directly adjust or calculate new $\alpha$ level)
 1. Assess significance of your tests *as a whole*
+
 
 ## FWER vs. False discovery rate
 
@@ -274,6 +279,7 @@ $$\mbox{FDR} = \frac{\mbox{n False Positives}}{\mbox{n All Positives}}$$
 e.g., I'm OK with 5% false positives *among the tests I judge as significant*.
 
 Note: False Positive Rate = $\frac{\mbox{n False Positives}}{\mbox{n All Tests}}$
+
 
 ## Distribution of *P* values 
 
@@ -304,14 +310,16 @@ ggplot(ps, aes(x = p1)) +
   labs(x = "P value")
 ```
 
+
 ## Distribution of *P* values 
 
 *P* values resulting from chance alone have a uniform distribution
 
-```{r fig.align='center'}
+```{r}
 #| message: false
+#| fig-align: center
 
-Ps <- ps %>% arrange(-log10(p1))
+Ps <- ps |> arrange(-log10(p1))
 Pp <- data.frame("P"= -log10(Ps$p1),
                  "X" = sort(-log10(runif(nrow(ps), 0, 1)))) 
 ggplot(Pp, aes(x = X, y = P)) + 
@@ -323,11 +331,12 @@ ggplot(Pp, aes(x = X, y = P)) +
   coord_equal()
 ```
 
+
 ## Distribution of *P* values 
 
 *P* values resulting from chance alone have a uniform distribution
 
-```{r }
+```{r}
 #| message: false
 
 require(latex2exp, quietly = TRUE)
@@ -365,7 +374,9 @@ p
 ```
 
 
-## Example *P* values to work with | Turning kinematics in hummingbirds
+## Example *P* values to work with 
+
+Turning kinematics in hummingbirds
 
 ```{r}
 #| echo: true
@@ -378,7 +389,7 @@ range(Ps$P)
 203 *P* values. Range: 10^-16^ to 0.992
 
 
-## Example *P* values to work with | Turning kinematics in hummingbirds
+## Example *P* values
 
 ```{r}
 ggplot(Ps, aes(P)) + geom_histogram(bins = 20)
@@ -386,12 +397,14 @@ ggplot(Ps, aes(P)) + geom_histogram(bins = 20)
 
 We have disproportionately more nominally significant tests. Otherwise relatively uniform.
 
+
 ## Distribution of *P* values
 
-```{r fig.align='center'}
+```{r}
 #| message: false
+#| fig-align: center
 
-Ps <- Ps %>% arrange(-log10(P))
+Ps <- Ps |> arrange(-log10(P))
 Pp <- data.frame("P"= -log10(Ps$P), "X"=sort(-log10(runif(nrow(Ps),0,1)))) 
 ggplot(Pp, aes(x=X, y=P)) + 
   geom_point() +
@@ -403,6 +416,7 @@ ggplot(Pp, aes(x=X, y=P)) +
   coord_equal()
 ```
 
+
 ## Sort *P* values
 
 It will be easier to follow the procedures if the rows are sorted smallest to largest:
@@ -410,7 +424,7 @@ It will be easier to follow the procedures if the rows are sorted smallest to la
 ```{r}
 #| echo: true
 
-Ps <- Ps %>% arrange(P)
+Ps <- Ps |> arrange(P)
 head(Ps)
 ```
 
@@ -505,13 +519,14 @@ sum(Ps$FDR)
 44 of the original 62 significant tests remain.
 
 
-## False discovery rate {.smaller}
+## False discovery rate
 
 ```{r}
 #| echo: true
 
-Ps %>% slice(32:47)
+Ps |> slice(32:47)
 ```
+
 
 ## Positive false discovery rate
 
@@ -662,6 +677,7 @@ max(qobj$pvalues[qobj$qvalues <= 0.05])
 
 Include unadjusted *P* values and adjust $\alpha$. Discuss results with respect to adjusted $\alpha$.
 
+
 ## Positive false discovery rate
 
 ```{r}
@@ -673,12 +689,13 @@ sum(Ps$pFDR)
 
 61 of the original 62 significant tests remain.
 
-## Positive false discovery rate {.smaller}
+
+## Positive false discovery rate
 
 ```{r}
 #| echo: true
 
-Ps %>% slice(32:47)
+Ps |> slice(32:47)
 ```
 
 ## A menu of MCPs {.smaller}
@@ -695,6 +712,7 @@ Ps %>% slice(32:47)
     - False Discovery Rate Methods
     - _Positive_ False Discovery Rate Methods
 
+
 ## Problems of Multiplicity
 
 A general failing to account for multiplicity of tests is one of the reasons experiments do not replicate
@@ -707,6 +725,7 @@ A general failing to account for multiplicity of tests is one of the reasons exp
     
 - Mathematical issues
     - Simultaneous corrections for thousands of tests
+
 
 ## References
 

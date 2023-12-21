@@ -15,8 +15,8 @@ code-annotations: hover
 bibliography: QMLS_Bibliography.bib
 csl: evolution.csl
 ---
-## Repeatability of measurements
 
+## Repeatability of measurements
 
 ```{r}
 #| label: setup
@@ -27,9 +27,7 @@ library(cowplot)
 theme_set(theme_cowplot())
 library(readxl)
 library(ggrepel)
-
 ```
-
 
 <!--
 Datasets
@@ -45,18 +43,15 @@ How good are my observations?
 1. Continuous measurements: **intraclass correlation coefficient**
 1. Discrete measurements: **interrater reliability**
 
+
 ## Visualizing ANOVA
 
-<center>
-<img src="https://i.imgur.com/dNF4ph0.png" width="100%" />
-</center>
-
+![](https://i.imgur.com/dNF4ph0.png){fig-align="center"}
 
 $$F = \frac{\mbox{Between Group Variation}}{\mbox{Within Group Variation}}$$
 
 
-
-## Intraclass Correlation Coefficient {.smaller}
+## Intraclass Correlation Coefficient
 
 For continuously varying measurements:
 
@@ -66,19 +61,24 @@ $$\sigma_{A}^{2}=\frac{MS_{group}-MS_{error}}{n}$$
 
 - $n$ = Number of measurements per specimen (*not the sample size*).
 
+
+## Intraclass Correlation Coefficient
+
 Uses the results of the linear model (ANOVA):
 
 $$\mbox{Measurement} \sim \mbox{Specimen ID}$$
 
+or the multilevel model
+
+$$\mbox{Measurement} \sim 1 + (1 | \mbox{Specimen ID})$$
+
 
 ## Repeatability of lipid levels in the same sample
 
-<center>
-<img src="https://imgur.com/6nkJATA.png" width="30%" />
-</center>
+![](https://i.imgur.com/6nkJATA.png){fig-align="center"}
 
 
-## Calculation of ICC {.smaller}
+## Calculation of ICC
 
 What is the ICC of repeated measurements of lipid levels in fruit flies?
 
@@ -86,7 +86,7 @@ What is the ICC of repeated measurements of lipid levels in fruit flies?
 #| echo: true
 #| message: false
 
-MM <- read_csv("../data/macromol_optim.csv") %>% 
+MM <- read_csv("../data/macromol_optim.csv") |> 
   mutate(replicate = rep(paste0("rep",c(1,2)),439),
          Line = factor(Line))
 glimpse(MM)
@@ -96,9 +96,11 @@ glimpse(MM)
 
 ## Pairs of measurements
 
-```{r fig.height=8, fig.width=8, fig.align='center'}
-wideM <- MM %>%
-  select(replicate,Line,Lipid.per.Fly) %>%
+```{r}
+#| fig-align: center
+
+wideM <- MM |>
+  select(replicate,Line,Lipid.per.Fly) |>
   pivot_wider(names_from = replicate, values_from = Lipid.per.Fly)
 
 ggplot(wideM, aes(rep1, rep2)) +
@@ -130,7 +132,7 @@ ICC is 0.60 for these measurements.
 
 ## With `ICCest()`
 
-```{r iccest}
+```{r}
 #| echo: true
 
 library(ICC)
@@ -150,6 +152,7 @@ ICCest(Line,
 
 `effort()`: Given a fixed researcher effort (e.g., total number of assays able to be run), this function plots the optimum *k* measurements per individual to use in order to obtain the smallest confidence interval at an expected intraclass correlation coefficient (ICC) estimate.
 
+
 ## Interrater reliability
 
 How well do observers agree on an observation or categorization?
@@ -164,20 +167,18 @@ Measured by Cohen's $\kappa$. See Fleiss [-@Fleiss1971-pa] for details.
 
 ## Scoring archosaur suture morphology
 
-<center>
-<img src="https://i.imgur.com/y9SByTR.png" width="60%" />
-</center>
+![](https://i.imgur.com/y9SByTR.png){fig-align="center"}
 
 From Bailleul et al. [-@Bailleul2016-tk]
 
 
-## Characters {.smaller}
+## Characters
 
 ```{r}
 #| echo: true
 
 MM <- read_excel("../data/GatorObs.xlsx")
-MM %>% filter(Specimen == "MOR-OST-1645")
+MM |> filter(Specimen == "MOR-OST-1645")
 ```
 
 
@@ -188,15 +189,16 @@ Extract observations as numeric vectors:
 ```{r}
 #| echo: true
 
-Obs1 <- MM %>% 
-  select(-Specimen) %>% 
-  filter(Observer == 1) %>%
-  as.matrix() %>% 
+Obs1 <- MM |> 
+  select(-Specimen) |> 
+  filter(Observer == 1) |>
+  as.matrix() |> 
   as.numeric()
-Obs2 <- MM %>% 
-  select(-Specimen) %>% 
-  filter(Observer == 2) %>%
-  as.matrix() %>% 
+
+Obs2 <- MM |> 
+  select(-Specimen) |> 
+  filter(Observer == 2) |>
+  as.matrix() |> 
   as.numeric()
 ```
 

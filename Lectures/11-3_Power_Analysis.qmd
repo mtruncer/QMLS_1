@@ -16,6 +16,7 @@ code-annotations: hover
 bibliography: QMLS_Bibliography.bib
 csl: evolution.csl
 ---
+
 ## Decision errors
 
 ```{r}
@@ -31,8 +32,8 @@ options(scipen = 999)
 
 ```
 
-
 Mistake #1: Concluding predictor(s) is important when it really isn't. 
+
 ```{r}
 #| echo: true
 
@@ -107,9 +108,9 @@ If we can estimate effect size *before we do the study*, we can estimate the pow
     - How small of a difference is not biologically meaningful?
 
 
-## Effect size {.smaller}
+## Effect size
 
-> "An effect size is a standardized measure that quantifies the size of the difference between two groups or the strength of an association between two variables." [@Button2013-vg]
+> "a standardized measure that quantifies the size of the difference between two groups or the strength of an association between two variables." [@Button2013-vg]
 
 Measures of effect size:
 
@@ -135,10 +136,10 @@ $$t=\frac{\bar{Y}_{1}-\bar{Y}_{2}}{SE_{Y_{1}-Y_{2}}}$$
 #| warning: false
 #| message: false
 
-M <- read_excel("../data/Mouse_Weaning_Data.xlsx", na = "NA") %>%
+M <- read_excel("../data/Mouse_Weaning_Data.xlsx", na = "NA") |>
   mutate(Sex = ifelse(Sex == 0, "Female", "Male"),
-         Sex = factor(Sex)) %>% 
-  select(Sex, WnMass) %>% 
+         Sex = factor(Sex)) |> 
+  select(Sex, WnMass) |> 
   drop_na()
 ggplot(M, aes(x = WnMass)) +
   geom_histogram(bins=30) +
@@ -172,8 +173,8 @@ $$ d = \frac{\bar{Y_F} - \bar{Y_M}}{s_{\mbox{pooled}}} $$
 #| echo: true
 
 library(DescTools)
-Females <- M %>% filter(Sex == "Female") %>% pull(WnMass)
-Males <- M %>% filter(Sex == "Male") %>% pull(WnMass)
+Females <- M |> filter(Sex == "Female") |> pull(WnMass)
+Males <- M |> filter(Sex == "Male") |> pull(WnMass)
 CohenD(Females, Males)
 ```
 
@@ -185,7 +186,7 @@ Also in `DescTools`:
 ```{r}
 #| echo: true
 
-JL <- read_csv("../data/JetLag.csv", col_types = "cd") %>% 
+JL <- read_csv("../data/JetLag.csv", col_types = "cd") |> 
   mutate(Treatment = factor(Treatment))
 fm <- lm(Shift ~ Treatment, data = JL)
 EtaSq(fm)
@@ -409,16 +410,15 @@ pwr_reg$Power <- NA
 ```
 
 
-## Power analysis via simulation  {.smaller}
+## Power analysis via simulation
 
 ```{r pwr_sma}
 #| eval: false
+#| echo: true
 
 set.seed(912)
 # Iterate through the rows of `pwr_reg`
 for (i in 1:nrow(pwr_reg)) {
-  tic <- Sys.time()
-  message(i, " of ", nrow(pwr_reg))
   n <- pwr_reg$n[i]
   b_dev <- pwr_reg$b_dev[i]
   sig <- logical(nsims)
@@ -431,13 +431,11 @@ for (i in 1:nrow(pwr_reg)) {
     sig[j] <- fm$slopetest[[1]]$p < alpha
   }
   pwr_reg$Power[i] <- mean(sig)
-  save(pwr_reg, file = "./data/pwr_reg_SMA.Rda")
-  message(Sys.time() - tic)
 }
 ```
 
-- Mass uniformly distributed from 1 - 1000
-- $a$ normally distributed with a mean of 1.31
+- *Mass* uniformly distributed from 1 - 1000
+- *a* normally distributed with a mean of 1.31
 - Calculate `log_Fem_Len`
 
 
@@ -472,7 +470,7 @@ p + theme(legend.background = element_rect(fill = "gray85",
 </center>
 
 
-## Power in MPPs {.smaller}
+## Power in MPPs
 
 ```{r}
 genos <- rbinom(10, 1, 0.5)
@@ -492,16 +490,12 @@ print(c(mean(phenos[genos==0]),mean(phenos[genos==1])))
 
 ## Power in MPPs
 
-<center>
-<img src="https://i.imgur.com/czRpqAD.png" width="100%" />
-</center>
+![](https://i.imgur.com/czRpqAD.png){fig-align="center"}
 
 
 ## Power in MPPs
 
-<center>
-<img src="https://i.imgur.com/qHWfIa6.png" width="60%" />
-</center>
+![](https://i.imgur.com/qHWfIa6.png){fig-align="center"}
 
 
 
