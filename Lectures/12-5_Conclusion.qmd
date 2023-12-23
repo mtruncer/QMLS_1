@@ -1,0 +1,59 @@
+---
+title: "Advanced Topics"
+subtitle: "Introduction"
+author:
+  - Elizabeth King
+  - Kevin Middleton
+format:
+  revealjs:
+    theme: [default, custom.scss]
+    standalone: true
+    self-contained: true
+    logo: QMLS_Logo.png
+    slide-number: true
+    show-slide-number: all
+code-annotations: hover
+bibliography: QMLS_Bibliography.bib
+csl: evolution.csl
+---
+
+## Topics we have covered
+
+- Programming with data, reproducible research
+- Data wrangling and visualization
+- Probability and likelihood
+- Lots of linear models, some multilevel
+- Making decisions, making errors in decisions
+- Model comparison
+- Experimental design
+
+
+## Techniques for using what you have learned
+
+- Start simple
+- 
+
+
+## Non-exhaustive list of topics we have not covered
+
+- Randomization and simulation
+- Multivariate approaches
+- Non-linear models
+- (Most of) Bayesian inference
+- (Most of) multilevel models
+- Non-Gaussian outcome variables
+
+
+
+## Where to go from here
+
+- Quantitative Methods in Life Sciences 2 (BIO_SC 8642)
+    - 5 week modules on focused topics
+- Other formal or informal classes (MU, online)
+- Study groups (pick a book and work through)
+- Discussion groups (Dataphiles, R-MUsers slack)
+- Self-study
+
+
+## Techniques for self-study
+

@@ -1,12 +1,20 @@
 ---
-title: "General(ized) Linear Models: Other Distributions"
-subtitle: "Quantitative Methods in Life Sciences"
-author: 'Elizabeth King, Kevin Middleton, and Lauren Sullivan'
-output:
-  ioslides_presentation:
-    fig_width: 8
+title: "Generalized Linear Models"
+subtitle: "Non-normal outcome variables"
+author:
+  - Elizabeth King
+  - Kevin Middleton
+format:
+  revealjs:
+    theme: [default, custom.scss]
+    standalone: true
+    self-contained: true
+    logo: QMLS_Logo.png
+    slide-number: true
+    show-slide-number: all
+code-annotations: hover
+bibliography: QMLS_Bibliography.bib
 csl: evolution.csl
-bibliography: Multivariate.bib
 ---
 
 ```{r setup, echo=FALSE, message=FALSE, warning=FALSE}

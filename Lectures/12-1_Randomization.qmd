@@ -1,42 +1,46 @@
 ---
-title: "Distribution Free Methods: Introduction"
-subtitle: "Quantitative Methods in Life Sciences"
-author: 'Elizabeth King, Kevin Middleton, and Lauren Sullivan'
-output:
-  ioslides_presentation:
-    fig_width: 8
-    css: styles.css
+title: "Distribution Free Methods"
+author:
+  - Elizabeth King
+  - Kevin Middleton
+format:
+  revealjs:
+    theme: [default, custom.scss]
+    standalone: true
+    self-contained: true
+    logo: QMLS_Logo.png
+    slide-number: true
+    show-slide-number: all
+code-annotations: hover
+bibliography: QMLS_Bibliography.bib
 csl: evolution.csl
-bibliography: Multivariate.bib
 ---
-
-```{r setup, echo=FALSE, message=FALSE, warning=FALSE}
-library(tidyverse)
-library(cowplot)
-theme_set(theme_cowplot())
-library(readxl)
-library(wesanderson)
-library(knitr)
-
-```
-
-<!--
-Datasets
-  Jackals.xlsx
--->
 
 
 ## Distribution Free Methods
 
+```{r}
+#| label: setup
+#| echo: false
+#| message: false
+#| warning: false
+
+library(tidyverse)
+library(cowplot)
+theme_set(theme_cowplot())
+library(readxl)
+library(gt)
+
+```
+
 Distribution free methods do not assume the data are drawn from any specific probability distribution. *Important: distribution-free, not assumption-free (e.g., IID).*
 
-  - Randomization 
-      - Shuffle data set in some way
-    
-  - Resampling
-      - Sample from data set in some way
-        - Jackknife
-        - Bootstrap
+- Randomization 
+    - Shuffle data set in some way
+- Resampling
+    - Sample from data set in some way
+      - Jackknife
+      - Bootstrap
 
 
 ## Why distribution free methods?      
@@ -66,9 +70,7 @@ Distribution free methods do not assume the data are drawn from any specific pro
 
 ## Hypothesis testing by randomization
 
-<center>
-<img src="https://i.imgur.com/OOYvufC.jpg" width="55%" />
-</center>
+![](https://i.imgur.com/OOYvufC.jpg){fig-align="center"}
 
 
 ## Hypothesis testing by randomization
@@ -76,15 +78,17 @@ Distribution free methods do not assume the data are drawn from any specific pro
 Mandible lengths of female and male jackals from the Natural History Museum (London).
 
 ```{r}
-M <- read_excel("../data/Jackals.xlsx")
+#| echo: true
+
+M <- read_excel("../data/Jackals.xlsx") |> 
+  mutate(Sex = factor(Sex))
 glimpse(M)
-M <- M %>% mutate(Sex = factor(Sex)) %>% as.data.frame()
 ```
 
 
 ## Randomization tests
 
-```{r echo=FALSE, message=FALSE}
+```{r}
 ggplot(M, aes(Mandible)) +
   geom_histogram(bins = 30) +
   facet_grid(Sex ~ .) +
@@ -94,7 +98,7 @@ ggplot(M, aes(Mandible)) +
 
 ## Randomization tests
 
-We'd like to do a *t*-test to compare group means.
+We'd like to do a linear model to compare group means.
 
 But:
 
@@ -109,10 +113,15 @@ But:
 1. Calculate the test statistic for the *observed* data
 1. Randomly shuffle the observations
 1. Calculate the test statistic for that group
-1. Repeat thousands of times
+1. Repeat 10^*x*^ of times (*x* is 3, 4, 5 or more)
 1. Determine the proportion of random combinations resulting in a test statistic more extreme than the observed value ("empirical *P*")
 
-When test assumptions are met, the results will match asymptotic procedures. When the assumptions are not met, the results will be valid.
+
+## Randomization procedure
+
+When test assumptions are met, the results will match asymptotic procedures (with enough iterations).
+
+When the assumptions are not met, the results will be valid.
 
 
 ## Decide on a test statistic
@@ -129,6 +138,8 @@ When test assumptions are met, the results will match asymptotic procedures. Whe
 Observed difference in mean value for females vs. males:
 
 ```{r}
+#| echo: false
+
 (obs <- mean(M$Mandible[M$Sex == "F"]) -
    mean(M$Mandible[M$Sex == "M"]))
 ```
@@ -136,24 +147,25 @@ Observed difference in mean value for females vs. males:
 
 ## Randomly reassign, recalculate, repeat
 
-```{r, echo=FALSE, fig.height=4}
+```{r}
 add_mean <- function(D) {
-  F_mean <- D %>% filter(Sex == "F") %>% 
-    summarize(bar = mean(Mandible)) %>% pull()
-  M_mean <- D %>% filter(Sex == "M") %>% 
-    summarize(bar = mean(Mandible)) %>% pull()
+  F_mean <- D |> filter(Sex == "F") |> 
+    summarize(bar = mean(Mandible)) |> pull()
+  M_mean <- D |> filter(Sex == "M") |> 
+    summarize(bar = mean(Mandible)) |> pull()
   st <- paste("F =", F_mean, "\nM =", M_mean)
   return(st)
 }
 
-M.set <- M %>%
+M.set <- M |>
   mutate("Original"= M$Sex)
 
 
 ggplot(M.set, aes(x = Sex, y = Mandible, color = Original)) +
   geom_point(position = position_jitter(width = 0.05),
              alpha = 1 / 2, size = 2) +
-    annotate("text", x = 1.5, y = 115, label = add_mean(M.set))
+    annotate("text", x = 1.5, y = 115, label = add_mean(M.set),
+             size = 5)
 ```
 
 
@@ -161,16 +173,17 @@ ggplot(M.set, aes(x = Sex, y = Mandible, color = Original)) +
 
 Shuffle Sex
 
-```{r echo=FALSE, fig.height=4}
+```{r}
 set.seed(23784)
 
-M.shuffle <- M.set %>%
+M.shuffle <- M.set |>
   mutate("Sex"= sample(M$Sex))
 
 ggplot(M.shuffle, aes(x = Sex, y = Mandible, color = Original)) +
   geom_point(position = position_jitter(width = 0.05),
              alpha = 1 / 2, size = 2) +
-  annotate("text", x = 1.5, y = 115, label = add_mean(M.shuffle))
+  annotate("text", x = 1.5, y = 115, label = add_mean(M.shuffle),
+           size = 5)
 ```
 
 
@@ -178,21 +191,24 @@ ggplot(M.shuffle, aes(x = Sex, y = Mandible, color = Original)) +
 
 Repeat N times
 
-```{r echo=FALSE, fig.height=4}
+```{r}
 
-M.shuffle <- M.set %>%
+M.shuffle <- M.set |>
   mutate("Sex"= sample(M$Sex))
 
 ggplot(M.shuffle, aes(x = Sex, y = Mandible, color = Original)) +
   geom_point(position = position_jitter(width = 0.05),
              alpha = 1 / 2, size = 2) +
-  annotate("text", x = 1.5, y = 115, label = add_mean(M.shuffle))
+  annotate("text", x = 1.5, y = 115, label = add_mean(M.shuffle),
+           size = 5)
 ```
 
 
 ## Randomly reassign, recalculate, repeat
 
 ```{r mc_mean}
+#| echo: true
+
 # Set random number seed
 set.seed(10)
 
@@ -209,25 +225,25 @@ for (ii in 2:nreps) {
 
 ## Visualize the results
 
-```{r ex_1, eval=FALSE, message=FALSE}
+```{r}
+#| echo: true
+#| output-location: slide
+
 ggplot(data.frame(diffs), aes(diffs)) +
   geom_histogram(bins = 25) +
-  geom_vline(xintercept = diffs[1], color = "red") +
+  geom_vline(xintercept = diffs[1], color = "firebrick4",
+             linewidth = 2) +
   labs(x = "Difference", y = "Count")
 ```
 
-Histogram of the randomized differences, vertical red line to mark the observed value.
-
-
-## Visualize the results
-
-```{r echo=FALSE, ref.label="ex_1", message=FALSE}
-```
+Histogram of the randomized differences, vertical red line marks the observed value.
 
 
 ## Proportion of randomized differences more extreme than the observed
 
 ```{r}
+#| echo: true
+
 mean(diffs <= diffs[1])
 ```
 
@@ -238,26 +254,38 @@ Empirically determined *P*-value is `r round(mean(diffs <= diffs[1]), 4)`.
 
 ## Example: Age predicted by coloration in lion noses
 
-<center>
-<img src="https://i.imgur.com/beEXTFK.jpg" width="40%" />
-<img src="https://i.imgur.com/5kXcaVu.jpg" width="42%" />
-</center>
+:::: {.columns}
+
+::: {.column width="30%"}
+
+![](https://i.imgur.com/beEXTFK.jpg){fig-align="center"}
+:::
+
+::: {.column width="70%"}
+
+![](https://i.imgur.com/5kXcaVu.jpg){fig-align="center"}
+:::
+
+::::
 
 
 ## Age predicted by coloration in lion noses
 
-```{r echo=FALSE}
+```{r}
 data("LionNoses", package = "abd")
 ggplot(LionNoses, aes(proportion.black, age)) +
-  geom_point() +
-  geom_smooth(method = "lm", se = FALSE, formula = y~x) +
+  geom_point(size = 4) +
+  geom_smooth(method = "lm", se = FALSE, formula = y ~ x,
+              linewidth = 2) +
   labs(x = "Proportion of Nose that is Black", y = "Age (y)")
 ```
 
 
-## Age predicted by nose coloration {.smaller}
+## Age predicted by nose coloration
 
 ```{r}
+#| echo: true
+
 fm <- lm(age ~ proportion.black, data = LionNoses)
 summary(fm)
 ```
@@ -265,29 +293,32 @@ summary(fm)
 
 ## Age predicted by nose coloration
 
-```{r echo=FALSE, message=FALSE}
+```{r}
 set.seed(481769)
 nreps <- 1e4
-t_stats <- numeric(nreps)
-t_stats[1] <- summary(fm)$coefficients[2, 3]
+pb <- numeric(nreps)
+pb[1] <- coef(fm)[2] |> as.numeric()
 
 for (ii in 2:nreps) {
   Rand_Age <- sample(LionNoses$age)
   fm_rand <- lm(Rand_Age ~ proportion.black, data = LionNoses)
-  t_stats[ii] <- summary(fm_rand)$coefficients[2, 3]
+  pb[ii] <- coef(fm_rand)[2] |> as.numeric()
 }
 
-ggplot(data.frame(t_stats), aes(t_stats)) +
+ggplot(data.frame(pb), aes(pb)) +
   geom_histogram(bins = 30) +
-  geom_vline(xintercept = t_stats[1], color = "red") +
-  labs(x = "t statistics", y = "Count")
+  geom_vline(xintercept = pb[1], color = "firebrick4",
+             linewidth = 2) +
+  labs(x = "Coefficient for Proportion Black", y = "Count")
 ```
 
 
 ## Age predicted by nose coloration
 
 ```{r}
-2 * mean(t_stats >= t_stats[1])
+#| echo: true
+
+2 * mean(pb >= pb[1])
 ```
 
 Note sign of the inequality: how often does the randomized age data give a *larger* *t* statistic than the observed?
@@ -295,18 +326,29 @@ Note sign of the inequality: how often does the randomized age data give a *larg
 Why 2 x 10^-4^?
 
 
-## Empirical *P* vs. Iterations {.smaller}
+## Empirical *P* vs. Iterations
 
 What is the minimal detectable *P* for *n* iterations?
 
-```{r echo=FALSE}
-logspace <- function(d1, d2, n) exp(log(10) * seq(d1, d2,
-                                                  length.out = n))
-steps <- 20
-reps_list <- floor(logspace(1, 6.1, n = steps))
-reps_ex <- data.frame(nreps = reps_list)
+```{r}
+#| output: asis
+
+reps_ex <- data.frame(nreps = c(500, 1000, 5000, 10000, 50000))
 reps_ex$min_P <- 2 * (1 / reps_ex$nreps)
-kable(reps_ex[seq(2, nrow(reps_ex), by = 2),])
+
+reps_ex |> 
+  gt() |> 
+  cols_label(nreps = md("Number of iterations"),
+             min_P = md("Minimum detectable *P*-value")) |> 
+  tab_style(style = cell_text(weight = "bold"),
+            locations = cells_column_labels()) |> 
+  tab_style(
+    style = cell_text(size = px(30)),
+    locations = list(cells_column_labels(),
+                     cells_body(
+                       columns = everything()))) |> 
+  as_raw_html()
+
 ```
 
 
