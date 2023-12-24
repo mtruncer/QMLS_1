@@ -17,7 +17,15 @@ bibliography: QMLS_Bibliography.bib
 csl: evolution.csl
 ---
 
-```{r setup, echo=FALSE, message=FALSE, warning=FALSE}
+
+## *Generalized* linear models
+
+```{r}
+#| label: setup
+#| echo: false
+#| message: false
+#| warning: false
+
 library(tidyverse)
 library(cowplot)
 library(readxl)
@@ -27,22 +35,6 @@ library(car)
 theme_set(theme_cowplot())
 ```
 
-<!--
-Datasets
-  Sole.xlsx
-  Tibetan_Skulls.xlsx
--->
-
-
-## Hierarchy of GLMs
-
-<center>
-<img src="https://i.imgur.com/E2Gu7ke.png" width="100%" />
-</center>
-
-
-## *Generalized* linear models
-
 $$\mbox{Response variable(s)} \sim \mbox{Predictor variable(s)} + \mbox{Error}$$
 
 Distribution of the response variable(s) can be:
@@ -50,7 +42,12 @@ Distribution of the response variable(s) can be:
 1. Normal (Gaussian)
 1. Binomial (two states)
 1. Poisson (counts)
-1. Lots and lots of others
+1. Many others
+
+
+## A miscellanea of distributions {.nostretch}
+
+![](https://i.imgur.com/Mks8NPD.png"){fig-align="center" width="80%"}
 
 
 ## General equation form of GLMs
@@ -89,55 +86,9 @@ What are the predictors of presence or absence?
 - Species
 - Rain
 
-<!-- ## Challenge -->
-
-<!-- How much variance is there in 0's and 1's? -->
-
-<!-- ## Odds -->
-
-<!-- $$\mbox{Odds} = \frac{P_{event}}{1 - P_{event}}$$ -->
-
-<!-- Odds is the ratio of the probability of an event to the probability of no event. -->
-
-<!-- $$\log O_i = \log \left(\frac{P_i}{1 - P_i} \right) = \mbox{logit}(P_i)$$ -->
-
-<!-- Logit function converts probabilities to a continuous value not bounded by 0 and 1. -->
-
-<!-- ## Probabilities, odds, and log odds -->
-
-<!-- P  | 0.001 | 0.5 | 0.999 -->
-<!-- --:|--:|--:|--:| -->
-<!-- 1 - P    | 0.999 | 0.5 | 0.001 -->
-<!-- Odds     | 0.001 | 1   | 999 -->
-<!-- log(Odds) | -6.9  | 0   | 6.9 -->
-
-<!-- ## Probabilities to log odds -->
-
-<!-- ```{r} -->
-<!-- P <- seq(0.0001, 0.9999, length.out = 1000) -->
-<!-- Odds <- P / (1 - P) -->
-<!-- log_Odds <- log(Odds) -->
-<!-- M <- data.frame(P, Odds, log_Odds) -->
-<!-- ``` -->
-
-<!-- ## Probabilities to log odds -->
-
-<!-- ```{r echo=FALSE} -->
-<!-- ggplot(M, aes(P, Odds)) + geom_line() + -->
-<!--   labs(x = "Probability", y = "Odds") -->
-<!-- ``` -->
-
-<!-- ## Probabilities to log odds -->
-
-<!-- ```{r echo=FALSE} -->
-<!-- ggplot(M, aes(P, log_Odds)) + geom_line() + -->
-<!--   labs(x = "Probability", y = "log Odds") -->
-<!-- ``` -->
-
-<!-- log-Odds ranges from never (-$\infty$) to always ($\infty$). -->
-
-
 ## Link functions
+
+"Linearize" the outcome variable
 
 1. Gaussian: Identity
 1. Binomial: Logit
@@ -154,9 +105,25 @@ Fitting in R:
 
 - `glm()` uses the formula interface
 - `family = ` determines the link function
-    - "Gaussian" $\rightarrow$ identity
-    - "binomial" $\rightarrow$ logit
-    - "Poisson" $\rightarrow$ log
+
+
+## Logit function
+
+$$logit(p) = \ln \left( \frac{p}{1-p} \right)$$
+
+```{r}
+#| fig-align: center
+
+Ps <- tibble(p = seq(0.001, 0.999, length.out = 200),
+             l = log(p / (1-p)))
+
+ggplot(Ps, aes(p, l)) +
+  geom_hline(yintercept = 0) +
+  geom_line(linewidth = 2, color = "navy") +
+  labs(y = "logit(p)") +
+  scale_x_continuous(breaks = seq(0, 1, by = 0.1))
+
+```
 
 
 ## Logistic regression
@@ -164,18 +131,20 @@ Fitting in R:
 ```{r}
 set.seed(4)
 rainfall <- c(runif(20, 100, 160),
-              runif(20, 160, 210))
+              runif(20, 160, 210)) |> round()
 presence <- c(rbinom(20, 1, 0.15),
               rbinom(20, 1, 0.95))
 LogReg <- data.frame(Rainfall = rainfall,
                      Presence = as.factor(presence))
-head(LogReg)
+LogReg
 ```
 
 
 ## Fitting a logistic model
 
 ```{r}
+#| echo: true
+
 fm <- glm(Presence ~ Rainfall,
           data = LogReg,
           family = "binomial")
@@ -184,7 +153,7 @@ fm <- glm(Presence ~ Rainfall,
 *Note*: `Presence` is a factor with two levels
 
 
-## Summarizing {.smaller}
+## Summarizing
 
 ```{r}
 summary(fm)
@@ -193,22 +162,57 @@ summary(fm)
 
 ## Summarizing with `logistic.display()`
 
-```{r message=FALSE}
+```{r}
+#| message: false
+
 library(epiDisplay)
 logistic.display(fm)
 ```
 
 
+## Back-transforming to probability
+
+`logistic()` back-transforms the logit function
+
+```{r}
+#| echo: true
+
+logistic <- function (x) {
+  p <- 1/(1 + exp(-x))
+  p <- ifelse(x == Inf, 1, p)
+  p
+}
+
+logistic(coef(fm)[2])
+```
+
+
+## Odds ratio
+
+- The probability of an event divided by the probability of *not* that event.
+
+$$OR = \frac{p}{1 - p}$$
+
+```{r}
+#| echo: true
+
+logistic(coef(fm)[2]) / (1 - logistic(coef(fm)[2]))
+```
+
+
 ## Visualizing
 
-```{r log_plot, eval=FALSE}
+```{r}
+#| echo: true
+#| output-location: slide
+
 ggplot(LogReg, aes(x = Rainfall,
                    y = as.numeric(Presence) - 1)) +
   geom_hline(yintercept = 0.5, linetype = "dotted", size = 0.5) +
   geom_smooth(formula = y ~ x,
               method = "glm",
               method.args = list(family = "binomial"),
-              se = FALSE, size = 2) +
+              se = FALSE, linewidth = 2) +
   geom_point(size = 3) +
   ylab("Probability of Presence") +
   xlab("Rainfall (cm/y)") +
@@ -216,17 +220,9 @@ ggplot(LogReg, aes(x = Rainfall,
 ```
 
 
-## Visualizing
-
-```{r echo=FALSE, ref.label="log_plot"}
-```
-
-
 ## Presence of sole
 
-<center>
-<img src="https://i.imgur.com/tippc8A.jpg" width="100%" />
-</center>
+![](https://i.imgur.com/tippc8A.jpg){fig-align="center"}
 
 
 ## Presence of sole
@@ -234,6 +230,8 @@ ggplot(LogReg, aes(x = Rainfall,
 Presence/absence of sole in the Tagus estuary of Portugal.
 
 ```{r}
+#| echo: true
+
 M <- read_excel("../data/Sole.xlsx")
 str(M)
 ```
@@ -242,14 +240,10 @@ str(M)
 ## Presence of sole
 
 ```{r}
-M$Solea_solea <- factor(M$Solea_solea)
+#| echo: true
+
 fm <- glm(Solea_solea ~ salinity, data = M, family = "binomial")
-```
 
-
-## Presence of sole {.smaller}
-
-```{r echo=FALSE}
 summary(fm)
 ```
 
@@ -257,20 +251,21 @@ summary(fm)
 ## Presence of sole
 
 ```{r}
+#| echo: true
+
 logistic.display(fm)
 ```
 
 
 ## Presence of sole
 
-```{r echo=FALSE}
-ggplot(M, aes(x = salinity,
-              y = as.numeric(Solea_solea) - 1)) +
+```{r}
+ggplot(M, aes(x = salinity, y = Solea_solea)) +
   geom_hline(yintercept = 0.5, linetype = "dotted", size = 0.5) +
   geom_smooth(formula = y ~ x,
               method = "glm",
               method.args = list(family = "binomial"),
-              se = FALSE, size = 2) +
+              se = FALSE, linewidth = 2) +
   geom_point(size = 3) +
   ylab("Probability of Presence") +
   xlab("Salinity") +
@@ -278,104 +273,144 @@ ggplot(M, aes(x = salinity,
 ```
 
 
-## Number of sole
+## Poisson regression for counts
+
+- Non-negative counts
+- Observations per some unit of area or time
+    - Plants per hectare
+    - Mutations per chromosome
+    - Cases of a disease per X thousand people
+    - Etc.
+
+
+## Peculiarities of Poisson Distrbutions
 
 ```{r}
-M2 <- M %>% group_by(season, month, area) %>%
-              summarize(number_sole = sum(as.numeric(Solea_solea)),
-                        avg_salinity = mean(salinity),
-                        .groups = "drop")
+#| echo: true
+set.seed(3746382)
+
+x <- rpois(1e4, lambda = 15)
 ```
 
-
-## Number of sole
+Mean == Variance
 
 ```{r}
-fm2 <- glm(number_sole ~ avg_salinity, data = M2, family = "poisson")
+#| echo: true
+mean(x)
+var(x)
 ```
 
+Excess zero counts is *overdispersion* ("zero-inflated").
 
-## Number of sole{.smaller}
+
+## Oceanic tools
 
 ```{r}
-summary(fm2)
+OT <- read_csv("../data/Oceanic_tools.csv", show_col_types = FALSE)
+OT
 ```
 
-
-## Number of sole
-
-```{r, echo = FALSE}
-ggplot(M2, aes(x = avg_salinity,
-              y = number_sole)) +
-  geom_hline(yintercept = 0.5, linetype = "dotted", size = 0.5) +
-  geom_smooth(formula = y ~ x,
-              method = "glm",
-              method.args = list(family = "poisson"),
-              se = FALSE, size = 2) +
-  geom_point(size = 3) +
-  ylab("Number of Sole") +
-  xlab("Salinity") 
-  
-```
+Data from Kline and Boyd [-@Kline2010-yk]
 
 
-## Tibetan skulls
-
-Morant [-@Morant1923-co] published data on 32 skulls from Tibet
-
-<center>
-<img src="https://i.imgur.com/a4DpQbL.png" width="70%" />
-</center>
-
-
-## Tibetan skulls
+## Mapping
 
 ```{r}
-M <- read_excel("../data/Tibetan_Skulls.xlsx")
-str(M)
-M <- M %>% mutate(Origin = factor(Origin))
+library(sf)
+library(rnaturalearth)
+library(rnaturalearthdata)
+
+world <- ne_countries(scale = "medium", returnclass = "sf")
+
+OT_sites <- st_as_sf(OT |> slice(1:8),
+                     coords = c('Lon', 'Lat'), crs = 4326,
+                     agr = "constant")
+
+ggplot(data = world) +
+  geom_sf() +
+  geom_text_repel(data = OT |> slice(1:8),
+                  seed = 235553,
+                  aes(x = Lon, y = Lat, label = Culture), 
+                  box.padding = 0.75,
+                  fontface = "bold") +
+  geom_sf(data = OT_sites, size = 4, color = "firebrick4") +
+  annotate(geom = "text", label = "Tonga and Hawai'i not shown",
+           x = 175, y = 10, size = 5) +
+  coord_sf(xlim = c(135, 185), ylim = c(-20, 12), expand = FALSE) +
+  labs(x = "Longitude", y = "Latitude")
+
 ```
 
 
-## Tibetan skulls
-
-```{r echo=FALSE}
-ggscatmat(M, 1:5, color = "Origin") +
-  theme(text = element_text(size = 9),
-        axis.text = element_text(size = 6),
-        axis.text.x = element_text(angle = -90, vjust = 0.5))
-```
-
-
-## Tibetan skulls
+## Number of tools
 
 ```{r}
-fm <- glm(Origin ~ ., data = M, family = "binomial")
-```
-
-- Use `~ .` to include all other variables
-
-
-## Tibetan skulls {.smaller}
-
-```{r echo=FALSE}
-summary(fm)
+p <- ggplot(OT, aes(y = Total_tools, x = log_Population)) +
+  geom_point(color = "firebrick4", size = 4) +
+  labs(x = "log(Population Size)", y = "Total Number of Tools") +
+  theme(axis.title = element_text(face = "bold"))
+p
 ```
 
 
-## Tibetan skulls {.smaller}
+## GLM
+
+Estimates are on the log-sacle.
 
 ```{r}
-logistic.display(fm)
+fm_pois <- glm(Total_tools ~ log_Population,
+               family = poisson, 
+               data = OT)
+summary(fm_pois)
 ```
 
 
-## Tibetan skulls
+## Why not just use a Gaussian model?
 
 ```{r}
-Anova(fm, type = "III")
+#| echo: true
+
+fm_gauss <- lm(Total_tools ~ log_Population,
+               data = OT)
+summary(fm_gauss)
 ```
 
+
+## Prediction
+
+```{r}
+preds <- data.frame(log_Population = seq(7, 13, length.out = 200))
+preds <- preds |> 
+  mutate(pred_pois = exp(predict(fm_pois, newdata = preds)),
+         pred_gauss = predict(fm_gauss, newdata = preds)) |> 
+  pivot_longer(cols = -log_Population) |> 
+  mutate(Model = if_else(name == "pred_gauss", "Gaussian", "Poisson"))
+
+p +
+  geom_line(data = preds,
+            aes(x = log_Population, y = value, color = Model),
+            linewidth = 1.5) +
+  scale_color_manual(values = c("#345995", "#EAC435"))
+
+```
+
+
+## Prediction
+
+```{r}
+preds <- data.frame(log_Population = seq(0, 13, length.out = 200))
+preds <- preds |> 
+  mutate(pred_pois = exp(predict(fm_pois, newdata = preds)),
+         pred_gauss = predict(fm_gauss, newdata = preds)) |> 
+  pivot_longer(cols = -log_Population) |> 
+  mutate(Model = if_else(name == "pred_gauss", "Gaussian", "Poisson"))
+
+p +
+  geom_line(data = preds,
+            aes(x = log_Population, y = value, color = Model),
+            linewidth = 1.5) +
+  scale_color_manual(values = c("#345995", "#EAC435"))
+```
 
 ## Generalized linear multilevel models
 
@@ -385,3 +420,8 @@ Large can of worms:
 
 - http://glmm.wikidot.com/faq
 
+
+## References
+
+::: {#refs}
+:::
