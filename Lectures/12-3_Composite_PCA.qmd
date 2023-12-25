@@ -17,12 +17,15 @@ csl: evolution.csl
 ---
 
 
+## Motivation: the curse of dimensionality
+
 ```{r}
 #| label: setup
 #| echo: false
 #| message: false
 #| warning: false
 
+library(MASS)
 library(tidyverse)
 library(cowplot)
 library(smatr)
@@ -34,15 +37,6 @@ library(knitr)
 
 theme_set(theme_cowplot())
 ```
-
-<!--
-Datasets
-  Milk.xlsx
-  mammals.xlsx
--->
-
-
-## Motivation: the curse of dimensionality
 
 Multivariate data is not just a challenge for visualization.
 
@@ -68,29 +62,26 @@ Multiple Regression Makes a Composite Variable
 
 ## Multiple regression makes a composite variable
 
-```{r echo=FALSE, warning = FALSE}
-milk <- read_excel("../data/Milk.xlsx", na = "NA")
-M <- milk %>% 
-  select(species, kcal.per.g, perc.fat, perc.lactose) %>%
-  drop_na() %>%
-  as.data.frame()
-names(M) <- c("Species", "Milk_Energy", "Fat", "Lactose")
+```{r}
+Milk <- read_excel("../data/Milk.xlsx", na = "NA") |> 
+  dplyr::select(Species, Milk_Energy, Fat, Lactose) |> 
+  drop_na()
 
-ggscatmat(M)
+ggscatmat(Milk)
 ```
 
 
-## Milk investment across mammalian species
+## Milk investment
 
-```{r webgl=TRUE, echo=FALSE}
-fig <- plot_ly() %>%
-  add_markers(data = M,
+```{r}
+fig <- plot_ly() |>
+  add_markers(data = Milk,
               x = ~ Fat,
               y = ~ Lactose,
               z = ~ Milk_Energy,
               size = 1,
-              showlegend = FALSE) %>%
-  hide_colorbar() %>%
+              showlegend = FALSE) |>
+  hide_colorbar() |>
   layout(scene = list(xaxis = list(title = 'Fat'),
                       yaxis = list(title = 'Lactose'),
                       zaxis = list(title = 'Milk Energy')))
@@ -127,40 +118,46 @@ For *q* variables, you get *q* PCs
 
 ## Milk investment 
 
-```{r echo=FALSE}
-ggplot(M, aes(Fat, Lactose)) + geom_point() + coord_fixed()
+```{r}
+ggplot(Milk, aes(Fat, Lactose)) + 
+  geom_point() +
+  coord_fixed()
 ```
 
 
 ## Milk investment 
 
-Find the indices of the minimum and maximum of `x1`
+Find the indices of the minimum and maximum of `Fat`
 
 ```{r}
-themin <- which.min(M$Fat)
-themax <- which.max(M$Fat)
+#| echo: true
+
+themin <- which.min(Milk$Fat)
+themax <- which.max(Milk$Fat)
 ```
 
 Make a `data.frame` with the points for plotting
 
 ```{r}
-minpt <- data.frame(x1 = M$Fat[themin], x2 = M$Lactose[themin])
-maxpt <- data.frame(x1 = M$Fat[themax], x2 = M$Lactose[themax])
+#| echo: true
+
+minpt <- data.frame(x1 = Milk$Fat[themin], x2 = Milk$Lactose[themin])
+maxpt <- data.frame(x1 = Milk$Fat[themax], x2 = Milk$Lactose[themax])
 ```
 
 
 ## Milk investment 
 
-Green = Low Fat, High Lactose
+Orange = Low Fat, High Lactose
 
 Blue = High Fat, Low Lactose
 
-```{r echo=FALSE}
-ma <- line.cis(M$Lactose, M$Fat,  method = "MA")
+```{r}
+ma <- line.cis(Milk$Lactose, Milk$Fat,  method = "MA")
 
-p <- ggplot(M, aes(Fat, Lactose)) + geom_point() +
-  geom_point(data = minpt, aes(x1, x2), col = "green", size = 3) +
-  geom_point(data = maxpt, aes(x1, x2), col = "blue", size = 3) +
+p <- ggplot(Milk, aes(Fat, Lactose)) + geom_point() +
+  geom_point(data = minpt, aes(x1, x2), col = "orange", size = 4) +
+  geom_point(data = maxpt, aes(x1, x2), col = "blue", size = 4) +
   coord_fixed()
 print(p)
 ```
@@ -168,47 +165,44 @@ print(p)
 
 ## Major axis == PC1
 
-Green = Low Fat, High Lactose
+Orange = Low Fat, High Lactose
 
 Blue = High Fat, Low Lactose
 
-```{r echo=FALSE}
+```{r}
 MA_plot <- p +
   geom_abline(slope = ma[2, 1], intercept = ma[1, 1],
               color = "red",
-              size = 1.5)
+              linewidth = 1.5)
 print(MA_plot)
 ```
 
 
 ## Minor axis == PC2
 
-Green = Low Fat, High Lactose
+Orange = Low Fat, High Lactose
 
 Blue = High Fat, Low Lactose
 
-```{r echo=FALSE}
+```{r}
 raw_plot <- MA_plot +
   geom_abline(slope = -1/ma[2, 1],
-              intercept = mean(M$Lactose) - -1/ma[2, 1] * mean(M$Fat),
+              intercept = mean(Milk$Lactose) - -1/ma[2, 1] * mean(Milk$Fat),
               color = "red",
               size = 1.5)
 print(raw_plot)
 ```
 
 
-## Plotting PCs
+## Rotation of the axes about the means
 
-- Rotation of the axes of multivariate data 
+```{r}
+#| fig-align: center
 
-Green = Low Fat, High Lactose
-
-Blue = High Fat, Low Lactose
-
-```{r echo=FALSE}
-z <- prcomp(~ Fat + Lactose, data = M, center = TRUE, scale. = TRUE)
+z <- prcomp(~ Fat + Lactose, data = Milk,
+            center = TRUE, scale. = TRUE)
 PC <- data.frame(pc1 = z$x[, 1],
-                 pc2 = z$x[, 2])
+                 pc2 = -1 * z$x[, 2])
 
 minpt <- data.frame(x1 = PC$pc1[themin], x2 = PC$pc2[themin])
 maxpt <- data.frame(x1 = PC$pc1[themax], x2 = PC$pc2[themax])
@@ -217,20 +211,17 @@ pc_plot <- ggplot(PC, aes(pc1, pc2)) +
   geom_vline(xintercept = 0, color = "red", size = 1.5) +
   geom_hline(yintercept = 0, color = "red", size = 1.5) +
   geom_point() +
-  geom_point(data = minpt, aes(x1, x2), col = "green", size = 3) +
-  geom_point(data = maxpt, aes(x1, x2), col = "blue", size = 3) +
-  coord_fixed()
+  geom_point(data = minpt, aes(x1, x2), col = "orange", size = 4) +
+  geom_point(data = maxpt, aes(x1, x2), col = "blue", size = 4) +
+  coord_fixed() +
+  labs(x = "PC1", y = "PC2")
 print(pc_plot)
 ```
 
 
 ## Comparing PCs
 
-Green = Low Fat, High Lactose
-
-Blue = High Fat, Low Lactose
-
-```{r echo=FALSE}
+```{r}
 plot_grid(raw_plot, pc_plot, ncol = 2)
 ```
 
@@ -240,17 +231,23 @@ plot_grid(raw_plot, pc_plot, ncol = 2)
 `prcomp()` is the preferred function for PCA (*not* `princomp()`):
 
 ```{r}
-z <- prcomp(~ Fat + Lactose, data = M, center = TRUE, scale. = TRUE)
+#| echo: true
+
+z <- prcomp(~ Fat + Lactose, data = Milk,
+            center = TRUE, scale. = TRUE)
 ```
 
 - One sided formula: `~ Fat + Lactose`
-- Centered to a mean of 0
-- Scaled to standard deviation of 1
+- PCA is scale-dependent
+    - Centered to a mean of 0
+    - Scaled to standard deviation of 1
 
 
-## `prcomp` objects {.smaller}
+## `prcomp` objects
 
 ```{r}
+#| echo: true
+
 str(z)
 ```
 
@@ -260,6 +257,8 @@ str(z)
 ## Proportion of variance (eigenvalues)
 
 ```{r}
+#| echo: true
+
 summary(z)
 ```
 
@@ -271,6 +270,8 @@ PC1 explains 97% of the variance in the data.
 Correlations with with composite variable
 
 ```{r}
+#| echo: true
+
 print(z)
 ```
 
@@ -282,6 +283,8 @@ print(z)
 ## Extracting PC scores
 
 ```{r}
+#| echo: true
+
 PC <- data.frame(pc1 = z$x[, 1],
                  pc2 = z$x[, 2])
 PC
@@ -290,45 +293,57 @@ PC
 
 ## Extracting PC scores
 
-Green = Low Fat, High Lactose
+Orange = Low Fat, High Lactose
 
 Blue = High Fat, Low Lactose
 
-```{r echo=FALSE}
+```{r}
+#| fig-align: center
+
 PC <- data.frame(pc1 = z$x[, 1],
                  pc2 = z$x[, 2])
 PC[1,]
+
 pc_plot <- ggplot(PC, aes(pc1, pc2)) +
   geom_vline(xintercept = 0, color = "red", size = 1.5) +
   geom_hline(yintercept = 0, color = "red", size = 1.5) +
   geom_point() +
-  geom_point(data = minpt, aes(x1, x2), col = "green", size = 3) +
-  geom_point(data = maxpt, aes(x1, x2), col = "blue", size = 3) +
-  geom_point(aes(x= -1.785, y=-0.0636), col="cyan", size=3) +
-  geom_segment(x = -1.785, xend = -1.785, y = -1, yend = -0.0636, col='cyan',lty=3,lwd=1.2) +
-  geom_segment(x = -3, xend = -1.785, y = -0.0636, yend = -0.0636,col='cyan',lty=3,lwd=1.2) +
-  coord_fixed()
+  geom_point(data = minpt, aes(x1, x2), col = "orange", size = 4) +
+  geom_point(data = maxpt, aes(x1, x2), col = "blue", size = 4) +
+  geom_point(aes(x= -1.785, y=-0.0636), col="purple", size = 4) +
+  geom_segment(x = -1.785, xend = -1.785,
+               y = -1, yend = -0.0636, col='purple', lty = 3,
+               linewidth = 1.2) +
+  geom_segment(x = -3, xend = -1.785,
+               y = -0.0636, yend = -0.0636,col='purple', lty = 3,
+               linewidth = 1.2) +
+  coord_fixed() +
+  labs(x = "PC1", y = "PC2")
 print(pc_plot)
 
 ```
 
 
-## Milk investment: PCA approach {.smaller}
+## Milk investment: PCA approach
 
-1. Do fat and lactose together predict milk energy?
+Do fat and lactose *together* predict milk energy?
 
 ```{r}
-PC1 <- z$x[, 1]
-summary(lm(Milk_Energy ~ PC1, data = M))
+#| echo: true
+
+Milk <- Milk |> 
+  mutate(PC1 = z$x[, 1])
+
+summary(lm(Milk_Energy ~ PC1, data = Milk))
 ```
 
 
-## Milk investment: Multiple Regression {.smaller}
+## Milk investment: Multiple Regression
 
-1. Do fat and lactose together predict milk energy?
+Do fat and lactose together independently milk energy after accounting for the other variable?
 
 ```{r}
-fm_Multi <- lm(Milk_Energy ~ Fat + Lactose, data = M)
+fm_Multi <- lm(Milk_Energy ~ Fat + Lactose, data = Milk)
 summary(fm_Multi)
 ```
 
@@ -336,17 +351,19 @@ summary(fm_Multi)
 ## Mammal life history
 
 ```{r}
-M <- read_excel("../data/mammals.xlsx", na = "NA") %>%
+#| echo: true
+
+M <- read_excel("../data/mammals.xlsx", na = "NA") |>
   dplyr::select(litter_size,
                 adult_body_mass_g,
                 neonate_body_mass_g,
                 max_longevity_m,
-                sexual_maturity_age_d) %>% 
+                sexual_maturity_age_d) |> 
   rename(Litter_Size = litter_size,
          Adult_Mass = adult_body_mass_g,
          Neonate_Mass = neonate_body_mass_g,
          Longevity = max_longevity_m,
-         Maturity_Age = sexual_maturity_age_d) %>% 
+         Maturity_Age = sexual_maturity_age_d) |> 
   drop_na()
 ```
 
@@ -356,6 +373,8 @@ M <- read_excel("../data/mammals.xlsx", na = "NA") %>%
 `~ .` means all columns
 
 ```{r}
+#| echo: true
+
 z <- prcomp(~ .,
             data = M,
             center = TRUE,
@@ -367,18 +386,24 @@ Centering and $Z$-scaling are important.
 - Should be the default but are not.
 
 
-## Use `factoextra` for more handy functions
+## Use `factoextra` for useful functions
 
-```{r eval=FALSE}
+```{r}
+#| echo: true
+#| eval: false
+
 remotes::install_github("kassambara/factoextra")
 library(factoextra)
 ```
 
 [factoextra](http://www.sthda.com/english/wiki/factoextra-r-package-quick-multivariate-data-analysis-pca-ca-mca-and-visualization-r-software-and-data-mining) has several convenience functions for working with PCA.
 
+
 ## Mammal life history
 
 ```{r}
+#| echo: true
+
 get_eig(z)
 ```
 
@@ -388,6 +413,8 @@ Eigenvalues are variances. Default R `print()` method returns standard deviation
 ## Mammal life history
 
 ```{r}
+#| echo: true
+
 print(z)
 ```
 
@@ -395,6 +422,8 @@ print(z)
 ## Mammal life history
 
 ```{r}
+#| echo: true
+
 fviz_eig(z, addlabels = TRUE)
 ```
 
@@ -402,6 +431,8 @@ fviz_eig(z, addlabels = TRUE)
 ## Mammal life history
 
 ```{r message=FALSE}
+#| echo: true
+
 fviz_pca_var(z)
 ```
 
@@ -409,6 +440,8 @@ fviz_pca_var(z)
 ## Mammal life history
 
 ```{r message = FALSE}
+#| echo: true
+
 fviz_pca_var(z, axes = c(2, 3))
 ```
 
@@ -443,291 +476,5 @@ PC1:
 
 1. Lose the original variable identity
     - Interpretation can be a challenge
-2. If centered and scaled (advised), you lose the original scale
+2. If centered and scaled (advised), you lose the original scale of the data
 
-
-## Hierarchy of GLMs
-
-<center>
-<img src="https://i.imgur.com/sdx4fMz.png" width="100%" />
-</center>
-
-
-## Approaches to continuous data
-
-*Correlation*:
-
-- 2 interchangeable variables
-
-*Canonical correlation*
-
-- *p* Continuous ~ *q* Continuous
-
-*PCA*:
-
-- 0 outcome variables (`~ .`)
-- *q* possibly correlated variables
-
-*Multiple regression*:
-
-- 1 continuous outcome variable
-- *q* predictors
-
-
-## Multivariate (Gaussian) linear models
-
-Directional:
-
-$$\mbox{Outcome variables} \sim \mbox{Predictor variables}$$
-
-1. "MLM": *p* Continuous ~ *q* Continuous
-2. MANOVA and Hotelling's *T*^2^: *p* Continuous ~ *q* Categorical
-3. MANCOVA: *p* Continuous ~ *q* Categorical + *r* Continuous
-4. (Multiple) correspondence analysis: *p* Categorical ~ *q* Categorical
-
-All of these create composite variables.
-
-## Canonical correlation
-
-Correlations of *linear combinations* of a set of multiple continuous variables with a separate set of multiple continuous variables.
-
-$$\mbox{Multiple variables} \sim \mbox{Multiple variables}$$
-
-- Weather variables vs. Growth variables
-- Ecology variables vs. Urbanization variables
-- Diversity variables vs. Landscape variables
-
-
-## Wheat
-
-> "Two identical 13.6-ton (500 bu.) parcels of Manitoba Northern wheat, variety Selkirk, were stored 183 cm deep in 2 similar and adjoining 305 cm X 333 cm wooden bins in a granary in Winnipeg during 1959-67. Two hundred-gram samples were collected monthly from fixed sampling sites in the bins." Sinha et al. [-@Sinha1969-mp]
-
-Measure biotic (insects, fungi, mites) and abiotic (location, depth, temperature) factors.
-
-- How do these correlate?
-
-
-## Wheat
-
-<center>
-<img src="https://i.imgur.com/jJd74yv.png" width="50%" />
-</center>
-
-
-## MANOVA
-
-Morant [-@Morant1923-co] published data on 32 skulls from Tibet:
-
-```{r}
-M <- read_excel("../data/Tibetan_Skulls.xlsx") %>%
-  mutate(Origin = factor(Origin))
-str(M)
-```
-
-
-## Tibetan skulls
-
-<center>
-<img src="https://i.imgur.com/a4DpQbL.png" width="80%" />
-</center>
-
-
-## Tibetan skulls
-
-```{r echo=FALSE}
-ggscatmat(M, 1:5, color = "Origin") +
-  theme(text = element_text(size = 9),
-        axis.text = element_text(size = 6),
-        axis.text.x = element_text(angle = -90, vjust = 0.5))
-```
-
-
-## MANOVA: Tibetan skulls
-
-```{r}
-fm <- lm(cbind(Skull_Length, Skull_Width,
-               Skull_Height, Face_Height,
-               Face_Breadth) ~ Origin, data = M)
-Anova(fm, type = "III")
-```
-
-
-## MANOVA vs DFA & Logistic Regression
-
-MANOVA and Hotelling's *T*^2^: *p* Continuous ~ *q* Categorical
-
-MANOVA creates a composite variable from the set of outcome variables and asks whether the groups differ.
-
-  - Predict the composite from the group membership
-
-DFA & Logistic Regression: *q* Categorical ~ *p* Continuous and/or *r* Categorical
-
-DFA and Logistic Regression create a composite variable from the set of predictor variables and asks which variables best predict group membership.
-
-  - Predict group membership from the composite scores
-
-
-## Logistic regression vs. DFA
-
-Both:
-
-- Which variable(s) are good predictors of group membership
-- Groups are known *a priori*
-- Uses linear combinations of variables
-- **Predict new observations**
-
-Differences:
-
-- Some assumptions
-- Predictive ability (depends on specifics)
-- See: [this stackexchange](https://stats.stackexchange.com/questions/95247/logistic-regression-vs-lda-as-two-class-classifiers)
-- Ease of interpretation for different questions
-
-
-## Penguin data
-
-```{r}
-library(palmerpenguins)
-glimpse(penguins)
-penguins <- penguins %>% 
-  dplyr::select(species, bill_length_mm, bill_depth_mm,
-         flipper_length_mm, body_mass_g) %>% 
-  drop_na()
-```
-
-
-## Penguin data
-
-```{r echo=FALSE}
-ggscatmat(penguins, 2:5, color = "species") +
-  theme(text = element_text(size = 9),
-        axis.text = element_text(size = 6),
-        axis.text.x = element_text(angle = -90, vjust = 0.5))
-```
-
-
-## DFA in R
-
-Linear discriminant analysis:
-
-- `lda()` with `Group ~ Predictors`
-
-```{r}
-penguin_lda <- lda(species ~ bill_length_mm + bill_depth_mm +
-                     flipper_length_mm + body_mass_g,
-                   data = penguins)
-```
-
-
-## Posterior prediction
-
-```{r}
-penguin_predict <- predict(penguin_lda, penguins[, 2:5])
-penguin_predict$posterior %>% head(10)
-```
-
-
-## Classification
-
-```{r}
-(penguin_classify <- penguin_predict$class)
-```
-
-
-## Percent correct
-
-Mean value of the correct classifications
-
-```{r}
-mean(penguin_classify == penguins$species)
-```
-
-
-## Confusion matrix
-
-```{r}
-table(Original = penguins$species, Predicted = penguin_classify)
-```
-
-
-## Predicting a new observation
-
-```{r}
-new_penguin <- tibble(bill_length_mm = 45,
-                      bill_depth_mm = 15,
-                      flipper_length_mm = 220,
-                      body_mass_g = 5000)
-```
-
-
-## Predicting a new observation
-
-```{r echo=FALSE, fig.height = 3.5}
-p1 <- ggplot(penguins, aes(y = bill_length_mm, x = body_mass_g,
-                     color = species)) +
-  geom_point() +
-  geom_point(data = new_penguin, color = "red", size = 3) +
-  theme(legend.position = "none")
-
-p2 <- ggplot(penguins, aes(y = bill_depth_mm, x = body_mass_g,
-                     color = species)) +
-  geom_point() +
-  geom_point(data = new_penguin, color = "red", size = 3) +
-  theme(legend.position = "none")
-
-p3 <- ggplot(penguins, aes(y = flipper_length_mm, x = body_mass_g,
-                     color = species)) +
-  geom_point() +
-  geom_point(data = new_penguin, color = "red", size = 3) +
-  theme(legend.position = c(0.65, 0.2),
-        legend.box.background = element_rect(colour = "black"))
-
-plot_grid(p1, p2, p3, ncol = 3)
-```
-
-```{r}
-predict(penguin_lda, new_penguin)$posterior
-```
-
-
-## Predicting a new observation
-
-```{r}
-new_penguin <- tibble(bill_length_mm = 40,
-                      bill_depth_mm = 12,
-                      flipper_length_mm = 150,
-                      body_mass_g = 2500)
-```
-
-
-## Predicting a new observation
-
-```{r echo=FALSE, fig.height = 3.5}
-p1 <- ggplot(penguins, aes(y = bill_length_mm, x = body_mass_g,
-                     color = species)) +
-  geom_point() +
-  geom_point(data = new_penguin, color = "red", size = 3) +
-  theme(legend.position = "none")
-
-p2 <- ggplot(penguins, aes(y = bill_depth_mm, x = body_mass_g,
-                     color = species)) +
-  geom_point() +
-  geom_point(data = new_penguin, color = "red", size = 3) +
-  theme(legend.position = "none")
-
-p3 <- ggplot(penguins, aes(y = flipper_length_mm, x = body_mass_g,
-                     color = species)) +
-  geom_point() +
-  geom_point(data = new_penguin, color = "red", size = 3) +
-  theme(legend.position = c(0.65, 0.2),
-        legend.box.background = element_rect(colour = "black"))
-
-plot_grid(p1, p2, p3, ncol = 3)
-```
-
-```{r}
-predict(penguin_lda, new_penguin)$posterior
-```
-
-
-## References
