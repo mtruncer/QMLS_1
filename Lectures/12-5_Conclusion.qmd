@@ -31,7 +31,9 @@ csl: evolution.csl
 ## Techniques for using what you have learned
 
 - Start simple
-- 
+- Recognize problems you have seen before
+- Adapt code for your own use
+    - View this course as a set of recipes
 
 
 ## Non-exhaustive list of topics we have not covered
@@ -42,7 +44,6 @@ csl: evolution.csl
 - (Most of) Bayesian inference
 - (Most of) multilevel models
 - Non-Gaussian outcome variables
-
 
 
 ## Where to go from here
