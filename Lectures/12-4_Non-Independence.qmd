@@ -1,5 +1,5 @@
 ---
-title: "Accounting for Non-independence"
+title: "Accounting for <br/>Non-independence"
 author:
   - Elizabeth King
   - Kevin Middleton
@@ -116,7 +116,8 @@ Is a given genotype associated with a phenotype of interest?
 - Consider two populations with ancestry differences
 - Not accounting for ancestry differences can lead to spurious associations
 - Population structure & relatedness are issues for all genetic association studies
-    
+  
+
 ## Genotype-Phenotype Relationships
 
 ```{r}
@@ -160,45 +161,23 @@ ggplot(pop, aes(x = as.factor(genotype), y = phenotype,
 An effect of both 1) different allele frequency in two pops, and 2) different average trait value in two pops
 
 
-## Hierarchical structure
-
-Review 09-4
-
-- FIXME examples
-
-
 ## Repeated sampling
 
 :::: {.columns}
 
 ::: {.column width="50%"}
 
-Review 09-3 and 09-4 FIXME
+Review unit 09, lecture 4
 
-- Squid growth
-- Orthodontic growth
-- Yearly climate data 
+- Technical replicates
+- Block designs
+- Head growth
 
 :::
 
 ::: {.column width="50%"}
 
-```{r}
-#| message: false
-
-CB <- read_csv("../data/cherry_blossoms.csv")
-
-CB |> 
-  select(year, doy, temp) |> 
-  rename(`Day of 1st\nBlossom` = doy,
-         `March Temp.\nEstimate` = temp) |> 
-  pivot_longer(cols = -year, names_to = "Variable", values_to = "Value") |> 
-  drop_na() |> 
-  ggplot(aes(x = year, y = Value)) +
-  geom_point(size = 1) +
-  facet_grid(Variable ~ ., scales = "free_y") +
-  geom_smooth(formula = y ~ poly(x, 20), method = "lm", se = FALSE)
-```
+![](https://www.sare.org/wp-content/uploads/Figure-6-Split-Plot-Experimental-Design-768x394.jpg){fig-align="center"}
 
 :::
 
@@ -334,8 +313,7 @@ ggtree(tree2, aes(color = group), ladderize = FALSE) +
     - Any test you can do using "standard" methods has a phylogenetically informed counterpart.
     - What is your evolutionary model?
 2. Ask and answer interesting evolutionary questions
-    - Trait evolution (continuous or categorical)
-    - Trait co-evolution
+    - Trait (co-)evolution (continuous or categorical)
     - Rates of evolution
     - What is your evolutionary model?
 
@@ -363,9 +341,16 @@ ggplot(lbr, aes(log_Mass, log_Home_Range, color = Clade)) +
 ```
 
 
+## R packages for phylogenetic data
+
+Many options:
+
+- See [CRAN Phylogenetics Taske View](https://cran.r-project.org/web/views/Phylogenetics.html)
+
+
 ## Working with `nlme::gls()`
 
-- We used `gls()` to fit the squid model, allowing correlated variance on a per-month basis
+- "General Least Squares"
 - Phylogenetically based correlation variation is a similar issue
 - Choose a phylogenetic correlation structure
 
@@ -382,7 +367,7 @@ See ?`corClasses`
 
 ## Model 1: Mass, BM
 
-```{r echo=FALSE}
+```{r}
 #| echo: true
 
 fm1 <- gls(log_Home_Range ~ log_Mass, data = lbr,
@@ -428,6 +413,8 @@ kable(round(mods, 1))
 Additive model is preferred (but all are pretty similar)
 
 ```{r}
+#| echo: true
+
 coef(fm2)
 ```
 
@@ -451,6 +438,7 @@ When modeled correctly, non-independence between samples can be very useful:
 
 ```{r}
 #| message: false
+#| echo: true
 
 library(MCMCglmm)
 library(kinship2)
@@ -459,10 +447,14 @@ data(BTped)
 str(BTped)
 ```
 
+Data from Hadfield, JD, et al. 2007. *J Evol Biol* 20: 549-557.
 
-## Look at part of pedigree
+
+## Examine part of pedigree
 
 ```{r}
+#| echo: true
+
 Nped <- BTped[which(apply(BTped, 1, function(x) {
   any(x == "R187920" | x == "R187921")})), ]
 Nped
@@ -485,6 +477,8 @@ plot(ped)
 ## Genetic distance
 
 ```{r}
+#| echo: true
+
 Aped <- 2 * kinship2::kinship(Nped[, 1], Nped[, 2], Nped[, 3])
 Aped[1:6,1:6]
 ```
@@ -501,6 +495,8 @@ head(BTdata)
 
 
 ## Heritability of tarsus length
+
+Using `MCMCglmm()`:
 
 ```{r}
 #| eval: false
@@ -551,6 +547,8 @@ h2 <- fm1$VCV[, "animal"] /
 ```
 
 ```{r}
+#| fig-align: center
+
 plot(h2)
 ```
 
