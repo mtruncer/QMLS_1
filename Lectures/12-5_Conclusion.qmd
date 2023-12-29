@@ -56,5 +56,21 @@ csl: evolution.csl
 - Self-study
 
 
-## Techniques for self-study
+## Skills for self-study you have already learned
+
+- Comfort with what you don't know & confidence you can grow and learn
+- Patience with incremental growth and skill building
+- Acceptance that multiple exposures are needed for growth & learning
+- Break down unfamiliar problems into smaller questions & steps
+
+
+## Tips for approaching self-study & becoming a modern life scientist
+
+- Curiosity about how things work "under the hood"
+- Channel toddler energy
+    - ask why...a lot
+- Use the literature
+- Try, fail, try again
+    - Run examples, simulate data, etc.
+    - Believe in yourself
 
