@@ -135,20 +135,26 @@ Progress Checks:
 *Friday*: Class meeting, discuss any issues from that week (anonymous or not), work together on next problem set.
 
 
+## Missing class
+
+- Let us know as far in advance as possible
+- Work alone or we will create virtual groups
+
+
 ## How do I find help?
 
+- Your group members
 - Lecture slides
+- Us
 - Resources on Canvas
 - Links we provide throughout course
-- R Cheatsheets
 - Internet (but use thoughtfully)
 
 
 ## Asking questions
 
-- Last weekly quiz question will ask you what areas are most challenging to you.
-- Start with what you know
-- Think about what you want to know.
+- The final weekly quiz question will ask you what topics were the most challenging to you.
+- Start from what you know. Think about what you do not understand.
 - Try to be as specific as possible
 
 "I understand that ... I am trying to understand ..."
