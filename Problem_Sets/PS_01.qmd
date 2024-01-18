@@ -32,7 +32,7 @@ Right now, go up to the header and change the line "author:" to have your name a
 
 As you work through the exercises, really think about what you are doing. In the upcoming problem sets, you will be learning how to think through analyses step by step, from loading data, to visualizing it, to actually carrying out statistical tests, and then interpreting the results.
 
-Read the code like you would a textbook (meaning studying and digesting as you go). It's easy to copy and paste or just run code chunks without really thinking about what the code is doing (we've done it too), but that's not a good way to learn.=
+Read the code like you would a textbook (meaning studying and digesting as you go). It's easy to copy and paste or just run code chunks without really thinking about what the code is doing (we've done it too), but that's not a good way to learn.
 
 
 ## Quarto Markdown $\rightarrow$ HTML
@@ -96,7 +96,7 @@ sd(4:10)
 
 ### Activity
 
-Execute the chunk above and look at the R console output. Explain what we have done here and what R must be doing without telling you. Write your answer after the ">" below. (">"" is the qmd for a block quote, which will make finding your answers easier.)
+Execute the chunk above and look at the R console output. Explain what we have done here and what R must be doing without telling you. Write your answer after the ">" below. (">" is the qmd syntax for a block quote, which will make finding your answers easier.)
 
 > 
 
