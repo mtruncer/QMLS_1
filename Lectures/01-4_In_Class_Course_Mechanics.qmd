@@ -39,6 +39,8 @@ csl: evolution.csl
 
 - Laptop
 - Can do attitude
+- Patience
+- Presence
 
 
 ## Book, etc.
@@ -108,6 +110,7 @@ Progress Checks:
     - Splitting up the problem set & not learning all the parts
     - You should only leave class early if your entire group has turned in the problem set
 
+
 ## Peer evaluations
 
 
@@ -115,6 +118,8 @@ Progress Checks:
 
 - Problem sets not graded
 - You are responsible for checking your group's answers against the answer key
+    - Learn from reading other code
+    - Many ways to the same outcome
 
 
 ## Typical weekly schedule
@@ -127,22 +132,24 @@ Progress Checks:
 - Peer evaluations
 - Weekly quizzes
 
-*Thursday* or *Friday*: Problem set posted online to Canvas. Download at the beginning of class.
-
 *Friday*: Class meeting, discuss any issues from that week (anonymous or not), work together on next problem set.
+
 
 ## How do I find help?
 
-- Resources on Canvas 
+- Lecture slides
+- Resources on Canvas
 - Links we provide throughout course
 - R Cheatsheets
-- Internet (but exercise caution)
+- Internet (but use thoughtfully)
 
 
 ## Asking questions
 
+- Last weekly quiz question will ask you what areas are most challenging to you.
 - Start with what you know
-- Think about what you want to know
+- Think about what you want to know.
+- Try to be as specific as possible
 
-"I understand 
+"I understand that ... I am trying to understand ..."
 
