@@ -1,0 +1,125 @@
+---
+title: "Unit 2 In Class Discussion"
+author:
+  - Elizabeth King
+  - Kevin Middleton
+format:
+  revealjs:
+    theme: [default, custom.scss]
+    standalone: true
+    self-contained: true
+    logo: QMLS_Logo.png
+    slide-number: true
+    show-slide-number: all
+code-annotations: hover
+bibliography: QMLS_Bibliography.bib
+csl: evolution.csl
+---
+
+```{r}
+#| label: setup
+#| echo: false
+
+library(tidyverse)
+
+```
+
+## Miscellaneous questions
+
+- Customizing plots
+- Excel vs. csv vs. some other format
+- Writing files from R
+- What does the pipe do?
+- When to use native pipe (`|>`) vs. magrittr pipe (`%>%`)?
+
+
+## `tibble`s and `data.frame`s
+
+- When are they the same?
+- When are they different?
+- Which one should I use?
+
+
+## Pivoting
+
+- Longer
+    - Multiple columns into rows
+    - We use 99% of the time
+- Wider
+    - Rows into multiple columns
+    - We use 1% of the time
+
+
+## Pivoting to long format
+
+```{r}
+#| echo: true
+
+set.seed(423747)
+DD <- tibble(ID = 1:10,
+             Column_1 = runif(10),
+             Column_2 = rnorm(10, mean = 10))
+DD
+```
+
+
+## Pivoting to long format
+
+```{r}
+#| echo: true
+
+DD_long <- DD |> 
+  pivot_longer(cols = -ID,
+               names_to = "old_column",
+               values_to = "random_number")
+DD_long
+```
+
+
+## Plotting long data
+
+```{r}
+#| echo: true
+#| output-location: slide
+
+ggplot(DD_long, aes(x = ID,
+                    y = random_number,
+                    color = old_column)) +
+  geom_point(size = 3) +
+  theme_bw()
+```
+
+
+## Pivoting to wide format
+
+```{r}
+#| echo: true
+DD_long |> 
+  pivot_wider(names_from = old_column,
+              values_from = random_number)
+```
+
+
+## The pivot round trip
+
+1. Pivot to long format
+2. Do some calculations
+3. Pivot to wide format
+
+
+## Learning R commands
+
+
+## Base R vs. tidyverse?
+
+- What should I learn?
+- When should I use which?
+
+
+## Why do we learn multiple tools?
+
+Which tool is the best for what situation does not have a single answer
+
+
+## When will we start learning statistics?
+
