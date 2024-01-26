@@ -221,7 +221,7 @@ One last step, let's write out your new, typo-free data. Look at the help for `w
 
 Now read your new file back in as if this next section is a new script. Feel free to overwrite your previous object, `SSD`. This is a good idea to avoid confusion. Use `read_csv()`.
 
-We prefer to use `write_csv()`, which is part of tidyverse, to R's built-in `write.csv()` (note _ vs. .). `write_csv()` has some friendlier defaults settings.
+We prefer to use `write_csv()`, which is part of tidyverse, to R's built-in `write.csv()` (note _ vs. .). `write_csv()` has some friendlier default settings.
 
 ```{r}
 
@@ -235,7 +235,12 @@ A very common activity when you are analyzing data is to take subsets, be they s
 
 ### Activity
 
-To give you some practice filtering, filter your data in the following ways using a) base R functions and b) tidyverse functions. Verify your results match in each case. You do not need to save the resulting `data.frame`s.
+To give you some practice filtering, filter your data in the following ways using both
+
+1. base R functions 
+2. tidyverse functions
+
+Verify your results match in each case. You do not need to save the resulting `data.frame`s.
 
 1. All *Pardosa ramulosa* 
 2. All females of both species

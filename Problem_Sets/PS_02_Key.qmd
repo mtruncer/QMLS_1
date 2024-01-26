@@ -104,7 +104,9 @@ library(tidyverse)
 
 Packages much be installed before they can be loaded. If you get a message like:
 
-> `Error in library("tidyverse") : there is no package called 'tidyverse'`
+```
+Error in library("tidyverse") : there is no package called 'tidyverse'
+```
 
 It means that the package is not installed. First install the package (note that the quotes are required):
 
@@ -207,6 +209,10 @@ sum(SSD$Sex == 'F' & SSD$Species == 'Nephila_clavipes')
 sum(SSD$Sex == 'M' & SSD$Species == 'Nephila_clavipes')
 sum(SSD$Sex == 'F' & SSD$Species == 'Pardosa_ramulosa')
 sum(SSD$Sex == 'M' & SSD$Species == 'Pardosa_ramulosa')
+
+# We can also use tidyverse functions
+SSD |> 
+  count(Sex, Species)
 ```
 
 It looks like something is not right.
@@ -218,6 +224,9 @@ There are a few ways to figure out what might be going on. Try using the `unique
 unique(SSD$Sex)
 
 SSD[which(!(SSD$Sex %in% c('F', 'M'))), 'ID']
+
+SSD |> 
+  filter(!(Sex %in% c('F', 'M')))
 ```
 
 You could use the results of your `which()` calls to find and correct your excel file after making a back up copy just in case you make a mistake (or use version control!). If you were planning to do more editing in Excel, this would be preferable. For this exercise will correct these within R here. We've given you the syntax for fixing one. Use this same format to fix the others. Run `unique()` again to make sure you got them all. 
@@ -230,6 +239,11 @@ First change `eval: false` to `eval: true`. Changing this flag in the chunk will
 SSD$Sex[SSD$Sex == 'f'] <- 'F'
 #FIXME
 SSD$Sex[SSD$Sex == 'm'] <- 'M'
+
+# We can also use tidyverse
+SSD <- SSD |> 
+  mutate(Sex = str_replace(Sex, "f", "F"),
+         Sex = str_replace(Sex, "m", "M"))
 ```
 
 Now check the `Species` column in the same way. Fix any errors that you find.
@@ -242,6 +256,18 @@ unique(SSD$Species)
 SSD$Species[SSD$Species == 'Pardosa_ramuloso'] <- 'Pardosa_ramulosa'
 SSD$Species[SSD$Species == 'Pardosa ramulosa'] <- 'Pardosa_ramulosa'
 SSD$Species[SSD$Species == 'Pardosa_ramulosa '] <- 'Pardosa_ramulosa'
+
+# And with tidyverse
+SSD <- SSD |> 
+  mutate(Species = str_replace(Species,
+                               "Pardosa_ramuloso",
+                               "Pardosa_ramulosa"),
+         Species = str_replace(Species,
+                               "Pardosa ramulosa",
+                               "Pardosa_ramulosa"),
+         Species = str_replace(Species,
+                               "Pardosa_ramulosa ",
+                               "Pardosa_ramulosa"))
 
 unique(SSD$Species)
 ```
@@ -257,11 +283,12 @@ write_csv(SSD, "../data/Size_Dimorphism_corrected.csv")
 
 Now read your new file back in as if this next section is a new script. Feel free to overwrite your previous object, `SSD`. This is a good idea to avoid confusion. Use `read_csv()`.
 
-We prefer to use `write_csv()`, which is part of tidyverse, to R's built-in `write.csv()` (note _ vs. .). `write_csv()` has some friendlier defaults settings.
+We prefer to use `write_csv()`, which is part of tidyverse, to R's built-in `write.csv()` (note _ vs. .). `write_csv()` has some friendlier default settings.
 
 ```{r}
 # FIXME
-SSD <- read_csv("../data/Size_Dimorphism_corrected.csv")
+SSD <- read_csv("../data/Size_Dimorphism_corrected.csv",
+                show_col_types = FALSE)
 ```
 
 
@@ -272,7 +299,12 @@ A very common activity when you are analyzing data is to take subsets, be they s
 
 ### Activity
 
-To give you some practice filtering, filter your data in the following ways using a) base R functions and b) tidyverse functions. Verify your results match in each case. You do not need to save the resulting `data.frame`s.
+To give you some practice filtering, filter your data in the following ways using both
+
+1. base R functions 
+2. tidyverse functions
+
+Verify your results match in each case. You do not need to save the resulting `data.frame`s.
 
 1. All *Pardosa ramulosa* 
 2. All females of both species
@@ -406,10 +438,14 @@ SSD <- SSD |> mutate(logMass = log10(BodyMass),
                      logLength = log10(BodyLength)) 
 
 # Scatterplot
+library(ggtext)
 ggplot(SSD, aes(x = logLength, y = logMass, color = Sex)) +
   geom_point() +
   facet_grid(Species ~ .) +
-  labs(x = "log Body Length", y = "log Body Mass")
+  labs(x = "**log<sub>10</sub> Body Length**",
+       y = "**log<sub>10</sub> Body Mass**") +
+  theme(axis.title.x = element_markdown(),
+        axis.title.y = element_markdown())
 ```
 
 What does this plot tell you? Do you think this is a more effective visualization of the data? 
@@ -422,9 +458,12 @@ Now add lines of best fit and transparency (`alpha`) to your points.
 # FIXME
 ggplot(SSD, aes(x = logLength, y = logMass, color = Sex)) +
   geom_point(alpha = 1/3) +
-  geom_smooth(method = 'lm') +
+  geom_smooth(method = 'lm', formula = 'y ~ x') +
   facet_grid(Species ~ .) +
-  labs(x = "log Body Length", y = "log Body Mass")
+  labs(x = "**log<sub>10</sub> Body Length**",
+       y = "**log<sub>10</sub> Body Mass**") +
+  theme(axis.title.x = element_markdown(),
+        axis.title.y = element_markdown())
 ```
 
 What do these regression lines tell you?
