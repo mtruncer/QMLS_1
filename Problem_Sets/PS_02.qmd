@@ -152,7 +152,7 @@ You can use two functions to get a quick overview of the columns of a `data.fram
 
 ### Activity
 
-Type `str(SSD)` into the code chunk below and then compile or execute the code chunk in the R console.
+Type `str(SSD)` into the code chunk below and then render the .qmd file or execute the code chunk in the R console (green arrow in the upper right corner of the code chunk).
 
 ```{r}
 
@@ -196,7 +196,7 @@ There are a few ways to figure out what might be going on. Try using the `unique
 
 You could use the results of your `which()` calls to find and correct your excel file after making a back up copy just in case you make a mistake (or use version control!). If you were planning to do more editing in Excel, this would be preferable. For this exercise will correct these within R here. We've given you the syntax for fixing one. Use this same format to fix the others. Run `unique()` again to make sure you got them all. 
 
-First change `eval: false` to `eval: true`. Changing this flag in the chunk will cause RStudio to evaluate the chunk when it is rendering the document. When `eval` is `false`, the chunk will be skipped. This is something that we need to do when writing the problem sets, so that they will compile.
+First change `eval: false` to `eval: true`. Changing this flag in the chunk will cause RStudio to evaluate the chunk when it is rendering the document. When `eval` is `false`, the chunk will be skipped. This is something that we need to do when writing the problem sets, so that they will render.
 
 ```{r}
 #| eval: false

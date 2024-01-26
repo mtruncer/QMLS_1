@@ -172,7 +172,7 @@ You can use two functions to get a quick overview of the columns of a `data.fram
 
 ### Activity
 
-Type `str(SSD)` into the code chunk below and then compile or execute the code chunk in the R console.
+Type `str(SSD)` into the code chunk below and then render the .qmd file or execute the code chunk in the R console (green arrow in the upper right corner of the code chunk).
 
 ```{r}
 # FIXME
@@ -231,7 +231,7 @@ SSD |>
 
 You could use the results of your `which()` calls to find and correct your excel file after making a back up copy just in case you make a mistake (or use version control!). If you were planning to do more editing in Excel, this would be preferable. For this exercise will correct these within R here. We've given you the syntax for fixing one. Use this same format to fix the others. Run `unique()` again to make sure you got them all. 
 
-First change `eval: false` to `eval: true`. Changing this flag in the chunk will cause RStudio to evaluate the chunk when it is rendering the document. When `eval` is `false`, the chunk will be skipped. This is something that we need to do when writing the problem sets, so that they will compile.
+First change `eval: false` to `eval: true`. Changing this flag in the chunk will cause RStudio to evaluate the chunk when it is rendering the document. When `eval` is `false`, the chunk will be skipped. This is something that we need to do when writing the problem sets, so that they will render.
 
 ```{r}
 #| eval: false
@@ -244,6 +244,12 @@ SSD$Sex[SSD$Sex == 'm'] <- 'M'
 SSD <- SSD |> 
   mutate(Sex = str_replace(Sex, "f", "F"),
          Sex = str_replace(Sex, "m", "M"))
+
+# The stringr package, which is loaded with tidyverse, has a function
+# str_to_upper() that we can use as well, because we just want to convert
+# f and m to uppercase.
+SSD <- SSD |> 
+  mutate(Sex = str_to_upper(Sex))
 ```
 
 Now check the `Species` column in the same way. Fix any errors that you find.
@@ -257,7 +263,7 @@ SSD$Species[SSD$Species == 'Pardosa_ramuloso'] <- 'Pardosa_ramulosa'
 SSD$Species[SSD$Species == 'Pardosa ramulosa'] <- 'Pardosa_ramulosa'
 SSD$Species[SSD$Species == 'Pardosa_ramulosa '] <- 'Pardosa_ramulosa'
 
-# And with tidyverse
+# And with tidyverse using str_replace
 SSD <- SSD |> 
   mutate(Species = str_replace(Species,
                                "Pardosa_ramuloso",
@@ -315,6 +321,8 @@ Verify your results match in each case. You do not need to save the resulting `d
 
 ```{r}
 # FIXME
+
+# We give the base R code and then the tidyverse code
 # 1
 SSD[SSD$Species == "Pardosa_ramulosa", ]
 SSD |> filter(Species == "Pardosa_ramulosa")
@@ -335,7 +343,8 @@ SSD |> slice(1:50)
 # 5
 max(SSD[SSD$Sex == 'F' & SSD$Species == 'Pardosa_ramulosa', 'BodyMass'])
 max(SSD[SSD$Sex == 'F' & SSD$Species == 'Nephila_clavipes', 'BodyMass'])
-SSD |> filter(Sex == "F") |> 
+SSD |> 
+  filter(Sex == "F") |> 
   group_by(Species) |>
   summarize(max_BodyMass = max(BodyMass))
 
@@ -343,7 +352,8 @@ SSD |> filter(Sex == "F") |>
 SSD[SSD$Species == "Pardosa_ramulosa" & 
     SSD$Sex == "M" &
     (SSD$BodyLength < 4 | SSD$BodyLength > 6), ]
-SSD |> filter(Species == "Pardosa_ramulosa" & Sex == "M") |> 
+SSD |> 
+  filter(Species == "Pardosa_ramulosa" & Sex == "M") |> 
   filter(BodyLength < 4 | BodyLength > 6)
 ```
 
@@ -468,4 +478,4 @@ ggplot(SSD, aes(x = logLength, y = logMass, color = Sex)) +
 
 What do these regression lines tell you?
 
-> The slopes of the lines are nearly identical, which suggests that the linear relationships between log length and log mass is probably equal across the four groups.
+> The slopes of the lines are nearly identical, which suggests that the linear relationships between log length and log mass is probably equal across the four groups. Later in the course we will learn how to specifically test this hypothesis.
