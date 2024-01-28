@@ -450,8 +450,7 @@ fviz_pca_var(z, axes = c(2, 3))
 Suggested sample sizes vary:
 
 - *n* = over 50
-- *n*:*q* > 5:1 (often violated with genomic data)
-- *n* and *n*:*q* are both large
+- Think about the number of predictor variables
 
 All data:
 
