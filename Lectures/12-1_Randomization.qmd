@@ -62,7 +62,7 @@ Distribution free methods do not assume the data are drawn from any specific pro
 
 ## Randomization
 
-  - Primarily a method for hypothesis testing
+  - Primarily a method for decision making (hypothesis testing)
   - More directly asks: What is the probability of observing a result as extreme or more than my observed result? 
   
   **Assumption:** Under the null hypothesis, observations are random draws from a common population

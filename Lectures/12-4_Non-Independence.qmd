@@ -130,7 +130,8 @@ pop <- data.frame('population' = rep(c('A', 'B'), each = 20),
 
 set.seed(23497823)
 ggplot(pop, aes(x = as.factor(genotype), y = phenotype)) +
-  geom_point(position = position_jitter(0.05), alpha = 0.8) +
+  geom_point(position = position_jitter(0.05), alpha = 0.8,
+             size = 2) +
   labs(x = 'Genotype', y = "Phenotype") +
   stat_summary(fun = mean, geom = "point", size = 5,
                color = "grey60") + 
@@ -148,7 +149,8 @@ Is a given genotype associated with a phenotype of interest?
 set.seed(23497823)
 ggplot(pop, aes(x = as.factor(genotype), y = phenotype,
                 color = population)) +
-  geom_point(position = position_jitter(0.05), alpha = 0.8) +
+  geom_point(position = position_jitter(0.05), alpha = 0.8,
+             size = 2) +
   labs(x = 'Genotype', y = "Phenotype") +
   stat_summary(fun = mean, geom = "point", size = 5,
                color = "grey60") + 

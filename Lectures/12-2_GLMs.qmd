@@ -237,6 +237,18 @@ str(M)
 ```
 
 
+## Salinity and sole
+
+```{r}
+ggplot(M, aes(x = salinity, y = Solea_solea)) +
+  geom_hline(yintercept = 0.5, linetype = "dotted", size = 0.5) +
+  geom_point(size = 3) +
+  ylab("Probability of Presence") +
+  xlab("Salinity") +
+  scale_y_continuous(breaks = seq(0, 1, by = 0.1))
+```
+
+
 ## Presence of sole
 
 ```{r}
@@ -414,11 +426,14 @@ p +
 
 ## Generalized linear multilevel models
 
-Generalization of Gaussian multilevel models to all the kinds of predictors that generalized linear models can be used for
+Generalization of Gaussian multilevel models
 
-Large can of worms:
+- All the types of predictors that generalized linear models can be used for
+- Binomial, Poisson, etc.
 
-- http://glmm.wikidot.com/faq
+Many additional concerns:
+
+- [http://glmm.wikidot.com/faq](http://glmm.wikidot.com/faq)
 
 
 ## References
