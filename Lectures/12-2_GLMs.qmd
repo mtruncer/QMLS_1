@@ -367,7 +367,7 @@ p
 
 ## GLM
 
-Estimates are on the log-sacle.
+Estimates are on the log-scale.
 
 ```{r}
 fm_pois <- glm(Total_tools ~ log_Population,
