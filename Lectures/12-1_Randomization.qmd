@@ -138,7 +138,7 @@ When the assumptions are not met, the results will be valid.
 Observed difference in mean value for females vs. males:
 
 ```{r}
-#| echo: false
+#| echo: true
 
 (obs <- mean(M$Mandible[M$Sex == "F"]) -
    mean(M$Mandible[M$Sex == "M"]))
@@ -163,15 +163,13 @@ M.set <- M |>
 
 ggplot(M.set, aes(x = Sex, y = Mandible, color = Original)) +
   geom_point(position = position_jitter(width = 0.05),
-             alpha = 1 / 2, size = 2) +
-    annotate("text", x = 1.5, y = 115, label = add_mean(M.set),
-             size = 5)
+             alpha = 1 / 2, size = 3) +
+  annotate("text", x = 1.5, y = 115, label = add_mean(M.set),
+           size = 7)
 ```
 
 
 ## Randomly reassign, recalculate, repeat
-
-Shuffle Sex
 
 ```{r}
 set.seed(23784)
@@ -181,15 +179,13 @@ M.shuffle <- M.set |>
 
 ggplot(M.shuffle, aes(x = Sex, y = Mandible, color = Original)) +
   geom_point(position = position_jitter(width = 0.05),
-             alpha = 1 / 2, size = 2) +
+             alpha = 1 / 2, size = 3) +
   annotate("text", x = 1.5, y = 115, label = add_mean(M.shuffle),
-           size = 5)
+           size = 7)
 ```
 
 
 ## Randomly reassign, recalculate, repeat
-
-Repeat N times
 
 ```{r}
 
@@ -198,9 +194,9 @@ M.shuffle <- M.set |>
 
 ggplot(M.shuffle, aes(x = Sex, y = Mandible, color = Original)) +
   geom_point(position = position_jitter(width = 0.05),
-             alpha = 1 / 2, size = 2) +
+             alpha = 1 / 2, size = 3) +
   annotate("text", x = 1.5, y = 115, label = add_mean(M.shuffle),
-           size = 5)
+           size = 7)
 ```
 
 
