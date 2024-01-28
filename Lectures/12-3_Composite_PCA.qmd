@@ -267,7 +267,7 @@ PC1 explains 97% of the variance in the data.
 
 ## Loadings (eigenvectors)
 
-Correlations with with composite variable
+Correlations of scaled variables with composite variables
 
 ```{r}
 #| echo: true
