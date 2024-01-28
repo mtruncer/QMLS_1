@@ -36,13 +36,13 @@ csl: evolution.csl
     - View this course as a set of recipes
 
 
-## Non-exhaustive list of topics we have not covered
+## Non-exhaustive list of topics we have not covered in depth
 
 - Randomization and simulation
 - Multivariate approaches
 - Non-linear models
-- (Most of) Bayesian inference
-- (Most of) multilevel models
+- Bayesian inference
+- Multilevel models
 - Non-Gaussian outcome variables
 
 
