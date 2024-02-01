@@ -11,7 +11,11 @@ output:
 ---
 
 
-```{r setup, echo=FALSE, message=FALSE, warning=FALSE}
+```{r}
+#| label: setup
+#| message: false
+#| warning: false
+
 ##FIXME
 library(tidyverse)
 library(readxl)
@@ -25,7 +29,24 @@ theme_set(theme_cowplot())
 
 ## Tidy Data
 
-We will be using `library(tidyverse)` a lot in this course, and one thing that makes this set of packages function really well is having "tidy" data. This will help you for future data manipulation, cleaning, visualization and analysis.
+We will be using `library(tidyverse)` quite often in this course, and one thing that makes this set of packages function really well is having "tidy" data. This will help you for future data manipulation, cleaning, visualization and analysis.
+
+Just like with base R, there are many different ways to accomplish the same goal using tidyverse functions. You might find a different solution from someone else. One way to check whether two R objects are (nearly) equal is to use the function `all.equal()`. If you perform two operations on the same set of data you can check whether the two final objects are nearly equal to one another. Here are a couple of examples. Run the code, and study them and see if you can figure them out.
+
+```{r}
+# Equal
+all.equal(sqrt(2)^2, 2)
+
+DT <- tibble(x = 1:3, y = 4:6)
+DF <- data.frame(x = 1:3, y = 4:6)
+
+# Not equal
+all.equal(DT, DF)
+
+# Equal
+all.equal(as.data.frame(DT), DF)
+
+```
 
 
 ### Activity
@@ -38,49 +59,51 @@ To practice learning how to tidy data, we will will use a dataset from Hautier, 
 
 Read in the plant growth data `"growthrate_data.csv"`, save it as an object `gr`, and look at the data. What are the dimensions of the resulting tibble?
 
-```{r, message=FALSE}
+```{r}
 # FIXME
-gr <- read_csv("../data/growthrate_data.csv")
+gr <- read_csv("../data/growthrate_data.csv", show_col_types = FALSE)
 gr
 ```
 
 > The data has 25 rows and 13 columns
 
-This appears to be how the scientists entered their data, with columns for plot, species, and then multiple columns for the biomass at the various days they collected their measurements. Unfortunately, this data is not tidy.  Why not?
+This appears to be how the researchers entered their data, with columns for plot, species, and then multiple columns for the biomass at the various days they collected their measurements. Unfortunately, this data is not tidy.  Why not?
 
 > Observations are in rows, but the variable "biomass" is found in most of the columns, which have repeated "day_" headers.  This should have a single column, with date as single column.
 
 To make this data go from wide to long format, you need to use the function `pivot_longer()`. Use this function to create a new dataset called `gr_long` that is tidy, with biomass as the value that runs for a full column.
 
-```{r, message=FALSE}
+```{r}
 # FIXME
 
-# There are a few ways to pivot these data. All of which pass the "day_"
-# columns into pivot_longer() as the "cols" parameter.
+# There are a few ways to pivot these data. All of which
+# pass the "day_" columns into pivot_longer() as the "cols"
+# parameter.
+
 # We show three ways below.
 
 # Pass a string vector specifying all the column names directly
 gr_long <- gr |>
   pivot_longer(cols = c("day_0","day_13","day_34","day_54","day_61","day_68",
                         "day_75","day_90","day_97", "day_103", "day_112"), 
-               names_to ="day", 
-               values_to ="biomass")
+               names_to = "day", 
+               values_to = "biomass")
 gr_long
 
 
 # Just specifying the column numbers
 gr_long2 <- gr |>
   pivot_longer(cols = c(3:13), 
-               names_to ="day", 
-               values_to ="biomass")
+               names_to = "day", 
+               values_to = "biomass")
 gr_long2
 
 # Use the starts_with() function to select all columns beginning with the 
 # string "day_"
 gr_long3 <- gr |>
   pivot_longer(cols = starts_with("day_"), 
-               names_to ="day", 
-               values_to ="biomass")
+               names_to = "day", 
+               values_to = "biomass")
 gr_long3
 
 # We can check that these three tibbles are identical with all.equal()
@@ -91,7 +114,7 @@ all.equal(gr_long2, gr_long2)
 
 Now that you have tidied this data, explain why it is tidy. Hint - use the column and row descriptions to explain each of the three rules above.
 
-> Each variable has it's own column, including plot, species, day, and biomass.  Each row is a unique plot by species combination, thus each row is an observation.  Finally, each cell is a value, there is one actual number/entry for each cell in the dataset.
+> Each variable has it's own column, including plot, species, day, and biomass. Each row is a unique plot by species combination, thus each row is an observation.  Finally, each cell is a value, there is one actual number/entry for each cell in the dataset.
 
 
 ## Separating Columns
@@ -103,12 +126,15 @@ The `separate()` function allows you to split columns of your data into two.
 
 You can see our `day` column is a `<chr>`, but we really only need the numeric part (i.e., removing "day_" from each. To be able to plot plant biomass growth through time, in the chunk below, pipe `gr_long` to `separate()` to split this column into two, making sure the column of integers for the day number is called `days`.
 
-```{r, message=FALSE}
+```{r}
+#| message: false
+
 # FIXME
 gr_long <- gr_long |>
   separate(day, into = c("text", "days"), convert = TRUE)
 
-# You can also remove this extraneous column using this the [] and - the column of interest
+# You can also remove this extraneous column using this the []
+# and - the column of interest
 gr_long <- gr_long[,-3]
 gr_long
 
@@ -129,7 +155,9 @@ Check the structure of your modified tibble. You may notice that your new column
 
 ## Data Counts
 
-Another way to get counts by group uses `group_by()` and `tally()`, which are part of tidyverse. `group_by()` splits data by factors (most commonly, but numerics will work as well) and `tally()` adds up the number of observations in each of those groups. Similarly, the `count()` function does both steps in one, grouping by the columns inside `()` and then counting.
+Another way to get counts by group uses `group_by()` and `tally()`, which are part of tidyverse. `group_by()` splits data by factors (most commonly, but numeric types will work as well) and `tally()` adds up the number of observations in each of those groups. Similarly, the `count()` function does both steps in one, grouping by the columns inside `()` and then counting.
+
+If you only want the counts, then using `count()` saves a step. However, if you plan further operations on the grouped data using `group_by()`, then the first method is preferred.
 
 
 ### Activity
@@ -137,7 +165,7 @@ Another way to get counts by group uses `group_by()` and `tally()`, which are pa
 In the chunk below, pipe `gr_long` to `group_by()`, grouping by species. Then pipe that to `tally()`. `tally()` does not require any arguments when used this way. Also try the same using `count()`.
 
 ```{r}
-#FIXME
+# FIXME
 gr_long |> group_by(species) |> tally()
 gr_long |> count(species)
 ```
@@ -179,7 +207,7 @@ So based on this, do we really have equal sample size?  Why not?
 The `drop_na()` function allows you to drop rows that have `NA`s in them in order to check to see if your sample size is equal. In the chunk below, pipe `gr_long` to `drop_na()` and save it as a new dataset called `gr_long2`. Then re-tally your data to see if you have equal sample size across all species.  
 
 ```{r}
-#FIXME
+# FIXME
 gr_long2 <- gr_long |>
   drop_na()
 
@@ -211,7 +239,7 @@ ggplot(gr_long2, aes(x = days, y = biomass, color = species))+
 
 ggplot(gr_long2, aes(x = days, y = biomass, color = species))+
   geom_point(position = position_jitter(width = 1), alpha = 1/3)+
-  geom_smooth(formula = y ~ x, method = "lm", se = FALSE)
+  geom_smooth(formula = "y ~ x", method = "lm", se = FALSE)
 ```
 
 Which species appears to have the fastest rate of growth (biomass change per time)? 
@@ -238,13 +266,14 @@ Does a log transformation of biomass improve the linear fit of the model?
 
 In this next section, we will be practicing data manipulation and exploration. We will work with two files that contain data related to a rainout experiment. Changes in precipitation are commonly predicted with climate change, so rainout experiments are used to examine how different proposed future precipitation conditions (i.e., in our case high or low rain reduction) influences plant species composition and biomass.
 
-The first dataset (`"rainout_plots.csv"`) describes plot-level data. This experiment contains 8 subplots per plot. Thus these plot-level data contains plot and subplot identities, as well as only a single value per subplot for each of its variables (e.g., light availability, biomass) as these are collected at the subplot level. We will also work with a dataset that contains information about species *within* each subplot called `"rainout_plantspecies_presence.csv"`. There will be multiple observations per subplot in this dataset because the unique species in each subplot was recorded.
+The first dataset (`rainout_plots.csv`) describes plot-level data. This experiment contains 8 subplots per plot. Thus these plot-level data contains plot and subplot identities, as well as only a single value per subplot for each of its variables (e.g., light availability, biomass) as these are collected at the subplot level. We will also work with a dataset that contains information about species *within* each subplot called `rainout_plantspecies_presence.csv`. There will be multiple observations per subplot in this dataset because the unique species in each subplot was recorded.
 
-Let's start with the plant composition data.  Read in `"rainout_plantspecies_presence.csv"` and save it to an object called `comp`. Look at the structure of this tibble.
+Let's start with the plant composition data.  Read in `rainout_plantspecies_presence.csv` and save it to an object called `comp`. Look at the structure of this tibble.
 
-```{r, message=FALSE}
+```{r}
 # FIXME
-comp <- read_csv("../data/rainout_plantspecies_presence.csv")
+comp <- read_csv("../data/rainout_plantspecies_presence.csv",
+                 show_col_types = FALSE)
 str(comp)
 ```
 
@@ -256,7 +285,7 @@ One very important tool you will learn from the tidyverse is how to summarize yo
 
 ### Activity
 
-```{r, message=FALSE}
+```{r}
 # FIXME
 
 richness <- comp |>
@@ -281,25 +310,26 @@ One of the most common things you will do in your data cleaning and exploration 
 
 ### Activity
 
-Read in the plot-level data , and save it to an object called `plot_ids`.
+Read in the plot-level data, and save it to an object called `plot_ids`.
 
-```{r, message=FALSE}
+```{r}
 # FIXME
-plot_ids <- read_csv("../data/rainout_plots.csv")
+plot_ids <- read_csv("../data/rainout_plots.csv",
+                     show_col_types = FALSE)
 plot_ids
 ```
 
-As we discussed in lecture, there are many different functions for joining in the tidyverse. We will focus on `left_join()` here because you can use this for most joining you need to do, and switch the order of the datasets you are joining depending on your need. I.e., `left_join(d1, d2)` is the same as `right_join(d2, d1)`.
+As we discussed in lecture, there are many different functions for joining in the tidyverse. We will focus on `left_join()` here because you can use this for most joining you need to do, and switch the order of the datasets you are joining depending on your need. For example, `left_join(d1, d2)` is the same as `right_join(d2, d1)`.
 
-Join your plot level data to your species richness data using `left_join()`. You can save this as the same object that the richness was saved as previously, given this is the data you are building upon.  Try doing this in two different ways, one where you specify the columns you want to join by, and one where you don't and let `left_join()` pick the columns that automatically match. This should help you see the power of these joining functions.
+Join your plot level data to your species richness data using `left_join()`. You can save this as the same object that the richness was saved as previously, given this is the data you are building upon. Try doing this in two different ways, one where you specify the columns you want to join by, and one where you don't and let `left_join()` pick the columns that automatically match. This should help you see the power of these joining functions.
 
-```{r, message=FALSE}
+```{r}
 # FIXME
 richness <- richness |>
   left_join(plot_ids, by = c("plot_no", "subplot"))
 richness
 
-#Also
+# Alternately
 richness |>
   left_join(plot_ids)
 ```
@@ -332,19 +362,21 @@ Create a graph that shows how rain removal influences the average species richne
 
 ```{r}
 # FIXME
-ggplot(richness, aes(x = rain_removal, y = richness,
+ggplot(richness, aes(x = rain_removal,
+                     y = richness,
                      color = factor(plot_no))) +
   geom_point(position = position_jitter(width = 0.2), alpha = 1/2) 
 
 ```
 
-With a scatterplot and this number of plots, it is difficult to see the trends per plot. Let's try a boxplot instead. Use `geom_boxplot` and  specify different colors for different plot numbers in the `aes()`.  
+With a scatterplot and this number of plots, it is difficult to see the trends per plot. Let's try a boxplot instead. Use `geom_boxplot` and specify different colors for different plot numbers in the `aes()`.  
 
 
 ```{r}
 # FIXME
 
-ggplot(richness, aes(x = rain_removal, y = richness,
+ggplot(richness, aes(x = rain_removal,
+                     y = richness,
                      color = factor(plot_no))) +
   geom_boxplot() 
 
@@ -364,14 +396,14 @@ Start by loading the original `Size_Dimprphism.xlsx` file into an R object. Use 
 
 ```{r}
 ## FIXME
-M <- read_excel("../data/Size_Dimorphism.xlsx")
+SSD <- read_excel("../data/Size_Dimorphism.xlsx")
 ```
 
-Counting the numbers of groups is easily accomplished by using the `tally()` function of grouped data like you saw above. In the next chunk, use `group_by()` to group the data by `Species` and `Sex` and then pipe this result to `tally()`
+Counting the numbers of groups is easily accomplished by using `count()` as  we saw above. Return the counts by both `Species` and `Sex` simultaneously.
 
 ```{r}
 ## FIXME
-M |> 
+SSD |> 
   count(Species, Sex)
 ```
 
@@ -383,10 +415,10 @@ In this chunk, mutate `Sex` using `toupper()`. Overwrite your R object from abov
 
 ```{r}
 ## FIXME
-M <- M |> 
+SSD <- SSD |> 
   mutate(Sex = toupper(Sex)) 
 
-M |> 
+SSD |> 
   count(Species, Sex)
 ```
 
@@ -405,10 +437,10 @@ This code replaces `x` with `xyz`. In the following chunk, overwrite `Species` w
 
 ```{r}
 ## FIXME
-M <- M |> 
+SSD <- SSD |> 
   mutate(Species = str_replace(Species, "Pardosa ramulosa", "Pardosa_ramulosa"),
          Species = str_replace(Species, "Pardosa_ramuloso", "Pardosa_ramulosa")) 
-M |> 
+SSD |> 
   count(Species, Sex)
 
 ```
