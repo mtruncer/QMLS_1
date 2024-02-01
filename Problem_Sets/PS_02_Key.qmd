@@ -209,10 +209,6 @@ sum(SSD$Sex == 'F' & SSD$Species == 'Nephila_clavipes')
 sum(SSD$Sex == 'M' & SSD$Species == 'Nephila_clavipes')
 sum(SSD$Sex == 'F' & SSD$Species == 'Pardosa_ramulosa')
 sum(SSD$Sex == 'M' & SSD$Species == 'Pardosa_ramulosa')
-
-# We can also use tidyverse functions
-SSD |> 
-  count(Sex, Species)
 ```
 
 It looks like something is not right.
@@ -237,19 +233,10 @@ First change `eval: false` to `eval: true`. Changing this flag in the chunk will
 #| eval: false
 
 SSD$Sex[SSD$Sex == 'f'] <- 'F'
+
 #FIXME
 SSD$Sex[SSD$Sex == 'm'] <- 'M'
 
-# We can also use tidyverse
-SSD <- SSD |> 
-  mutate(Sex = str_replace(Sex, "f", "F"),
-         Sex = str_replace(Sex, "m", "M"))
-
-# The stringr package, which is loaded with tidyverse, has a function
-# str_to_upper() that we can use as well, because we just want to convert
-# f and m to uppercase.
-SSD <- SSD |> 
-  mutate(Sex = str_to_upper(Sex))
 ```
 
 Now check the `Species` column in the same way. Fix any errors that you find.
@@ -262,18 +249,6 @@ unique(SSD$Species)
 SSD$Species[SSD$Species == 'Pardosa_ramuloso'] <- 'Pardosa_ramulosa'
 SSD$Species[SSD$Species == 'Pardosa ramulosa'] <- 'Pardosa_ramulosa'
 SSD$Species[SSD$Species == 'Pardosa_ramulosa '] <- 'Pardosa_ramulosa'
-
-# And with tidyverse using str_replace
-SSD <- SSD |> 
-  mutate(Species = str_replace(Species,
-                               "Pardosa_ramuloso",
-                               "Pardosa_ramulosa"),
-         Species = str_replace(Species,
-                               "Pardosa ramulosa",
-                               "Pardosa_ramulosa"),
-         Species = str_replace(Species,
-                               "Pardosa_ramulosa ",
-                               "Pardosa_ramulosa"))
 
 unique(SSD$Species)
 ```
