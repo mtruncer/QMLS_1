@@ -230,11 +230,11 @@ You could use the results of your `which()` calls to find and correct your excel
 First change `eval: false` to `eval: true`. Changing this flag in the chunk will cause RStudio to evaluate the chunk when it is rendering the document. When `eval` is `false`, the chunk will be skipped. This is something that we need to do when writing the problem sets, so that they will render.
 
 ```{r}
-#| eval: false
+#| eval: true
 
 SSD$Sex[SSD$Sex == 'f'] <- 'F'
 
-#FIXME
+#FIXME - switch eval
 SSD$Sex[SSD$Sex == 'm'] <- 'M'
 
 ```

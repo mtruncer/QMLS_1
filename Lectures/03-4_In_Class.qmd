@@ -28,7 +28,7 @@ library(tidyverse)
 - You can't understand everything
 - Something you are curious about
 
-Spend some time thinking before you answer.
+Spend some time thinking before you answer with your question.
 
 - Take notes while you are watching
 - Review the slides / videos

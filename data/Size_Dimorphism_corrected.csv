@@ -11,11 +11,11 @@ ID,Species,Sex,BodyLength,BodyMass
 10,Pardosa_ramulosa,M,3.409,0.043
 11,Pardosa_ramulosa,M,6.459,0.21
 12,Pardosa_ramulosa,M,4.236,0.056
-13,Pardosa_ramulosa,m,5.397,0.257
+13,Pardosa_ramulosa,M,5.397,0.257
 14,Pardosa_ramulosa,M,5.547,0.137
 15,Pardosa_ramulosa,M,4,0.122
 16,Pardosa_ramulosa,M,4.443,0.07
-17,Pardosa_ramulosa,m,5.792,0.212
+17,Pardosa_ramulosa,M,5.792,0.212
 18,Pardosa_ramulosa,M,7.136,0.62
 19,Pardosa_ramulosa,M,7.134,0.167
 20,Pardosa_ramulosa,M,3.842,0.052
@@ -26,7 +26,7 @@ ID,Species,Sex,BodyLength,BodyMass
 25,Pardosa_ramulosa,M,6.05,0.346
 26,Pardosa_ramulosa,M,4.773,0.12
 27,Pardosa_ramulosa,M,5.338,0.202
-28,Pardosa_ramulosa,m,5.768,0.259
+28,Pardosa_ramulosa,M,5.768,0.259
 29,Pardosa_ramulosa,M,4.475,0.058
 30,Pardosa_ramulosa,M,4.916,0.096
 31,Pardosa_ramulosa,M,5.868,0.186
@@ -52,13 +52,13 @@ ID,Species,Sex,BodyLength,BodyMass
 51,Pardosa_ramulosa,F,6.436,0.319
 52,Pardosa_ramulosa,F,5.925,0.464
 53,Pardosa_ramulosa,F,4.586,0.067
-54,Pardosa_ramulosa,f,6.907,0.251
+54,Pardosa_ramulosa,F,6.907,0.251
 55,Pardosa_ramulosa,F,6.116,0.112
 56,Pardosa_ramulosa,F,7.908,0.254
 57,Pardosa_ramulosa,F,6.043,0.251
 58,Pardosa_ramulosa,F,6.799,0.201
 59,Pardosa_ramulosa,F,5.142,0.16
-60,Pardosa_ramulosa,f,4.936,0.096
+60,Pardosa_ramulosa,F,4.936,0.096
 61,Pardosa_ramulosa,F,3.844,0.045
 62,Pardosa_ramulosa,F,5.702,0.194
 63,Pardosa_ramulosa,F,5.499,0.17
@@ -186,7 +186,7 @@ ID,Species,Sex,BodyLength,BodyMass
 185,Nephila_clavipes,F,63.706,79.43
 186,Nephila_clavipes,F,49.106,145.16
 187,Nephila_clavipes,F,55.504,184.92
-188,Nephila_clavipes,f,40.598,71.96
+188,Nephila_clavipes,F,40.598,71.96
 189,Nephila_clavipes,F,58.325,161.2
 190,Nephila_clavipes,F,40.473,56.45
 191,Nephila_clavipes,F,58.516,98.67
@@ -194,7 +194,7 @@ ID,Species,Sex,BodyLength,BodyMass
 193,Nephila_clavipes,F,56.9,757.07
 194,Nephila_clavipes,F,50.086,42.56
 195,Nephila_clavipes,F,49.173,77.51
-196,Nephila_clavipes,f,54.067,113.77
+196,Nephila_clavipes,F,54.067,113.77
 197,Nephila_clavipes,F,59.701,149.45
 198,Nephila_clavipes,F,53.695,218.03
 199,Nephila_clavipes,F,52.272,534.31

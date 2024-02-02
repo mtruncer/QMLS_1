@@ -130,24 +130,33 @@ You can see our `day` column is a `<chr>`, but we really only need the numeric p
 #| message: false
 
 # FIXME
-gr_long <- gr_long |>
+gr_long1 <- gr_long |>
   separate(day, into = c("text", "days"), convert = TRUE)
+gr_long1
 
-# You can also remove this extraneous column using this the []
-# and - the column of interest
-gr_long <- gr_long[,-3]
-gr_long
+# You can also remove this extraneous column by passing NA
+# to the into = parameter to directly drop the new column
+gr_long2 <- gr_long |>
+  separate(day, into = c(NA, "days"), convert = TRUE)
+gr_long2
 
-# Alternately, you can use select() with - to do this step in a pipe:
-gr_long2 <- gr_long2 |>
+# You can use select() with - to do drop the new "day" column
+# in a pipe:
+gr_long3 <- gr_long |>
   separate(day, into = c("text", "days"), convert = TRUE) |> 
   select(-text)
+gr_long3
 
 # A fourth method to is to remove "day_" from `day` with `str_remove()` via
 # `mutate()`
 #
 # gr_long <- gr_long |> 
 #   mutate(days = as.numeric(str_remove(day, "day_")), .keep = "unused")
+
+# WE will need gr_long later, so:
+gr_long <- gr_long |>
+  separate(day, into = c(NA, "days"), convert = TRUE)
+
 ```
 
 Check the structure of your modified tibble. You may notice that your new column `days` is still a character.  If so, go back and fix the code above so it is no longer a character. Check the help file for `separate()`.
