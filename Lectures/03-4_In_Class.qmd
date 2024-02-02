@@ -1,0 +1,127 @@
+---
+title: "Unit 3 In Class Discussion"
+author:
+  - Elizabeth King
+  - Kevin Middleton
+format:
+  revealjs:
+    theme: [default, custom.scss]
+    standalone: true
+    self-contained: true
+    logo: QMLS_Logo.png
+    slide-number: true
+    show-slide-number: all
+code-annotations: hover
+bibliography: QMLS_Bibliography.bib
+csl: evolution.csl
+---
+
+```{r}
+#| label: setup
+#| echo: false
+
+library(tidyverse)
+```
+
+## You should have a question.
+
+- You can't understand everything
+- Something you are curious about
+
+Spend some time thinking before you answer.
+
+- Take notes while you are watching
+- Review the slides / videos
+
+
+## How to use the problem set keys
+
+Compare your answers and study alternate approaches
+
+
+## Cheatsheets
+
+- [Posit's tidyverse cheatsheets](https://posit.co/resources/cheatsheets/)
+- [RStudio's repository](https://github.com/rstudio/cheatsheets)
+    - [Base R](https://github.com/rstudio/cheatsheets/blob/main/base-r.pdf)
+
+
+## Miscellaneous questions
+
+- Fixing up plots, what goes where
+- When am I using base vs. tidyverse? Does it matter?
+- Understanding R's error messages
+
+
+## For the end of class
+
+
+## Pasting text together
+
+- `paste()` and `paste0()`
+    - Use inside `mutate()`
+- `unite()`
+    - Use in a pipe
+
+```{r}
+#| echo: true
+
+(DD <- tibble(Col1 = letters[1:2],
+              Col2 = 1:2))
+
+```
+
+
+## `paste()` and `paste0()`
+
+```{r}
+#| echo: true
+
+DD |> 
+  mutate(Paste = paste(Col1, Col2),
+         Paste2 = paste(Col1, Col2, sep = "-"),
+         Paste0 = paste0(Col1, Col2))
+```
+
+
+## `unite()`
+
+By default the old columns are dropped (`remove = TRUE`)
+
+```{r}
+#| echo: true
+DD |> unite(col = "Unite", Col1, Col2)
+DD |> unite(col = "Unite", Col1, Col2, sep = "-")
+```
+
+
+```{r}
+#| echo: true
+DD |> unite(col = "Unite", Col1, Col2, remove = FALSE)
+```
+
+
+## Boxplots: What do all the parts mean?
+
+```{r}
+#| echo: true
+#| output-location: slide
+
+set.seed(3423644)
+DD <- tibble(y = c(rnorm(19, mean = 10, sd = 5), 25))
+
+ggplot(DD, aes(y)) +
+  geom_boxplot() +
+  coord_flip()
+```
+
+
+## Boxplot recipe
+
+1. Median = center line
+1. Box = IQR (25th to 75th percentiles)
+1. Whiskers at 1.5 x 25th and 75th percentiles
+1. Dots for anything outside 1.5 x 25th and 75th percentiles
+
+
+## `separate()` vs. stringr functions
