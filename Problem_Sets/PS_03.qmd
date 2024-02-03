@@ -2,12 +2,12 @@
 title: 'Problem Set 03'
 author: "Your Name Here: Group X"
 date: 'Last updated: `r Sys.Date()`'
-output:
-  html_document:
-    smart: no
-    theme: flatly
+format:
+  html:
     toc: true
-    toc_float: true
+    number-depth: 3
+    toc-location: left
+    embed-resources: true
 ---
 
 
@@ -43,6 +43,8 @@ all.equal(DT, DF)
 all.equal(as.data.frame(DT), DF)
 
 ```
+
+Note that when two objects are not equal, `all.equal()` prints  information about what is different between them. This information can be helpful sometimes, but often you just want to know if they are equal or not.
 
 
 ### Activity
@@ -89,7 +91,7 @@ You can see our `day` column is a `<chr>`, but we really only need the numeric p
 
 ```
 
-Check the structure of your modified tibble. You may notice that your new column `days` is still a character.  If so, go back and fix the code above so it is no longer a character. Check the help file for `separate()`.
+Check the structure of your modified tibble. You may notice that your new column `days` is still a character.  If so, go back and fix the code above so it is no longer a character. Read the help file for `separate()` to see what options are available for converting new column types and for immediately dropping new columns that are created.
 
 
 ## Data Counts

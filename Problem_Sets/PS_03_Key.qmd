@@ -2,12 +2,12 @@
 title: 'Problem Set 03'
 author: "Your Name Here: Group X"
 date: 'Last updated: `r Sys.Date()`'
-output:
-  html_document:
-    smart: no
-    theme: flatly
+format:
+  html:
     toc: true
-    toc_float: true
+    number-depth: 3
+    toc-location: left
+    embed-resources: true
 ---
 
 
@@ -16,7 +16,7 @@ output:
 #| message: false
 #| warning: false
 
-##FIXME
+## FIXME
 library(tidyverse)
 library(readxl)
 library(cowplot)
@@ -47,6 +47,8 @@ all.equal(DT, DF)
 all.equal(as.data.frame(DT), DF)
 
 ```
+
+Note that when two objects are not equal, `all.equal()` prints  information about what is different between them. This information can be helpful sometimes, but often you just want to know if they are equal or not.
 
 
 ### Activity
@@ -153,13 +155,13 @@ gr_long3
 # gr_long <- gr_long |> 
 #   mutate(days = as.numeric(str_remove(day, "day_")), .keep = "unused")
 
-# WE will need gr_long later, so:
+# We will need gr_long later, so let's just overwrite it:
 gr_long <- gr_long |>
   separate(day, into = c(NA, "days"), convert = TRUE)
 
 ```
 
-Check the structure of your modified tibble. You may notice that your new column `days` is still a character.  If so, go back and fix the code above so it is no longer a character. Check the help file for `separate()`.
+Check the structure of your modified tibble. You may notice that your new column `days` is still a character.  If so, go back and fix the code above so it is no longer a character. Read the help file for `separate()` to see what options are available for converting new column types and for immediately dropping new columns that are created.
 
 
 ## Data Counts
@@ -302,8 +304,8 @@ richness <- comp |>
   summarize(richness = length(unique(species)))
 richness
 
-# You can get rid of the message `summarize()` has grouped output by 'plot_no'
-# like this:
+# You can get rid of the message `summarize()` has grouped output
+#by 'plot_no' like this:
 richness2 <- comp |>
   group_by(plot_no, subplot) |>
   summarize(richness = length(unique(species)),
@@ -447,8 +449,10 @@ This code replaces `x` with `xyz`. In the following chunk, overwrite `Species` w
 ```{r}
 ## FIXME
 SSD <- SSD |> 
-  mutate(Species = str_replace(Species, "Pardosa ramulosa", "Pardosa_ramulosa"),
-         Species = str_replace(Species, "Pardosa_ramuloso", "Pardosa_ramulosa")) 
+  mutate(
+    Species = str_replace(Species, "Pardosa ramulosa", "Pardosa_ramulosa"),
+    Species = str_replace(Species, "Pardosa_ramuloso", "Pardosa_ramulosa")) 
+
 SSD |> 
   count(Species, Sex)
 
