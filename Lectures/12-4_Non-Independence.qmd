@@ -347,7 +347,7 @@ ggplot(lbr, aes(log_Mass, log_Home_Range, color = Clade)) +
 
 Many options:
 
-- See [CRAN Phylogenetics Taske View](https://cran.r-project.org/web/views/Phylogenetics.html)
+- See [CRAN Phylogenetics Task View](https://cran.r-project.org/web/views/Phylogenetics.html)
 
 
 ## Working with `nlme::gls()`
