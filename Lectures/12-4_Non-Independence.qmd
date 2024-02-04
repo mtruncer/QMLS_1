@@ -261,8 +261,9 @@ dist(pts) |> print(digits = 2)
 
 Data from Garland et al. [-@Garland1992-bf]
 
-- Body mass (km)
+- Body mass (kg)
 - Home range area (km^2^)
+- Both log-transformed
 
 
 ## Home range vs. body mass
