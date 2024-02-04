@@ -392,11 +392,10 @@ Centering and $Z$-scaling are important.
 #| echo: true
 #| eval: false
 
-remotes::install_github("kassambara/factoextra")
 library(factoextra)
 ```
 
-[factoextra](http://www.sthda.com/english/wiki/factoextra-r-package-quick-multivariate-data-analysis-pca-ca-mca-and-visualization-r-software-and-data-mining) has several convenience functions for working with PCA.
+[factoextra](https://rpkgs.datanovia.com/factoextra/index.html) has several convenience functions for working with PCA.
 
 
 ## Mammal life history
