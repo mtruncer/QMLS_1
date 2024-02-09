@@ -16,7 +16,11 @@ bibliography: QMLS_Bibliography.bib
 csl: evolution.csl
 ---
 
-```{r setup, echo=FALSE, message=FALSE}
+```{r}
+#| label: setup
+#| echo: false
+#| message: false
+
 library(tidyverse)
 library(cowplot)
 theme_set(theme_cowplot())
@@ -25,9 +29,15 @@ theme_set(theme_cowplot())
 
 ## Announcements
 
-- Submit both your Rmd and the knitted HTML file. It helps us to review what you have done.
+- Submit both your qmd and the knitted HTML file. It helps us to review what you have done.
 - Progress Check 1 coming next week
-- A few words on peer evaluations
+
+
+## PS 03 topics
+
+- Boxplots?
+- Pivots?
+- Joins?
 
 
 ## Thinking about probabilities
@@ -37,11 +47,18 @@ Why learn probability?
 - You could learn all the statistical analyses/tests without really understanding probability.
 
 
+## Maize kernel germination
+
+Given the following probabilities for maize kernel germination, what is the probability of finding one kernel that is germinated and one that is not?
+
+![](../images/Probability_Constant.drawio.png){fig-align="center"}
+
+
 ## Binomial probabilities
 
 About 10% of people are left handed.
 
-- What is the probability of exactly 0 left handed people in a *random sample* of 26?
+- What is the probability of exactly 0 left handed people in a *random sample* of 24?
 - What is the probability of exactly 1?
 - What is the probability of 1 *or more*?
 
@@ -59,19 +76,23 @@ Probability density functions in R: `dbinom()`, `dnorm()`, `dpois()`, etc.
 
 ## Binomial probabilities
 
-What is the probability of *exactly* 0 left handed people in a *sample* of 26?
+What is the probability of *exactly* 0 left handed people in a *sample* of 24?
 
-```{r eval=FALSE}
-dbinom(0, 26, prob = 0.1)
+```{r}
+#| eval: false
+
+dbinom(0, 24, prob = 0.1)
 ```
 
 
 ## Binomial probabilities
 
-What is the probability of *exactly* 0 left handed people in a *sample* of 26?
+What is the probability of *exactly* 0 left handed people in a *sample* of 24?
 
 ```{r}
-dbinom(0, 26, prob = 0.1)
+#| echo: true
+
+dbinom(0, 24, prob = 0.1)
 ```
 
 
@@ -85,7 +106,9 @@ What is the probability of exactly 1?
 What is the probability of exactly 1?
 
 ```{r}
-dbinom(1, 26, prob = 0.1)
+#| echo: true
+
+dbinom(1, 24, prob = 0.1)
 ```
 
 
@@ -99,7 +122,9 @@ What is the probability of 1 *or more*?
 What is the probability of 1 *or more*?
 
 ```{r}
-sum(dbinom(1:26, 26, prob = 0.1))
+#| echo: true
+
+sum(dbinom(1:24, 24, prob = 0.1))
 ```
 
 *"or more"* is critical here for hypothesis testing:
@@ -109,13 +134,13 @@ sum(dbinom(1:26, 26, prob = 0.1))
 
 ## Binomial probabilities for Pr[left] = 0.1
 
-```{r echo=FALSE}
-M <- tibble(Lefties = 0:26,
-            Probability = dbinom(0:26, 26, prob = 0.1))
+```{r}
+M <- tibble(Lefties = 0:24,
+            Probability = dbinom(0:24, 24, prob = 0.1))
 ggplot(M, aes(Lefties, Probability)) + 
   geom_bar(stat = "identity") +
   labs(x = "n Left-handers") +
-  scale_x_continuous(breaks = seq(0, 26, by = 5))
+  scale_x_continuous(breaks = seq(0, 24, by = 5))
 ```
 
 $n > 8$ have very low probabilities.
@@ -123,23 +148,26 @@ $n > 8$ have very low probabilities.
 
 ## Binomial probabilities for Pr[left] = 0.1
 
-```{r echo=FALSE}
-M <- tibble(Lefties = 0:26,
-            Probability = dbinom(0:26, 26, prob = 0.1)) %>% 
+```{r}
+M <- tibble(Lefties = 0:24,
+            Probability = dbinom(0:24, 24, prob = 0.1)) |> 
   mutate(log_Prob = log10(Probability))
 ggplot(M, aes(Lefties, log_Prob)) + 
   geom_bar(stat = "identity") +
   labs(x = "n Left-handers", y = "log10 Probability") +
-  scale_x_continuous(breaks = seq(0, 26, by = 5))
+  scale_x_continuous(breaks = seq(0, 24, by = 5))
 ```
 
 
-## Powerball {.smaller}
+## Powerball
 
-1. 69 balls in one pool: Choose 5
-1. 26 in the other pool: Choose 1
+1. 69 balls in pool #1: Choose 5
+1. 26 in the pool #2: Choose 1
 
 Number of winning combinations in pool 1 is the **binomial coefficient**
+
+
+## Binomial coefficient
 
 - the number of unique ordered sequences of successes that yield exactly $k$ successes from $n$ trials ("n choose k").
 - the "successes" can happen in any order
@@ -147,13 +175,21 @@ Number of winning combinations in pool 1 is the **binomial coefficient**
 
 $$\left({n\atop k}\right)=\frac{n!}{k!\left(n - k\right)!}$$
 
+```{r}
+#| echo: true
+
+choose(3, 2)
+```
+
 
 ## Powerball
 
-1. 69 balls in one pool: Choose 5
-1. 26 in the other pool: Choose 1
+1. 69 balls in pool #1: Choose 5
+1. 26 in the pool #2: Choose 1
 
 ```{r}
+#| echo: true
+
 choose(69, 5)
 choose(26, 1)
 ```
@@ -164,10 +200,69 @@ choose(26, 1)
 5 successes from 69 chances $\times$ 1 success from 26 chances.
 
 ```{r}
+#| echo: true
+
 choose(69, 5) * choose(26, 1)
+1 / (choose(69, 5) * choose(26, 1))
 ```
 
 What if the order had to be correct as well?
+
+
+## When should I buy a ticket?
+
+*Expected value*: "average" value of a ticket
+
+- Each ticket costs $2
+
+```{r}
+#| echo: true
+
+2 * (choose(69, 5) * choose(26, 1))
+```
+
+Expected value is >$2 when the jackpot is >$584,402,676
+
+
+## Breast cancer screening
+
+Approximately correct numbers:
+
+1. 1 in 100 women in the age range 40-50 have breast cancer
+2. 20% with cancer have a negative mammogram (false negative)
+3. 90% without cancer have a negative mammogram (true negative)
+
+What is the probability of a randomly sampled woman having breast cancer, given a negative test?
+
+
+## Breast cancer screening
+
+$$Pr[C|N] = \frac{False~Negatives}{False~Negatives + True~Negatives}$$
+
+$$Pr[C|N] = \frac{Pr[N|C] \times Pr[C]}{Pr[N]}$$
+
+
+## Breast cancer screening
+
+- 100 women
+- 1 has cancer, 99 do not
+- How many overall will get a negative test?
+
+With cancer: 1 * 0.2 = 0.2
+
+
+Without cancer: 99 * 0.9 = 89.1
+
+
+Total negative tests: 0.2 + 89.1 = 89.3
+
+Probability of having cancer, given negative test: 
+
+```{r}
+#| echo: true
+
+0.2/89.3
+```
 
 
 ## Breast cancer screening
@@ -208,43 +303,8 @@ $$Pr[C|T] = \frac{Pr[T|C] \times Pr[C]}{Pr[T]}$$
 - $Pr[T] = (0.8 \times 0.01) + (0.1 \times 0.99)$
 
 ```{r}
+#| echo: true
+
 (0.8 * 0.01) / ((0.8 * 0.01) + (0.1 * 0.99))
 ```
 
-
-## Breast cancer screening
-
-Approximately correct numbers:
-
-1. 1 in 100 women in the age range 40-50 have breast cancer
-2. 20% with cancer have a negative mammogram (false negative)
-3. 90% without cancer have a negative mammogram (true negative)
-
-What is the probability of a randomly sampled woman having breast cancer, given a negative test?
-
-
-## Breast cancer screening
-
-$$Pr[C|N] = \frac{False~Negatives}{False~Negatives + True~Negatives}$$
-
-$$Pr[C|N] = \frac{Pr[N|C] \times Pr[C]}{Pr[N]}$$
-
-## Breast cancer screening
-
-- 100 women
-- 1 has cancer, 99 do not
-- How many overall will get a negative test?
-
-With cancer: 1 * 0.2 = 0.2
-
-
-Without cancer: 99 * 0.9 = 89.1
-
-
-Total negative tests: 0.2 + 89.1 = 89.3
-
-Probability of having cancer, given negative test: 
-
-```{r}
-0.2/89.3
-```
