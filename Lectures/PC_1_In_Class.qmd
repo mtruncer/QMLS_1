@@ -41,11 +41,13 @@ island_data <- tibble(
 5. Probability
 6. Progress Check 1 Questions
 
+
 ## Best practices for coding & learning
 
 > What's going to be the best option for reproducibility vs "reading the code" in the step-by-step way. 
 
 > Important points to consider when writing code in R in general and with respect to drawing bar charts, boxplots etc.
+
 
 ## Best practices for coding & learning
 
@@ -53,8 +55,10 @@ island_data <- tibble(
 
 > ... (and this is a bit more philosophical) is there a "right" answer? Although you said at the beginning of the semester that there are many ways to do the same operation in R, it does seem like there are particular ways you would prefer us to do things in opposition to that. Could you be explicit about where we can have freedom to experiment and where you want "your" answer?
 
+
 ## Best practices for coding & learning
- - example code 
+
+Let's look at some code
 
 
 ## Strategies for Learning R {.smaller}
@@ -70,6 +74,7 @@ island_data <- tibble(
 3. Extra Resources
     - For learning R & lots of other stuff (like Git)
 
+
 ## Miscellaneous questions
 
 > How do we deal with numbers that are considered chr in R?  Like doing analysis/mathematical functions and stuff.
@@ -83,19 +88,23 @@ str(as.numeric(myVector))
 
 ```
 
+
 ## Miscellaneous questions
 
 > How do we go about changing a column of data if there is an unwanted variable in them?
+
 
 ## Miscellaneous questions
 
 > How would we determine the right number of samples for a study for it to be statistically significant? 
 
-- Stay tuned for power analysis
+- Stay tuned for power analysis (Unit 11)
+
 
 ## Miscellaneous questions
 
 > What are the limitations associated with applying Bayesian approaches in the context of large-scale omics data analysis, including issues related to data sparsity, model complexity, and computational scalability?
+
 
 ## Miscellaneous questions
 
@@ -103,53 +112,80 @@ str(as.numeric(myVector))
 
 -add example
 
+
 ## Miscellaneous questions
 
 > Can you show an example of how to determine if your dataset follows a normal (or other) distribution?
 
+
 ## Tests of normality
 
-```{r fig.height=3}
+```{r}
+#| echo: true
+
+set.seed(93847)
 x <- rnorm(5000)
 ggplot(tibble(x), aes(x)) +
   geom_histogram(bins = 30)
 ```
 
+
+## Tests of normality
+
 ```{r}
+#| echo: true
 shapiro.test(x)
 ```
 
 
 ## Tests of normality
 
-```{r, echo=FALSE, fig.height=3}
+```{r}
+#| echo: true
+
+set.seed(423479)
 x <- runif(500)
 ggplot(tibble(x), aes(x)) +
   geom_histogram(bins = 30)
 ```
 
+
+## Tests of normality
+
 ```{r}
+#| echo: true
+
 shapiro.test(x)
 ```
 
 
 ## Tests of normality
 
-```{r, echo=FALSE, fig.height=3}
-x <- rnorm(20)
+```{r}
+#| echo: true
+
+set.seed(347)
+x <- runif(15)
 ggplot(tibble(x), aes(x)) +
   geom_histogram(bins = 30)
 ```
 
+
+## Tests of normality
+
 ```{r}
+#| echo: true
+
 shapiro.test(x)
 ```
+
 
 ## Set seed
 
 > How does the set.seed() function work? I understand that setting a seed at the beginning of the chunk allows for the random numbers being generated to be consistent each time you run the code, but how does this actually work?
 
 `?set.seed()`
+
 
 ## Set seed {.smaller}
 
@@ -170,32 +206,300 @@ set.seed(34235)
 BB <- rnorm(3)
 AA 
 BB
-
 ```
 
 
 ## Tidyverse functions
 
-> I would like to better understand when I should be pivotting my data. I have a decent understanding of how to do it now, and I think I understand how R reads the data differently in the long format, but I am still unsure of when data needs to be pivotted if I am given a dataset and left to my own devices. Is it good practice to immediately convert wide data into long and then convert it back again after final analyses or transformations? Or are there certain functions which require the long data format, and if so, how can I identify them?
+> I would like to better understand when I should be pivoting my data. ...  I am still unsure of when data needs to be pivotted if I am given a dataset and left to my own devices. Is it good practice to immediately convert wide data into long and then convert it back again after final analyses or transformations? Or are there certain functions which require the long data format, and if so, how can I identify them?
 
 > I'm still a bit confused about joining tables. Specifically, when do I need to pivot my data frames before joining or is that something I always do?
 
+
+## Tidyverse functions
+
 > I don't understand the selection process for grouping compared to filtering. The 2nd activity in the PS-04 where we're meant to assign the variables in the 1st activity and then change only one value each time. I couldn't figure out how to change one variable without retyping the whole thing; and that makes the outputs different but I feel its inefficient. General question about what I should be thinking when I know I'm going to need this data later.
+
+
+## Tidyverse: pivots
+
+> Why is it good data practice to keep my data in a bunch of smaller tables that I join together?
+
+> When making clean data, what is the best way to determine whether or not you need to make it longer or wider at a quick glance of the data.
+
+
+## Pivots
+
+Shape of your data:
+
+- Wide: rows have multiple columns with values
+- Long: rows have 1 column with values
+
+
+## Wide data
+
+Most common for data entry:
+
+```{r}
+#| echo: true
+
+library(palmerpenguins)
+head(penguins)
+```
+
+Each row is a logical unit (e.g., sample, individual)
+
+
+## Wide data
+
+```{r}
+#| echo: true
+
+island_data
+```
+
+
+## Long data
+
+- Truly "tidy"
+- Frequently impractical for data entry (lot of repeated values)
+- Often useful for plotting
+    - Column name becomes a value for a new variable
+    - Cell value becomes the value for that new variable
+
+`pivot_longer()`: wide $\rightarrow$ long
+
+`pivot_wider()`: long $\rightarrow$ wide
+
+
+## You want this plot
+
+```{r}
+penguins_long <- penguins |>
+  select(species, sex, body_mass_g, bill_length_mm, bill_depth_mm) |> 
+  pivot_longer(cols = -c(species, sex, body_mass_g),
+               names_to = "bill_measure",
+               values_to = "length") |> 
+  drop_na()
+
+ggplot(penguins_long, aes(x = body_mass_g, y = length, color = species)) +
+  geom_point(size = 3) +
+  scale_colour_viridis_d() +
+  facet_grid(bill_measure ~ sex, scales = "free_y")
+```
+
+
+## You need
+
+- `species`
+- `sex`
+- `body_mass_g`
+- `bill_length_mm`
+- `bill_depth_mm`
+
+Turn `bill_length_mm` and `bill_depth_mm` into a new column "bill_measure" and values to a column called "length"
+
+
+## `pivot_longer()`
+
+```{r}
+#| echo: true
+
+penguins_long <- penguins |>
+  select(species, sex, body_mass_g, bill_length_mm, bill_depth_mm) |> 
+  pivot_longer(cols = c(bill_length_mm, bill_depth_mm),
+               names_to = "bill_measure",
+               values_to = "length") |> 
+  drop_na()
+```
+
+or
+
+```{r}
+#| echo: true
+
+penguins_long <- penguins |>
+  select(species, sex, body_mass_g, bill_length_mm, bill_depth_mm) |> 
+  pivot_longer(cols = -c(species, sex, body_mass_g),
+               names_to = "bill_measure",
+               values_to = "length") |> 
+  drop_na()
+```
+
+
+## Long data
+
+```{r}
+#| echo: true
+
+penguins_long
+```
+
+
+## Plot
+
+```{r}
+#| echo: true
+#| output-location: slide
+
+ggplot(penguins_long, aes(x = body_mass_g, y = length, color = species)) +
+  geom_point(size = 3) +
+  scale_colour_viridis_d() +
+  facet_grid(bill_measure ~ sex, scales = "free_y")
+```
+
+
+## Edit values
+
+```{r}
+#| echo: true
+
+penguins_long <- penguins_long |> 
+  mutate(bill_measure = str_remove(bill_measure, "_mm"),
+         bill_measure = str_remove(bill_measure, "bill_"))
+
+head(penguins_long)
+```
+
+
+## `pivot_wider()`
+
+Be careful:
+
+```{r}
+#| echo: true
+
+penguins_long |> 
+  pivot_wider(id_cols = c(species, sex, body_mass_g),
+              names_from = bill_measure, values_from = length)
+```
+
+
+## What happened?
+
+`species`, `sex`, and `body_mass_g` don't uniquely identify new rows
+
+```{r}
+#| echo: true
+
+penguins_long |> 
+  group_by(species, sex, body_mass_g) |> 
+  tally()
+```
+
+
+## Tidyverse: joins
 
 > Joining with three tibbles is a little challenging can you help with how you would start this? 
 
-## Probability 
+Always joining two tibbles/data.frames: `left_join(left_join(A, B), C)`
 
-> Can you go through conditional probability one more time, an example similar to the HIV one?
+What rows do you want to keep?
 
-> I still have doubts in the probability related questions and standard deviation, mean related questions. It would be great if we can discuss a few more questions belonging to the above categories. 
+- `left_join(x, y)`: includes all rows in x.
+- `right_join(x, y)`: includes all rows in y.
+- `inner_join(x, y)`: includes all rows in x *and* y.
+- `full_join(x, y)`: includes all rows in x *or* y.
 
-> I'm still struggling a bit with probability. I have a tendency to overthink and overcomplicate probability which often times causes me to second guess myself and make mistakes.
 
-> I  would like to know more about conditional probability and the equation related to it.
+## Joining
 
-> What makes up a sufficient interpretation of a probability?
-I feel like I struggle to find the words to answer questions related to the interpretation of probabilities. I think covering some more examples of this would be helpful for me, though I will also return to previous lectures for review. 
+You also have data about the penguins' islands:
+
+```{r}
+#| echo: true
+
+island_data
+```
+
+
+## Which way to join?
+
+1. Penguin data into island data
+2. Island data into penguin data
+
+
+## Keys
+
+```{r}
+#| echo: true
+
+intersect(colnames(penguins), colnames(island_data))
+```
+
+
+## `left_join()`
+
+```{r}
+#| echo: true
+
+left_join(penguins, island_data)
+```
+
+
+## Making new variables
+
+```{r}
+#| echo: true
+
+penguins <- penguins |> 
+  mutate(log_bill_length = log10(bill_length_mm),
+         log_bill_depth = log10(bill_depth_mm))
+
+str(penguins)
+```
+
+
+## Making new variables
+
+```{r}
+#| echo: true
+
+penguins$log_body_mass <- log10(penguins$body_mass_g)
+
+str(penguins)
+```
+
+
+## `group_by()` and `summarize()`
+
+1. Split the data into some set of subgroups
+2. Apply some function(s) to create new variable(s)
+3. Recombine the sets
+
+- Means by species
+- Means by species and sex
+- Means by species, sex, and island
+
+
+## Summarizing {.smaller}
+
+```{r}
+#| echo: true
+
+penguins |> 
+  group_by(species, sex, island) |> 
+  summarize(mean_log_mass = mean(log_body_mass),
+            mean_log_bill_length = mean(log_bill_length),
+            .groups = "drop")
+```
+
+
+## What happened? {.smaller}
+
+- Some `sex` coded as `NA`
+
+```{r}
+#| echo: true
+
+penguins |> 
+  drop_na(sex) |> 
+  group_by(species, sex, island) |> 
+  summarize(mean_log_mass = mean(log_body_mass),
+            mean_log_bill_length = mean(log_bill_length),
+            .groups = "drop")
+```
+
 
 ## Data visualization
 
@@ -203,17 +507,118 @@ I feel like I struggle to find the words to answer questions related to the inte
 
 > I might've missed this, but does R automatically generate a graph based on the type of dataset? I know from previous statistics courses that the data set depends on the graph. Are we going to learn more graph types? 
 
-> Is this a specific order to ggplot arguments?
-I'm still a little confused on how to set "bins" for histograms
+> Is this a specific order to ggplot arguments? I'm still a little confused on how to set "bins" for histograms
+
+
+## Data visualization
 
 > Not necessarily a question per se, but I would like to learn more about interpreting visualization of data in R.  We've learned about different types of plots and visualizations and the code to use, but I struggle sometimes in my own data to articulately describe what a plot is telling me.  This might be something we discuss further on in the course, but, as of right now, it's something that I've been struggling with. 
 
 > Are there other graphing tips that you can provide as we navigate the different types and how to set up each one?
 
 
+## Data visualization
+
 > I face issues with ggplot questions. Just a review on that will be very helpful
 
 > I always make very silly little mistakes when creating plots with ggplot. Could you guys give a few organized examples of what all needs to be included when making plots.  
+
+
+## Working with aesthetics
+
+```{r}
+penguins <- penguins |> 
+  drop_na(body_mass_g)
+```
+
+```{r}
+#| echo: true
+
+ggplot(penguins, aes(body_mass_g, fill = species)) +
+  geom_density()
+```
+
+
+## Working with aesthetics
+
+```{r}
+#| echo: true
+
+ggplot(penguins, aes(body_mass_g, fill = species)) +
+  geom_density(alpha = 0.5)
+```
+
+
+## Working with aesthetics
+
+```{r}
+#| echo: true
+
+penguins <- penguins |> 
+  mutate(species_alpha = case_when(
+    species == "Adelie" ~ 1,
+    species == "Chinstrap" ~ 0.5,
+    species == "Gentoo" ~ 0.25
+  ))
+penguins |> select(species, species_alpha) |> slice_sample(n = 10)
+```
+
+
+## Working with aesthetics
+
+```{r}
+#| echo: true
+
+ggplot(penguins, aes(body_mass_g, fill = species,
+                     alpha = species_alpha)) +
+  geom_density()
+```
+
+
+## Working with aesthetics
+
+```{r}
+#| echo: true
+
+library(ggridges)
+ggplot(penguins, aes(x = body_mass_g, y = species, fill = species)) +
+  geom_density_ridges(alpha = 0.5)
+```
+
+
+## Working with aesthetics
+
+```{r}
+#| echo: true
+
+ggplot(penguins, aes(body_mass_g, color = species, fill = species)) +
+  geom_histogram(bins = 30, alpha = 0.5)
+```
+
+
+## Working with aesthetics
+
+```{r}
+#| echo: true
+
+ggplot(penguins, aes(log_bill_length, log_bill_depth, color = species,
+                     size = log_body_mass)) +
+  geom_point()
+```
+
+
+## Working with aesthetics
+
+- color
+- shape
+- size
+- linetype
+- fill
+- alpha
+- text parameters
+
+All are context-specific
+
 
 ## Progress check questions
 
@@ -222,8 +627,221 @@ I'm still a little confused on how to set "bins" for histograms
 > Also, is there an easier way to slice the NA values out of the Rattlesnake data. Is there a way to specify only odd or even rows in the data without numbering them one by one?
 
 
+## Probability 
+
+> Can you go through conditional probability one more time, an example similar to the HIV one?
+
+> I'm still struggling a bit with probability. I have a tendency to overthink and overcomplicate probability which often times causes me to second guess myself and make mistakes.
 
 
+## Probability 
+
+> I  would like to know more about conditional probability and the equation related to it.
+
+> What makes up a sufficient interpretation of a probability? I feel like I struggle to find the words to answer questions related to the interpretation of probabilities. I think covering some more examples of this would be helpful for me, though I will also return to previous lectures for review. 
+
+
+## Temperature dependent sex determination
+
+<center>
+<img src="https://i.imgur.com/GBXvrf9.jpg" width="70%" />
+</center>
+
+
+## Temperature dependent sex determination
+
+Above the critical temperature ($T_c$)
+
+- $Pr[Female] = 0.8$
+- $Pr[Male] = 0.2$
+
+Below the critical temperature ($not~T_c$)
+
+- $Pr[Female] = 0.5$
+- $Pr[Male] = 0.5$
+
+
+## How to *preferentially* collect female eggs?
+
+You want to collect an egg from a nest and estimate what the temperature was in that nest when sex was determined.
+
+- You want to preferentially collect from nests with large numbers of females
+- The temperature now is not necessarily what it was (so you can't use a thermometer)
+
+What is the probability that the nest was above $T_c$, given that you have collected a female egg?
+
+
+## Variables
+
+- $Pr[Female | Above~T_c] = 0.8$
+- $Pr[Female | Below~T_c] = 0.5$
+
+
+## Bayes' rule
+
+$$Pr[A | B] = \frac{Pr[B | A] \cdot Pr[A]}{Pr[B]}$$
+
+We want: *probability of $T_c$ given that we have observed a $Female$*
+
+$$Pr[Above~T_c | Female]$$
+
+So:
+
+- $A$ is $Above~T_c$
+- $B$ is $Female$
+
+
+## Bayes' rule
+
+$$Pr[Above~ T_c | F] = \frac{Pr[F | Above~T_c] \cdot Pr[Above~T_c]}{Pr[F]}$$
+
+We have:
+
+- $Pr[F | Above~T_c] = 0.8$
+
+We need:
+
+- $Pr[Above~T_c]$
+- $Pr[F]$
+
+
+## Estimating $Pr[Above~T_c]$?
+
+Without any additional information about the distribution of $Above~T_c$ among nests:
+
+$$Pr[Above~T_c] = 0.5$$
+
+- Equal probability that a nest is above $T_c$ or below.
+- Choose some other probability if we have *a priori* information.
+
+
+## Bayes' rule
+
+$$Pr[Above~T_c | F] = \frac{Pr[F | Above~T_c] \cdot Pr[Above~T_c]}{Pr[F]}$$
+
+We have:
+
+- $Pr[F | Above~T_c] = 0.8$
+- $Pr[Above~T_c] = 0.5$
+
+We need:
+
+- $Pr[F]$
+
+
+## Conditional probability
+
+```{r}
+#| fig-align: center
+
+library(ggflowchart)
+
+FC <- tribble(
+  ~ from, ~ to,
+  "Temperature", "Above Tc\n0.5",
+  "Temperature", "Below Tc\n0.5",
+  "Above Tc\n0.5", "Pr[Female]\n0.8",
+  "Above Tc\n0.5", "Pr[Male]\n0.2",
+  "Below Tc\n0.5", "Pr[Female]\n0.5",
+  "Below Tc\n0.5", "Pr[Male]\n0.5",
+  "Pr[Female]\n0.8", "Female\nAbove Tc",
+  "Pr[Male]\n0.2", "Male\nAbove Tc",
+  "Pr[Female]\n0.5", "Female\nBelow Tc",
+  "Pr[Male]\n0.5", "Male\nBelow Tc"
+)
+
+ggflowchart(FC,
+            horizontal = TRUE,
+            arrow_size = 0.25,
+            text_size = 4,
+            x_nudge = 0.3,
+            y_nudge = 0.3)
+```
+
+$Pr[F]$ is the sum of the two paths to Female.
+
+
+## Bayes' rule
+
+\begin{align}
+Pr[F] = & Pr[F | Above~T_c] \cdot Pr[T_c] + \\
+        & Pr[F | Below~ T_c] \cdot Pr[Below~T_c]
+\end{align}
+
+So:
+
+\begin{align}
+Pr[F] & = 0.5 \cdot 0.5 + 0.5 \cdot 0.8 \\
+      & = 0.25 + 0.4 \\
+      & = 0.65
+\end{align}
+
+
+## Bayes' rule
+
+\begin{align}
+Pr[Above~T_c | F] & = \frac{Pr[F | Above~T_c] \cdot Pr[Above~T_c]}{Pr[F]}\\
+                  & = \frac{0.8 \cdot 0.5}{0.65} \\
+                  & = \frac{0.40}{0.65} \\
+                  & = 0.62
+\end{align}
+
+Given a female egg, the probability that the nest was above $T_c$ is 0.62.
+
+
+## Solving with natural numbers
+
+```{r}
+FC2 <- tribble(
+  ~ from, ~ to,
+  "Temperature", "Above Tc\n0.5",
+  "Temperature", "Below Tc\n0.5",
+  "Below Tc\n0.5", "Pr[Male]\n0.5",
+  "Below Tc\n0.5", "Pr[Female]\n0.5",
+  "Above Tc\n0.5", "Pr[Male]\n0.2",
+  "Above Tc\n0.5", "Pr[Female]\n0.8",
+  "Pr[Male]\n0.5", "Male\n0.5 * 0.5 = 0.25",
+  "Pr[Female]\n0.5", "Female\n0.5 * 0.5 = 0.25",
+  "Pr[Male]\n0.2", "Male\n0.5 * 0.2 = 0.1",
+  "Pr[Female]\n0.8", "Female\n0.5 * 0.8 = 0.4"
+)
+
+ggflowchart(FC2,
+            horizontal = TRUE,
+            arrow_size = 0.25,
+            text_size = 4,
+            x_nudge = 0.25)
+
+```
+
+
+## Solving with natural numbers
+
+```{r}
+#| fig-align: center
+
+FC3 <- tribble(
+  ~ from, ~ to,
+  "Temperature\n100", "Above Tc\n0.5 * 100 = 50",
+  "Temperature\n100", "Below Tc\n0.5 * 100 = 50",
+  "Below Tc\n0.5 * 100 = 50", "Pr[Male]\n0.5 * 50 = 25",
+  "Below Tc\n0.5 * 100 = 50", "Pr[Female]\n0.5 * 50 = 25",
+  "Above Tc\n0.5 * 100 = 50", "Pr[Male]\n0.2 * 50 = 10",
+  "Above Tc\n0.5 * 100 = 50", "Pr[Female]\n0.8 * 50 = 40",
+  "Pr[Male]\n0.5 * 50 = 25", "Male\n25",
+  "Pr[Female]\n0.5 * 50 = 25", "Female\n25",
+  "Pr[Male]\n0.2 * 50 = 10", "Male\n10",
+  "Pr[Female]\n0.8 * 50 = 40", "Female\n40"
+)
+
+ggflowchart(FC3,
+            horizontal = TRUE,
+            arrow_size = 0.25,
+            text_size = 4,
+            x_nudge = 0.25)
+```
+
+$$\frac{40}{40 + 25} = \frac{40}{65} = 0.62$$
 
 
 
@@ -293,388 +911,8 @@ airquality |> slice_sample(prop = 0.05)
 ```
 
 
-## Tidyverse: pivots
 
-> Why is it good data practice to keep my data in a bunch of smaller tables that I join together?
 
-> When making clean data, what is the best way to determine whether or not you need to make it longer or wider at a quick glance of the data.
-
-
-## Pivots
-
-Shape of your data:
-
-- Wide: rows have multiple columns with values
-- Long: rows have 1 column with values
-
-
-## Wide data
-
-Most common for data entry:
-
-```{r}
-library(palmerpenguins)
-head(penguins)
-```
-
-Each row is a logical unit (e.g., sample, individual)
-
-
-## Wide data
-
-```{r}
-island_data
-```
-
-
-## Long data
-
-- Truly "tidy"
-- Frequently impractical for data entry (lot of repeated values)
-- Often useful for plotting
-    - Column name becomes a value for a new variable
-    - Cell value becomes the value for that new variable
-
-`pivot_longer()`: wide $\rightarrow$ long
-
-`pivot_wider()`: long $\rightarrow$ wide
-
-
-## "Quoted" vs. unquoted variables
-
-> When writing in R how do you know when to use " " and when not two when referring to variables and values.
-
-- Most tidyverse functions can be unquoted
-    - A few exceptions (e.g., `facet_wrap("variable")`)
-- When you need a "string"
-    - `names_to = "bill_measure"`
-    - `today <- "Friday"`
-- Mix in base R
-    - `penguins$species` vs. `penguins[, "species"]`
-
-
-## You want this plot
-
-```{r, echo=FALSE}
-penguins_long <- penguins |>
-  select(species, sex, body_mass_g, bill_length_mm, bill_depth_mm) |> 
-  pivot_longer(cols = -c(species, sex, body_mass_g),
-               names_to = "bill_measure",
-               values_to = "length") |> 
-  drop_na()
-
-ggplot(penguins_long, aes(x = body_mass_g, y = length, color = species)) +
-  geom_point(size = 3) +
-  scale_colour_viridis_d() +
-  facet_grid(bill_measure ~ sex, scales = "free_y")
-```
-
-
-## You need
-
-- `species`
-- `sex`
-- `body_mass_g`
-- `bill_length_mm`
-- `bill_depth_mm`
-
-Turn `bill_length_mm` and `bill_depth_mm` into a new column "bill_measure" and values to a column called "length"
-
-
-## `pivot_longer()`
-
-```{r}
-penguins_long <- penguins |>
-  select(species, sex, body_mass_g, bill_length_mm, bill_depth_mm) |> 
-  pivot_longer(cols = c(bill_length_mm, bill_depth_mm),
-               names_to = "bill_measure",
-               values_to = "length") |> 
-  drop_na()
-```
-
-or
-
-```{r}
-penguins_long <- penguins |>
-  select(species, sex, body_mass_g, bill_length_mm, bill_depth_mm) |> 
-  pivot_longer(cols = -c(species, sex, body_mass_g),
-               names_to = "bill_measure",
-               values_to = "length") |> 
-  drop_na()
-```
-
-
-## Long data
-
-```{r}
-penguins_long
-```
-
-
-## Plot
-
-```{r, eval=FALSE}
-ggplot(penguins_long, aes(x = body_mass_g, y = length, color = species)) +
-  geom_point(size = 3) +
-  scale_colour_viridis_d() +
-  facet_grid(bill_measure ~ sex, scales = "free_y")
-```
-
-
-## Plot
-
-```{r, eval=TRUE, fig.height=4}
-ggplot(penguins_long, aes(x = body_mass_g, y = length, color = species)) +
-  geom_point(size = 3) +
-  scale_colour_viridis_d() +
-  facet_grid(bill_measure ~ sex, scales = "free_y")
-```
-
-
-## Edit values
-
-```{r}
-penguins_long <- penguins_long |> 
-  mutate(bill_measure = str_remove(bill_measure, "_mm"),
-         bill_measure = str_remove(bill_measure, "bill_"))
-
-head(penguins_long)
-```
-
-
-## `pivot_wider()`
-
-Be careful:
-
-```{r}
-penguins_long |> 
-  pivot_wider(id_cols = c(species, sex, body_mass_g),
-              names_from = bill_measure, values_from = length)
-```
-
-
-## What happened?
-
-`species`, `sex`, and `body_mass_g` don't uniquely identify new rows
-
-```{r}
-penguins_long |> 
-  group_by(species, sex, body_mass_g) |> 
-  tally()
-```
-
-
-## Tidyverse: joins
-
-> Could you go over mutating joins?
-
-> A review of the different join methods and how to select one.
-
-> I would like to get explanation again on how the code for joining two datasets work and how can we specify in the code what we need; for example if we want only one column from df1 to merge it from only one column from df2. Or if we wouldn't want all observations/rows in the new merged set.
-
-
-## Tidyverse: joins
-
-Always joining two tibbles/data.frames.
-
-What rows do you want to keep?
-
-- `left_join(x, y)`: includes all rows in x.
-- `right_join(x, y)`: includes all rows in y.
-- `inner_join(x, y)`: includes all rows in x *and* y.
-- `full_join(x, y)`: includes all rows in x *or* y.
-
-
-## Joining
-
-You also have data about the penguins' islands:
-
-```{r}
-island_data
-```
-
-
-## Which way to join?
-
-1. Penguin data into island data
-2. Island data into penguin data
-
-
-## Keys
-
-```{r}
-intersect(colnames(penguins), colnames(island_data))
-```
-
-
-## `left_join()`
-
-```{r}
-left_join(penguins, island_data)
-```
-
-
-## Tidyverse: summarize, mutate, etc.
-
-> I think I understand the difference between the mutate() and transmute() functions but, just to be clear, mutate() adds your new calculated variable on to your dataframe you've specified and keeps your original variables as well while transmute() only returns the new variable while eliminating or modifying the original variable you acted on as well?
-
-
-
-## Making new variables
-
-```{r}
-penguins <- penguins |> 
-  mutate(log_bill_length = log10(bill_length_mm),
-         log_bill_depth = log10(bill_depth_mm))
-
-str(penguins)
-```
-
-
-## Making new variables
-
-```{r}
-penguins$log_body_mass <- log10(penguins$body_mass_g)
-
-str(penguins)
-```
-
-
-## `group_by()` and `summarize()`
-
-1. Split the data into some set of subgroups
-2. Apply some function(s) to create new variable(s)
-3. Recombine the sets
-
-- Means by species
-- Means by species and sex
-- Means by species, sex, and island
-
-
-## Summarizing {.smaller}
-
-```{r}
-penguins |> 
-  group_by(species, sex, island) |> 
-  summarize(mean_log_mass = mean(log_body_mass),
-            mean_log_bill_length = mean(log_bill_length),
-            .groups = "drop")
-```
-
-
-## What happened? {.smaller}
-
-- Some `sex` coded as `NA`
-
-```{r}
-penguins |> 
-  drop_na(sex) |> 
-  group_by(species, sex, island) |> 
-  summarize(mean_log_mass = mean(log_body_mass),
-            mean_log_bill_length = mean(log_bill_length),
-            .groups = "drop")
-```
-
-
-## Data Visualizations
-
-> What should one consider when deciding which plot to use for a given data set? Based on the graphs, would it be easy to identify if we used the incorrect type of distribution and what would that look like?
-
-
-> In ggplot, how and why does assigning 'color = Species' works? Does it plot by the species or does it give it a color?
-
-> For ggplot, is there a general rule for what goes into the aes() argument and what doesn't? Specifically for the geom additions (geom_point, geom_density, etc.)?
-
-
-## Data Visualizations
-
-> PS 4: Create a density plot for #3 and #6 above on the same plot. First create a single data frame with both sets and a column identifying each group.
-
-> How to clean up the scatterplots and make them less noisy and more legible.
-
-> Can you go over more plot manipulation please? (ggplot, boxplots, color manipulations, grouping, and more)
-
-
-## Working with aesthetics
-
-```{r, echo=FALSE}
-penguins <- penguins |> 
-  drop_na(body_mass_g)
-```
-
-```{r, fig.height=4}
-ggplot(penguins, aes(body_mass_g, fill = species)) +
-  geom_density()
-```
-
-
-## Working with aesthetics
-
-```{r, fig.height=4}
-ggplot(penguins, aes(body_mass_g, fill = species)) +
-  geom_density(alpha = 0.5)
-```
-
-
-## Working with aesthetics
-
-```{r, fig.height=4}
-penguins <- penguins |> 
-  mutate(species_alpha = case_when(
-    species == "Adelie" ~ 1,
-    species == "Chinstrap" ~ 0.5,
-    species == "Gentoo" ~ 0.25
-  ))
-penguins |> select(species, species_alpha) |> slice_sample(n = 10)
-```
-
-
-## Working with aesthetics
-
-```{r, fig.height=4}
-ggplot(penguins, aes(body_mass_g, fill = species,
-                     alpha = species_alpha)) +
-  geom_density()
-```
-
-
-## Working with aesthetics
-
-```{r, fig.height=4, message=FALSE}
-library(ggridges)
-ggplot(penguins, aes(x = body_mass_g, y = species, fill = species)) +
-  geom_density_ridges(alpha = 0.5)
-```
-
-
-## Working with aesthetics
-
-```{r, fig.height=4}
-ggplot(penguins, aes(body_mass_g, color = species, fill = species)) +
-  geom_histogram(bins = 30, alpha = 0.5)
-```
-
-
-## Working with aesthetics
-
-```{r, fig.height=4}
-ggplot(penguins, aes(log_bill_length, log_bill_depth, color = species,
-                     size = log_body_mass)) +
-  geom_point()
-```
-
-
-## Working with aesthetics
-
-- color
-- shape
-- size
-- linetype
-- fill
-- alpha
-- text parameters
-
-All are context-specific
 
 
 ## Probability
@@ -688,130 +926,6 @@ All are context-specific
 > I would like to go over the probability formula we used in unit 4. I feel like I still struggle with where to put each variable.
 
 > I wouldn't mind another example of Bayes' Rule. I understand the premise but would like more practice with it.
-
-
-## Temperature dependent sex determination
-
-<center>
-<img src="https://i.imgur.com/GBXvrf9.jpg" width="70%" />
-</center>
-
-
-## Temperature dependent sex determination
-
-Above the critical temperature ($T_c$)
-
-- $Pr[Female] = 0.8$
-- $Pr[Male] = 0.2$
-
-Below the critical temperature ($not~T_c$)
-
-- $Pr[Female] = 0.5$
-- $Pr[Male] = 0.5$
-
-
-## How to *preferentially* collect female eggs?
-
-You want to collect an egg from a nest and estimate what the temperature was in that nest when sex was determined.
-
-- You want to preferentially collect from nests with large numbers of females
-- The temperature now is not necessarily what it was (so you can't use a thermometer)
-
-What is the probability that the nest was above $T_c$, given that you have collected a female egg?
-
-
-## Variables
-
-- $Pr[Female | T_c] = 0.8$
-- $Pr[Female | not~T_c] = 0.5$
-
-
-## Bayes' rule
-
-$$Pr[A | B] = \frac{Pr[B | A] \cdot Pr[A]}{Pr[B]}$$
-
-We want: *probability of $T_c$ given that we have observed a $Female$*
-
-$$Pr[T_c | Female]$$
-
-So:
-
-- $A$ is $T_c$
-- $B$ is $Female$
-
-
-## Bayes' rule
-
-$$Pr[T_c | Female] = \frac{Pr[Female | T_c] \cdot Pr[T_c]}{Pr[Female]}$$
-
-We have:
-
-- $Pr[Female | T_c] = 0.8$
-
-We need:
-
-- $Pr[T_c]$
-- $Pr[Female]$
-
-
-## Good distribution for $Pr[T_c]$?
-
-Without any additional information about the distribution of $T_c$ among nests:
-
-$$Pr[T_c] = 0.5$$
-
-There is equal probability that a nest is above $T_c$ or below.
-
-
-## Conditional probability
-
-<center>
-<img src="https://i.imgur.com/ViEcXg3.jpg" width="50%" />
-</center>
-
-$Pr[Female]$ is the sum of the two paths to Female.
-
-
-## Bayes' rule
-
-$$Pr[T_c | Female] = \frac{Pr[Female | T_c] \cdot Pr[T_c]}{Pr[Female]}$$
-
-We have:
-
-- $Pr[Female | T_c] = 0.8$
-- $Pr[T_c] = 0.5$
-
-We need:
-
-$$Pr[Female] = Pr[Female | T_c] \cdot Pr[T_c] + $$
-$$Pr[Female | not~ T_c] \cdot Pr[not~T_c]$$
-
-
-## Bayes' rule
-
-We need:
-
-$$Pr[Female] = Pr[Female | T_c] \cdot Pr[T_c] + $$
-$$Pr[Female | not~ T_c] \cdot Pr[not~T_c]$$
-
-So:
-
-$$Pr[Female] = 0.8 \cdot 0.5 + 0.5 \cdot 0.5$$
-$$= 0.4 + 0.25$$
-$$= 0.65$$
-
-## Bayes' rule
-
-$$Pr[T_c | Female] = \frac{Pr[Female | T_c] \cdot Pr[T_c]}{Pr[Female]}$$
-
-$$Pr[T_c | Female] = \frac{0.8 \cdot 0.5}{0.65} = \frac{0.40}{0.65} = 0.62$$
-
-
-## Bayes' rule
-
-<center>
-<img src="https://i.imgur.com/xJQzoB5.jpg" width="100%" />
-</center>
 
 
 ## Probability
