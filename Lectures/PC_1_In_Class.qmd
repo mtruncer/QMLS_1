@@ -58,6 +58,7 @@ island_data <- tibble(
 
 ## Best practices for coding & learning
 
+Many people have advice & resources
 Let's look at some code
 
 

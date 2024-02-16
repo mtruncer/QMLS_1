@@ -1,0 +1,100 @@
+---
+title: "PC1_Code_InClass"
+format: html
+---
+
+```{r setup}
+#| message: false
+
+library(tidyverse)
+library(cowplot)
+theme_set(theme_cowplot())
+
+```
+
+
+## Outliers
+
+```{r}
+set.seed(49387)
+ExDat <- tibble(SampleID = paste0("S",1:30),
+                Concentration = c(0.12,rnorm(29,15,3)),
+                Treatment = rep(c("C","T"), each = 15),
+                Notes = c("Not sure this sample was added", rep("none",29))
+                )
+ExDat <- ExDat[sample(1:nrow(ExDat)),]
+```
+
+
+```{r}
+
+# Plot the data
+
+ExDat |>
+  ggplot(aes(Treatment, Concentration)) +
+  geom_point(position = position_jitter(width = 0.2)) +
+  ylim(c(0,21))
+
+
+# Find the low point
+
+ww <- which.min(ExDat$Concentration)
+
+# Look at this row
+
+ExDat[ww,]
+unique(ExDat$Notes)
+
+ExDat |>
+  filter(Notes != "none")
+
+```
+
+```{r}
+set.seed(49387)
+ExDat <- tibble(SampleID = paste0("S",1:30),
+                Concentration = c(2.5,rnorm(29,15,3)),
+                Treatment = rep(c("C","T"), each = 15),
+                Notes = c("Not sure this sample was added", rep("none",29))
+                )
+ExDat <- ExDat[sample(1:nrow(ExDat)),]
+```
+
+
+```{r}
+
+# Plot the data
+
+ExDat |>
+  ggplot(aes(Treatment, Concentration)) +
+  geom_point(position = position_jitter(width = 0.2)) +
+  ylim(c(0,21))
+
+```
+
+
+
+
+```{r}
+set.seed(49387)
+ExDat <- tibble(SampleID = paste0("S",1:30),
+                Concentration = c(3.5,rnorm(29,15,3)),
+                Treatment = rep(c("C","T"), each = 15),
+                Notes = c("Not sure this sample was added", rep("none",29))
+                )
+ExDat <- ExDat[sample(1:nrow(ExDat)),]
+```
+
+
+```{r}
+
+# Plot the data
+
+ExDat |>
+  ggplot(aes(Treatment, Concentration)) +
+  geom_point(position = position_jitter(width = 0.2)) +
+  ylim(c(0,21))
+
+```
+
+
