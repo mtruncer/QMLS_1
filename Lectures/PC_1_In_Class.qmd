@@ -35,11 +35,11 @@ island_data <- tibble(
 ## Topics for Today
 
 1. Best practices for coding & learning
-2. Miscellaneous questions
-3. Tidyverse functions
-4. Data visualization
-5. Probability
-6. Progress Check 1 Questions
+1. Miscellaneous questions
+1. Tidyverse functions
+1. Data visualization
+1. Progress Check 1 Questions
+1. Probability
 
 
 ## Best practices for coding & learning
@@ -58,8 +58,9 @@ island_data <- tibble(
 
 ## Best practices for coding & learning
 
-Many people have advice & resources
-Let's look at some code
+- Many people have advice & resources
+    - Working on a resources page for Canvas
+- Let's look at some code
 
 
 ## Strategies for Learning R {.smaller}
@@ -68,7 +69,8 @@ Let's look at some code
 2. Using help files
     - ?unique
 3. Tips
-    - Make your own Help folder 
+    - Make your own help folder
+        - https://github.com/kmiddleton/rexamples
     - Develop a system for saving resources
     - Write pseudocode & use comments
     - Growth mindset
@@ -110,8 +112,6 @@ str(as.numeric(myVector))
 ## Miscellaneous questions
 
 > Refresher on how to find and recategorize outliers.
-
--add example
 
 
 ## Miscellaneous questions
@@ -384,8 +384,7 @@ penguins_long |>
 #| echo: true
 
 penguins_long |> 
-  group_by(species, sex, body_mass_g) |> 
-  tally()
+  count(species, sex, body_mass_g)
 ```
 
 
@@ -651,12 +650,12 @@ All are context-specific
 
 ## Temperature dependent sex determination
 
-Above the critical temperature ($T_c$)
+Above the critical temperature ($Above~T_c$)
 
 - $Pr[Female] = 0.8$
 - $Pr[Male] = 0.2$
 
-Below the critical temperature ($not~T_c$)
+Below the critical temperature ($Below~T_c$)
 
 - $Pr[Female] = 0.5$
 - $Pr[Male] = 0.5$
@@ -745,10 +744,10 @@ FC <- tribble(
   "Above Tc\n0.5", "Pr[Male]\n0.2",
   "Below Tc\n0.5", "Pr[Female]\n0.5",
   "Below Tc\n0.5", "Pr[Male]\n0.5",
-  "Pr[Female]\n0.8", "Female\nAbove Tc",
-  "Pr[Male]\n0.2", "Male\nAbove Tc",
-  "Pr[Female]\n0.5", "Female\nBelow Tc",
-  "Pr[Male]\n0.5", "Male\nBelow Tc"
+  "Pr[Female]\n0.8", "Female, Above Tc\n0.40",
+  "Pr[Male]\n0.2", "Male, Above Tc\n0.10",
+  "Pr[Female]\n0.5", "Female Below Tc\n0.25",
+  "Pr[Male]\n0.5", "Male Below Tc\n0.25"
 )
 
 ggflowchart(FC,
@@ -759,13 +758,13 @@ ggflowchart(FC,
             y_nudge = 0.3)
 ```
 
-$Pr[F]$ is the sum of the two paths to Female.
+$Pr[F]$ is the sum of the two ways to get a Female egg.
 
 
 ## Bayes' rule
 
 \begin{align}
-Pr[F] = & Pr[F | Above~T_c] \cdot Pr[T_c] + \\
+Pr[F] = & Pr[F | Above~T_c] \cdot Pr[Above~T_c] + \\
         & Pr[F | Below~ T_c] \cdot Pr[Below~T_c]
 \end{align}
 
@@ -843,108 +842,4 @@ ggflowchart(FC3,
 ```
 
 $$\frac{40}{40 + 25} = \frac{40}{65} = 0.62$$
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-## old slides
-
-
-## Tibbles, matrices, and data.frames
-
-> Dataframes, matrices, and tibbles are still a bit confusing. Could you go over the differences in each one and how they are similar and different?
-
-> When is it appropriate to select creating a tibble over a data frame?
-
-> What is the best way to determine if there are formatting issues in the data.
-
-- `str()`, `glimpse()`, `unique()`, `count()`
-
-
-## Slicing
-
-> I still don't understand slice_sample() very well or how it works. Could you please go over it?
-
-NYC Air quality May-September 1973
-
-```{r}
-str(airquality)
-```
-
-
-## Slicing specific rows
-
-```{r}
-airquality[c(1, 3, 5), ]
-airquality |> slice(1, 3, 5)
-```
-
-
-## 7 rows
-
-```{r}
-airquality[sample(1:nrow(airquality), 7), ]
-
-airquality |> slice_sample(n = 7)
-```
-
-
-## 5% of rows
-
-```{r}
-airquality[sample(1:nrow(airquality), nrow(airquality) %/% 20), ]
-
-airquality |> slice_sample(prop = 0.05)
-```
-
-
-
-
-
-
-## Probability
-
-> One more slow explanation of conditional probability can't hurt. I think I just about understand it, but I want to really try and follow along.
-
-> Could you go over an example similar to the cancer example in Problem Set 4? I am still struggling with interpreting Bayes' Rule. I understand how to set them up, but I am still working on interpreting what the question is asking!
-
-> Can we briefly go over the prostate cancer example from Problem Set 4 - specifically how to solve it efficiently using R?
-
-> I would like to go over the probability formula we used in unit 4. I feel like I still struggle with where to put each variable.
-
-> I wouldn't mind another example of Bayes' Rule. I understand the premise but would like more practice with it.
-
-
-## Probability
-
-> How do you correctly identify true positives, false positives, true negatives, and false negatives based on the wording provided? Additionally, how does this relate to sensitivity and specificity?
-
-
-## Probability
-
-<center>
-<img src="https://i.imgur.com/TdyYkUY.jpg" width="60%" />
-</center>
-
-- Sensitivity = [a/(a+c)] × 100 = True Positive *Proportion*
-- Specificity = [d/(b+d)] × 100 = True Negative *Proportion*
-- Positive predictive value(PPV) = [a/(a+b)] × 100
-- Negative predictive value(NPV) = [d/(c+d)] × 100.
-
-From: https://doi.org/10.3389/fpubh.2017.00307
-
 
