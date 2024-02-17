@@ -819,6 +819,7 @@ ggflowchart(FC2,
 
 ```{r}
 #| fig-align: center
+#| fig-height: 4
 
 FC3 <- tribble(
   ~ from, ~ to,
@@ -840,6 +841,5 @@ ggflowchart(FC3,
             text_size = 4,
             x_nudge = 0.25)
 ```
-
 $$\frac{40}{40 + 25} = \frac{40}{65} = 0.62$$
 
