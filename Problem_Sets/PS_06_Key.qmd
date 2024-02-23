@@ -179,32 +179,7 @@ log(L_1)
 ```
 
 
-#### Likelihood ratio (Bayes Factor)
-
-The equation for Bayes Factor can be calculated in two ways:
-
-$$BF = \frac{\mathcal{L}(Model~2)}{\mathcal{L}(Model~1)} = \left(\frac{\hat{\sigma}^2_2}{\hat{\sigma}^2_1}\right)^{-\frac{n_1 + n_2}{2}}$$
-
-Use the calculations we have given you above to calculate the Bayes Factor for model 2 (the data come from distributions with different means) vs. model 1 (the data come from a single distribution with one mean).
-
-You can either use the ratio of the likelihoods or the ratio of variances from the equation above.
-
-```{r}
-# FIXME
-L_2 / L_1
-(s_hat_2 / s_hat_1) ^ (-(n1 + n2) / 2)
-```
-
-What do you conclude based on the Bayes Factor comparison?
-
-> There is overwhelming support for the two mean model. This is pretty apparent from the plot.
-
-We have actually violated one of the assumptions of the likelihood calculations that we did. What is it?
-
-> The variances are likely *not* equal. The variance is 16x higher in the cotton group than in the corn group.
-
-
-## Confidence intervals
+## FIXME FIXME Confidence intervals
 
 We will use the same data to explore confidence intervals.
 
