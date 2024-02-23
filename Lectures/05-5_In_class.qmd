@@ -1,0 +1,665 @@
+---
+title: "Unit 5 In Class Discussion"
+author:
+  - Elizabeth King
+  - Kevin Middleton
+format:
+  revealjs:
+    theme: [default, custom.scss]
+    standalone: true
+    self-contained: true
+    logo: QMLS_Logo.png
+    slide-number: true
+    show-slide-number: all
+code-annotations: hover
+bibliography: QMLS_Bibliography.bib
+csl: evolution.csl
+---
+
+```{r}
+#| label: setup
+#| message: false
+#| warning: false
+
+library(tidyverse)
+library(cowplot)
+library(plotly)
+library(cmdstanr)
+library(bayesplot)
+library(posterior)
+
+theme_set(theme_cowplot())
+
+mode <- function(x) {
+  dd <- density(x)
+  dd$x[which.max(dd$y)]
+}
+```
+
+
+## Today's plan
+
+- Progress check
+- Big picture questions
+- Practice (which will answer some of your questions)
+- Return for likelihood examples and discussion
+
+
+## Progress check
+
+- Key posted soon
+- Study the key, compare to your answers
+- Questions next week
+
+
+## Types of predictors
+
+> ..how you would go about categorizing organisms into morphotypes based on continuous characters (such as with the long vs short-winged crickets).
+
+
+## Models
+
+> What is the "cutoff" for having more than one model? Or more specifically, at what point should you move things into a different model even though they are on the same research topic? 
+
+
+## Measures of spead
+
+> How and when does measure of spread help in any data analysis? What would be some examples besides students' grading ?
+
+
+## Frameworks
+
+> Is there a right or wrong framework to choose based on your own data? 
+
+> I find it hard in understanding the difference between likelihood inference and Bayesian inference. Also, continuous maximum likelihood was challenging to understand.
+
+> Frequentist/Likelihood : Probability of the data, given the parameter estimate; Bayesian: Probability of the parameters given the data (and priors)
+
+
+## Bayesian priors
+
+> It was unclear to me what a prior is, why its required and when its needed.
+
+> The lecture slides in 5-4 mention that a prior places less probability on lower values. Why is this? Does it do the same thing with values that are high? 
+
+
+## Likelihood
+
+> Is one of the baseline assumption for calculating model likelihood normally distributed data?
+
+> Is there a good way to reconcile the mathematics equations with the code we use in R to solve them?
+
+> I also am not clear on the difference between the log values being better than the normal values (unless it's just the computer constraint). The examples make it seem like comparing a bunch of negative numbers to other negative numbers and knowing which from normal vs log-like are better.
+
+
+## Grid approximation
+
+> I understand that the grid function makes a grid but I'm a little confused how in the lecture example you used a crossing function? Does that cross mu and sigma in the grid? This may be a silly question but just want to be clear. 
+
+
+## Optimizing
+
+> I did not fully understand the slides in 5-4, where we defined a function and then did the optim() function. I think I am not quite understanding all the parts/variables that made the example work (e.g. the theta vector with the subsetting). I feel like I am close to understanding though, so it would be helpful to maybe see it worked through in a different way or with a different example. 
+
+> When you were calculating likelihood and used mean of 98.6 and sd of 0.1, then changed the mean to 98.4, how do you come up with another mean?  In live data sampling, you wont usually get another mean right?  The data you measured is the data you measured.  
+
+
+
+
+
+
+## A bit of history
+
+:::: {.columns}
+
+::: {.column width="60%"}
+![](https://i.imgur.com/av682V7.png){fig-align="center"}
+:::
+
+::: {.column width="40%"}
+![](https://miro.medium.com/v2/1*chgYpijERWp3_0bBj4ZjJA.jpeg){fig-align="center"}
+:::
+
+::::
+
+
+## Frameworks for inference
+
+1. Frequentist / Maximum likelihood
+1. Bayesian
+
+
+## Human body temperature
+
+![](https://ehealth.eletsonline.com/wp-content/uploads/2020/01/human-body-temperature.jpg){fig-align="center"}
+
+
+## Sampling people
+
+```{r}
+#| echo: true
+
+set.seed(213123)
+(temps <- rnorm(8, mean = 98.4, sd = 0.5) |> round(digits = 1))
+```
+
+```{r}
+ggplot() +
+  geom_vline(xintercept = 98.6, color = "firebrick", linewidth = 1) +
+  geom_dotplot(data = tibble(temps), aes(temps), binwidth = 0.05) +
+  labs(x = "Temperature (F)", y = "Count") +
+  scale_x_continuous(limits = c(97.6, 99.6), breaks = seq(97.6, 99.6, by = 0.2))
+
+```
+
+
+## Inferring a mean
+
+What is the mean temperature for this "sample" of healthy people?
+
+
+## Maximum likelihood inference of mean
+
+Use `dnorm()` to calculate the relative likelihood of an observed value $Y_i$ drawn from a normal distribution given a mean ($\mu$) and standard deviation ($\sigma$).
+
+$$f\left(Y_i; \mu, \sigma\right) = \frac{1}{\sqrt{2\pi\sigma^{2}}} e^{\frac{-\left(Y_i-\mu\right)^{2}}{2\sigma^{2}}}$$
+
+What is a reasonable value for $\sigma$?
+
+- ~95% of points fall within $2 \cdot \sigma$ of the mean
+
+
+## Standard normal distribution
+
+```{r}
+#| echo: true
+
+dnorm(0, mean = 0, sd = 1) # <1>
+```
+
+1. The density (height) of the normal distribution with a mean of 0 and standard deviation of 1 at the value 0.
+
+```{r}
+#| label: normal_plot
+#| fig-height: 4
+
+M <- tibble(x = seq(-3, 3, length = 100),
+            y = dnorm(x))
+ggplot() + 
+  geom_line(data = M, aes(x, y), linewidth = 1, color = "navyblue") +
+  labs(x = "Y", y = "Relative Likelihood")
+```
+
+
+## Our normal distribution
+
+```{r}
+#| echo: true
+
+dnorm(98.6, mean = 98.6, sd = 0.1) # <1>
+```
+
+1. The density (height) of the normal distribution with a mean of 98.6 and standard deviation of 0.1 at the value 98.6.
+
+```{r}
+#| label: normal_plot_2
+#| fig-height: 4
+
+M <- tibble(x = seq(97.6, 99.6, length = 100),
+            y = dnorm(x, mean = 98.6, sd = 0.1))
+ggplot() +
+  geom_line(data = M, aes(x, y), linewidth = 1, color = "navyblue") +
+  geom_vline(xintercept = 98.6, color = "firebrick", linewidth = 1) +
+  geom_dotplot(data = tibble(temps), aes(temps), binwidth = 0.05) +
+  labs(x = "Temperature", y = "Relative Likelihood") +
+  scale_x_continuous(limits = c(97.6, 99.6), breaks = seq(97.6, 99.6, by = 0.2))
+```
+
+
+## Calculating a likelihood
+
+*Hypothesizing that the population mean is 98.6 and the standard deviation is 0.1*, what is the likelihood of the observed values?
+
+1. This is a model.
+2. Calculate the relative likelihood of each observation
+3. Model likelihood is the product of the individual likelihoods
+    - log-likelihood is easier with work with
+
+
+## Model Likelihood ($\mathcal{L}$)
+
+For a set of observations and hypothesized parameters the model likelihood is the product of the observations' individual likelihoods (probabilities):
+
+\begin{align*}
+
+\mathcal{L}\left[ Y; \Theta\right] &= \prod Pr\left[Y; \Theta\right]\\
+
+\log\left( \mathcal{L}\left[ Y; \Theta\right] \right) &= \sum \log\left(Pr\left[Y; \Theta\right]\right)
+\end{align*}
+
+- $Y$ is a vector of temperatures
+- $\Theta$ is a vector with the mean and standard deviation
+
+
+## Calculating the log-likelihood for a single combination of $\mu$ and $\sigma$
+
+*Hypothesizing that the population mean is 98.6 and the standard deviation is 0.1*, what is the likelihood of the observed values?
+
+Likelihood for the first observation (`temps[1]`):
+
+```{r}
+#| echo: true
+
+temps[1]
+dnorm(temps[1], mean = 98.6, sd = 0.1)
+```
+
+
+## Calculating the log-likelihood for a single combination of $\mu$ and $\sigma$
+
+```{r, echo=FALSE, fig.height=3.5}
+#| fig-height: 3.5
+
+ggplot() +
+  geom_line(data = M, aes(x, y), linewidth = 1, color = "navyblue") +
+  geom_vline(xintercept = 98.6, color = "firebrick", linewidth = 1) +
+  geom_dotplot(data = tibble(temps), aes(temps), binwidth = 0.05) +
+  labs(x = "Temperature", y = "Relative Likelihood") +
+  scale_x_continuous(limits = c(97.6, 99.6), breaks = seq(97.6, 99.6, by = 0.2)) +
+  geom_point(aes(x = temps[1],
+                 y = dnorm(temps[1], mean = 98.6, sd = 0.1)),
+             color = "violet",
+             size = 3) +
+  geom_segment(aes(x = temps[1],
+                   xend = temps[1],
+                   y = 0,
+                   yend = dnorm(temps[1],mean = 98.6, sd = 0.1)),
+               color = "violet", linewidth = 1.5)
+```
+
+This is only the likelihood for *one* observation. We need the likelihoods for all `r length(temps)` temperatures to get a model likelihood.
+
+
+## Calculating the log-likelihood for a single combination of $\mu$ and $\sigma$
+
+Vector of likelihoods for all values in `temps` given `mean = 98.6` and `sd = 0.1`:
+
+```{r}
+#| echo: true
+
+(rel_liks <- dnorm(temps, mean = 98.6, sd = 0.1))
+```
+
+
+## Calculating the log-likelihood for a single combination of $\mu$ and $\sigma$
+
+Model likelihood is the product of those likelihoods:
+
+$$\mathcal{L}\left[ Y; \Theta\right] = \prod Pr\left[Y; \Theta\right]$$
+
+```{r}
+#| echo: true
+
+(lik <- prod(rel_liks))
+```
+
+
+## Likelihood to log-likelihood
+
+```{r}
+#| echo: true
+
+log(lik)
+```
+
+Rather than logging the product, sum the log-likelihoods:
+
+$$\log\left( \mathcal{L}\left[ Y; \Theta\right] \right) = \sum \log\left(Pr\left[Y; \Theta\right]\right)$$
+
+```{r}
+#| echo: true
+
+sum(log(rel_liks))
+```
+
+For a model in which the mean is 98.6 and standard deviation is 0.1, the model log-likelihood is `r round(log(lik), 2)`.
+
+
+## Higher likelihood
+
+Is there another combination of $\mu$ and $\sigma$ that gives a higher likelihood (= larger log-likelihood)?
+
+Try $\mu = 98.4$ and $\sigma = 0.1$:
+
+```{r}
+#| echo: true
+
+sum(log(dnorm(temps, mean = 98.4, sd = 0.1)))
+```
+
+This is an improvement over $\mu = 98.6$ and $\sigma = 0.1$.
+
+- $-25$ vs. $-31$ (higher is better)
+
+
+## Calculating the log-likelihood for a _range_ of $\mu$ and $\sigma$
+
+Find the combination of $\mu$ and $\sigma$ that maximizes the log-likelihood of the model for the mean and standard deviation of temperatures.
+
+Ranges of possible values:
+
+1. Mean ($\mu$): $-\infty < \mu < \infty$
+2. Standard deviation ($\sigma$): $0 < \sigma < \infty$
+
+
+## Try other combinations of values
+
+For combinations of $\mu$ and $\sigma$, calculate the model likelihood. Pick the largest log-likelihood as the parameter estimates.
+
+Set up the grid:
+
+```{r}
+#| echo: true
+
+n <- 100                            # How fine is the grid?
+mu <- seq(97.6, 99.6, length = n)   # Vector of mu
+sigma <- seq(0.05, 0.5, length = n) # Vector of sigma
+
+grid_LL <- crossing(mu, sigma) # <1>
+```
+
+1. `crossing()` creates a tibble will all pairwise combinations of mu and sigma.
+
+```{r}
+grid_LL
+```
+
+
+## Try other combinations of values
+
+```{r}
+#| label: grid-approx
+#| echo: true
+
+log_lik <- numeric(length = nrow(grid_LL))
+
+for (ii in 1:nrow(grid_LL)) {
+  log_lik[ii] <- sum(dnorm(temps,
+                           mean = grid_LL$mu[ii],
+                           sd = grid_LL$sigma[ii],
+                           log = TRUE)) # <1>
+}
+grid_LL$log_lik <- log_lik
+```
+
+1. Return the log probability from `dnorm()` to avoid the extra step (and possible numerical problems)
+
+- Iterate through the rows ($ii$) of `grid_LL`
+- For each row, assign the model log-likelihood calculated for that combination of `mu` and `sigma` to `log_lik`
+
+---
+
+```{r}
+grid_LL
+```
+
+- For a 100 X 100 grid, there are 10,000 calculations.
+- If there were 3 parameters, there would be 1,000,000.
+
+
+## Visualizing the likelihood surface
+
+```{r}
+grid_LL <- do.call(data.frame,
+                       lapply(grid_LL,
+                              function(x) replace(x, is.infinite(x), NA)))
+
+fig <- plot_ly() |>
+  add_markers(data = grid_LL,
+              x = ~ mu,
+              y = ~ sigma,
+              z = ~ log_lik,
+              color = ~ log_lik,
+              size = 1,
+              showlegend = FALSE) |>
+  add_markers(data = grid_LL[which.max(grid_LL$log_lik), ],
+              x = ~ mu,
+              y = ~ sigma,
+              z = ~ log_lik,
+              size = 2,
+              showlegend = FALSE) |> 
+  hide_colorbar() |>
+  layout(scene = list(xaxis = list(title = 'Mu'),
+                      yaxis = list(title = 'Sigma'),
+                      zaxis = list(title = 'log-Likelihood')))
+
+fig
+```
+
+
+## Try other combinations of values
+
+For this set, the maximum likelihood estimates of $\mu$ and $\sigma$ are:
+
+```{r}
+#| echo: true
+
+grid_LL[which.max(grid_LL$log_lik), ] # <1>
+```
+
+1. `which.max()` return the index of the maximum value of `log_lik`.
+
+The analytical estimates are:
+
+```{r}
+#| echo: true
+
+mean(temps)
+sd(temps)
+```
+
+
+## Maximum likelihood via optimization
+
+- Trying combinations of values is slow and imprecise
+    - Impractical (impossible?) for large numbers of parameters
+- *Search* for the most likely values of $\mu$ and $\sigma$ across all possible values.
+
+
+## Maximum likelihood via optimization
+
+Define a function
+
+- `theta`: a vector of values to optimize ($\mu$ and $\sigma$)
+- `Y`: a set of data
+- Return the log-likelihood
+
+```{r}
+#| echo: true
+
+log_lik <- function(theta, Y){
+  liks <- dnorm(Y, mean = theta[1], sd = theta[2], log = TRUE)
+  return(sum(liks))
+}
+```
+
+Simultaneously optimize $\mu$ and $\sigma$, maximizing the log-likelihood.
+
+
+## Maximum likelihood via optimization
+
+```{r}
+#| echo: true
+#| label: ML_optim
+#| warning: false
+
+optim(par = c(99, 0.5), # Start at 99, 0.5
+      fn = log_lik,
+      Y = temps,
+      control = list(fnscale = -1,      # <1>
+                     reltol = 10^-100)) # <2>
+```
+
+1. `fnscale = -1` tells `optim()` to maximize the function
+2. `reltol` says to stop when the improvement is <1^-100^.
+
+## Closed-form Solution (Frequentist/Likelihood Framework): One-sample *t*-test
+
+```{r}
+#| echo: true
+
+t.test(temps, mu = 98.6)
+```
+
+
+## Bayesian vs. ML inference
+
+Frequentist/Likelihood inference:
+
+- Probability of the data, given the parameter estimate
+- Parameters are fixed; data varies
+- No prior possible
+
+Bayesian inference:
+
+- Probability of the parameters, given the data (and priors)
+- Data are fixed; parameters vary
+- Prior required
+
+
+## Bayesian inference of the mean
+
+Ranges of possible maximum likelihood values:
+
+1. $\mu$: $-\infty < \mu < \infty$
+2. $\sigma$: $0 < \sigma < \infty$
+
+Drawbacks:
+
+1. $\mu$ can't be negative (no negative temperatures) and probably isn't a large number
+2. $\sigma$ is also probably not huge either
+
+Can we do better? Yes, Bayesian priors.
+
+
+## Prior for the mean
+
+```{r}
+ggplot() +
+  geom_line(data = M, aes(x, y), linewidth = 1, color = "navyblue") +
+  geom_vline(xintercept = mean(temps), color = "firebrick", linewidth = 1) +
+  geom_dotplot(data = tibble(temps), aes(temps), binwidth = 0.05) +
+  labs(x = "Temperature", y = "Relative Likelihood") +
+  scale_x_continuous(limits = c(97.6, 99.6), breaks = seq(97.6, 99.6, by = 0.2))
+```
+
+
+## Bayesian model
+
+[stan](http://mc-stan.org/) code:
+
+```{r}
+#| echo: true
+
+model <- "
+  data{
+    int N;
+    array[N] real temps;
+  }
+  parameters{
+    real<lower=0> mu;
+    real<lower=0> sigma;
+  }
+  model{
+    // Priors
+    mu ~ normal(98.6, 0.1);
+    sigma ~ normal(0, 1);
+    
+    // Distribution of temps
+    temps ~ normal(mu, sigma);
+  }
+"
+```
+
+## Sample the model...
+
+```{r}
+#| label: stan_fit
+#| message: false
+#| warning: false
+#| results: hide
+
+if (FALSE) {
+  # Only run this interactively to avoid needing to refit the model
+  # each time you render the slides. Posterior samples are saved out
+  # to a rds file to save space. Only saving mu and sigma without
+  # any diagnostics, etc.
+  bayes_model <- cmdstan_model(stan_file = write_stan_file(model))
+  fm_bayes <- bayes_model$sample(
+    data = list(temps = temps,
+                N = length(temps)),
+    iter_warmup = 2500,
+    iter_sampling = 2500,
+    seed = 2236726,
+    chains = 4)
+  samples <- fm_bayes$draws(variables = c("mu", "sigma"))
+  write_rds(x = samples, file = "../data/bayes_model_means.rds")
+}
+
+# Read the posterior samples from the saved rds file.
+post <- read_rds("../data/bayes_model_means.rds")
+
+mcmc_trace(post)
+```
+
+
+## Summarizing the results
+
+```{r}
+#| fig-height: 3
+
+samples <- post |>
+  as_draws_df() |> 
+  mutate(Difference = 98.6 - mu)
+
+mcmc_dens(samples,
+          pars = c("mu", "sigma"))
+
+```
+
+- Modes: $\mu = `r round(mode(samples$mu), 2)`$ and $\sigma = `r round(mode(samples$sigma), 2)`$
+- Higher mean than the analytical or ML estimate (`r round(mean(temps), 2)`), because the prior places less probability on lower values.
+
+
+## Difference of samples and 98.6
+
+```{r}
+#| fig-height: 4
+
+ggplot() +
+  geom_vline(xintercept = 0) +
+  geom_density(data = samples, aes(Difference),
+               color = "firebrick4", linewidth = 1.5) +
+  labs(y = "Density", x = "Difference (98.6 - mu)")
+
+```
+
+Quantiles
+
+```{r}
+quantile(samples$Difference, c(0.025, 0.975))
+```
+
+
+## From data to inference via models
+
+- Many paths from data to inference
+- No one way is best or uniquely correct
+
+![](../images/Models_schematic.png){fig-align="center"}
+
+
+
+
+
+
