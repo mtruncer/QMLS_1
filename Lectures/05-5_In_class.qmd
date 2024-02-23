@@ -114,7 +114,6 @@ crossing(lls,nns)
 ```
 
 
-
 ## Likelihood
 
 > Is one of the baseline assumption for calculating model likelihood normally distributed data?
@@ -124,8 +123,6 @@ crossing(lls,nns)
 > I also am not clear on the difference between the log values being better than the normal values (unless it's just the computer constraint). The examples make it seem like comparing a bunch of negative numbers to other negative numbers and knowing which from normal vs log-like are better.
 
 
-
-
 ## Optimizing 
 
 > I did not fully understand the slides in 5-4, where we defined a function and then did the optim() function. I think I am not quite understanding all the parts/variables that made the example work (e.g. the theta vector with the subsetting). 
@@ -133,8 +130,53 @@ crossing(lls,nns)
 > When you were calculating likelihood and used mean of 98.6 and sd of 0.1, then changed the mean to 98.4, how do you come up with another mean?  In live data sampling, you wont usually get another mean right?  The data you measured is the data you measured.  
 
 
+## Maximizing through optimization
+
+- 5 heads from 20 coin flips
+
+What is the maximum likelihood estimate of $Pr[Heads]$
+
+```{r}
+#| echo: true
+
+log_lik <- function(theta, heads, flips) {
+  dbinom(heads, flips, prob = theta, log = TRUE)
+}
+
+log_lik(0.5, 5, 20)
+dbinom(5, 20, prob = 0.5, log = TRUE)
+```
 
 
+## Maximizing through optimization
+
+```{r}
+#| echo: true
+
+optim(par = 0.5,
+      fn = log_lik,
+      heads = 5,
+      flips = 20,
+      method = "Brent",
+      lower = 0, upper = 1,
+      control = list(fnscale = -1))
+```
+
+
+## Maximizing through optimization
+
+```{r}
+#| echo: true
+40/87
+dbinom(40, 87, prob  = 40/87, log = TRUE)
+optim(par = 0.5,
+      fn = log_lik,
+      heads = 40,
+      flips = 87,
+      method = "Brent",
+      lower = 0, upper = 1,
+      control = list(fnscale = -1))
+```
 
 
 
