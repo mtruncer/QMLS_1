@@ -23,17 +23,9 @@ csl: evolution.csl
 
 library(tidyverse)
 library(cowplot)
-library(plotly)
-library(cmdstanr)
-library(bayesplot)
-library(posterior)
 
 theme_set(theme_cowplot())
 
-mode <- function(x) {
-  dd <- density(x)
-  dd$x[which.max(dd$y)]
-}
 ```
 
 
@@ -62,9 +54,15 @@ mode <- function(x) {
 > What is the "cutoff" for having more than one model? Or more specifically, at what point should you move things into a different model even though they are on the same research topic? 
 
 
-## Measures of spead
+## Measures of spread
 
-> How and when does measure of spread help in any data analysis? What would be some examples besides students' grading ?
+> How and when does measure of spread help in any data analysis? What would be some examples besides students' grading?
+
+```{r}
+dd <- 
+
+
+```
 
 
 ## Frameworks
