@@ -29,6 +29,10 @@ theme_set(theme_cowplot())
 ```
 
 
+## Progress Check
+
+> I found the last question of the progress check challenging, and I would like to see another example like it. At the time I struggled keeping up with the progression of assigning all the random distributions to variables then using those values as options in the last chunk. 
+
 ## Problem set 5
 
 > During this week's problem set, my group and I struggled with the question "about how many seedlings are at the smallest replicate `block` level of the data?"  We weren't sure if we had done the proceeding code incorrectly or if the issue was just understanding what the question was asking.
