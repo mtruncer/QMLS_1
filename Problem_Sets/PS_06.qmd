@@ -75,7 +75,7 @@ What can you conclude from these results? Does the result of this statistical te
 
 > 
 
-`t.test()` is a function that performs a very specific task: carrying out a *t*-test (by default with Welch's correction for unequal variances). `lm()` is a general function that fits many many different kinds of linear models. We will use `lm()` almost exclusvely in the coming units.
+`t.test()` is a function that performs a very specific task: carrying out a *t*-test (by default with Welch's correction for unequal variances). `lm()` is a general function that fits many many different kinds of linear models. We will use `lm()` almost exclusively in the coming units.
 
 A *t*-test is just a special kind of linear model (1 categorical predictor with 2 levels), so we can also fit the same model using `lm()`.
 
@@ -145,7 +145,7 @@ Do you see anything that concerns you about moving ahead?
 
 > 
 
-Return to the model ouptut. See if you can figure out what the coefficients represent. You will find estimates for the slope and intercept of the line, their respective standard errors,^[Remember that standard errors tell us about the uncertainty in parameter estimates] and a *t*-test, which tests each parameter estimate vs. 0. Try to figure out how the *t*-value is calculated (divide one column by another).
+Return to the model output. See if you can figure out what the coefficients represent. You will find estimates for the slope and intercept of the line, their respective standard errors,^[Remember that standard errors tell us about the uncertainty in parameter estimates] and a *t*-test, which tests each parameter estimate vs. 0. Try to figure out how the *t*-value is calculated (divide one column by another).
 
 > 
 
