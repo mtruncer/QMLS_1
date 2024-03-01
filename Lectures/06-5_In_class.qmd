@@ -1,0 +1,161 @@
+---
+title: "Unit 6 In Class Discussion"
+author:
+  - Elizabeth King
+  - Kevin Middleton
+format:
+  revealjs:
+    theme: [default, custom.scss]
+    standalone: true
+    self-contained: true
+    logo: QMLS_Logo.png
+    slide-number: true
+    show-slide-number: all
+code-annotations: hover
+bibliography: QMLS_Bibliography.bib
+csl: evolution.csl
+---
+
+```{r}
+#| label: setup
+#| message: false
+#| warning: false
+
+library(tidyverse)
+library(cowplot)
+
+theme_set(theme_cowplot())
+
+```
+
+
+## Problem set 5
+
+> During this week's problem set, my group and I struggled with the question "about how many seedlings are at the smallest replicate `block` level of the data?"  We weren't sure if we had done the proceeding code incorrectly or if the issue was just understanding what the question was asking.
+
+
+## Quiz questions
+
+- 6-2, question 1
+- 6-3
+
+
+## Mean of means {.smaller}
+
+> Is it bad form to take a mean of mean values? For example, if you have a dataset of average temperatures for each month of the year measured at various locations, and you want to get an average annual temperature to compare between various locations, should you go to the original dataset used to produce those average monthly values to get a more accurate annual mean temperature, or would that value not differ substantially from a mean of the average monthly temperatures as long as the months were equally weighted within the dataset? Would taking an average of a subsample of the original temperatures be preferable to a mean of the monthly means, or would you always want to use all of the data available to you?
+
+
+## Linear models
+
+> I am not sure when to use a t-test vs an anova.
+
+
+## Bayes models {.smaller}
+
+> A few times you showed a very long, ~20 line segment of code for a model.  Is that being done behind the scenes or do we have to input all of that.  If so, how do we know what to put?
+
+> I had a hard time wrapping my mind around this equation from the Bayes model: "y ~ normal(theta_0 + theta_1 * X, sigma)". Why we are using the normal function? What I think is going on is "theta_0 + theta_1 * X" is used as the mean in normal because it represents the mean of the response variable "Y" given the predictor "X", and that we use normal as a way to account for uncertainty in the prediction. If this is the case, are there situations where researchers would use different values for the parameters used in the distribution of sigma (parameters meaning 0 and 1 in normal(0, 1))? 
+
+
+## Traceplots
+
+> I found the model on slide nineteen of lesson 6-3 to be interesting, especially since I've been seeing it at seminars lately. What kind of model is this, and when is it most commonly used?
+
+![](https://bcss.org.my/tut/wp-content/uploads/2020/04/randomWalk_2000-1.png){fig-align="center"}
+
+
+## Assumptions
+
+> I would like to go over the assumptions of bivariate regressions more and how to interpret the summaries. 
+
+> The variance of all y values should be equal? Is this something that's common or just needed to be in order to fit a linear model? 
+
+
+## Problematic residuals
+
+![](https://openintro-ims.netlify.app/24-inf-model-slr_files/figure-html/whatCanGoWrongWithLinearModel-1.png){fig-align="center" width=100%}
+
+From [Introduction to Modern Statistics](https://openintro-ims.netlify.app/) (Çetinkaya-Rundel and Hardin, 2021)
+
+
+## Assumptions of OLS
+
+-  At each $X$, there is a normally distributed population of $Y$ observations with a mean at the regression line
+
+-  The variance of all $Y$ observations is equal. 
+
+![](https://i.imgur.com/F0Y5Fva.png){fig-align="center" width="70%}
+
+
+## Extreme values {.smaller}
+
+> When do we know that the assumptions are not fit for the predicted model? I feel a bit confused about the outliers and how that helps us identify mistakes in our dataset? 
+
+> Should we only be removing outliers that majorly effect the Linear model diagnostics? 
+
+> What type of outlier test should someone use?
+
+> Would you recommend running the check_model() instead of using a formal test such as Levene's?
+
+
+## Likelihoods (Lecture 6-2)
+
+> Likelihood of observing a value in a given regression model and comparing that to the actual observed model. If they are not similar, does that void the observed value even if the value is collected accurately? I don't understand how the value being likely to be found in a normal distribution is necessary.
+
+> Is max log-likelihood the value that is the largest possible but still reasonable for this dataset to be considered valid? I don't understand what that is. 
+
+
+## Diagnostics
+
+> Do you recommend running all of the different bivariate model diagnostics when we are testing our models, or are there certain situations when we should be running one independent of another?
+
+> Does your data have to fit all the regression diagnostics tests to be reliable for linear regression?  Even in the example presented in the lecture, for some it looks okay and for some it is out of the set standard. 
+
+
+## Using `model_check()`
+
+> When looking at the qmd attached to the lecture the plot which was assigned PP is outside brackets of [[1]] then 2, and so on. When you use the check_model(fm) linear model diagnostics does r know that [1] is posterior and so on? 
+
+> "Reference line should be flat and horizontal" I am struggling to understand this in the context of the lecture.
+
+
+## `model_check()`
+
+```{r}
+#| fig-align: center
+
+library(performance)
+fm <- lm(Petal.Width ~ Petal.Length, data = iris)
+PP <- plot(check_model(fm, panel = FALSE))
+PP[[2]]
+```
+
+
+## The data
+
+```{r}
+#| fig-align: center
+
+library(tidyverse)
+ggplot(iris, aes(Petal.Length, Petal.Width)) +
+  geom_point(size = 3) +
+  geom_smooth(formula = y ~ x, method = "lm", se = FALSE,
+              linewidth = 1.5) +
+  labs(x = "Petal Length", y = "Petal Width")
+```
+
+
+## The data
+
+```{r}
+#| fig-align: center
+
+ggplot(iris, aes(Petal.Length, Petal.Width, color = Species)) +
+  geom_point(size = 3) +
+  geom_smooth(aes(group = 1),
+              formula = y ~ x, method = "lm", se = FALSE,
+              linewidth = 1.5) +
+  theme(legend.position = "none") +
+  labs(x = "Petal Length", y = "Petal Width")
+```
+
