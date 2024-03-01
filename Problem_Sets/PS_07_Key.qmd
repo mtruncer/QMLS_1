@@ -10,7 +10,11 @@ format:
     embed-resources: true
 ---
 
-```{r setup, message=FALSE, warning=FALSE}
+```{r}
+#| label: setup
+#| message: false
+#| warning: false
+
 # FIXME
 library(tidyverse)
 library(readxl)
@@ -27,7 +31,11 @@ Datasets
   mammals.xlsx
 -->
 
-```{r echo=FALSE, eval=FALSE}
+```{r}
+#| echo: false
+#| eval: false
+
+# FIXME
 # Generate data for question 1.
 # P = 0.0495
 n <- 15
@@ -37,7 +45,7 @@ M1 <- tibble(
                            rnorm(n, 0.242, 0.07)),
   Trout = factor(rep(c("Absent", "Present"), each = n))
 )
-write_csv(M1, file = "../data/BrookTrout1.csv")
+write_csv(M1, path = "../data/BrookTrout1.csv")
 
 ggplot(M1, aes(x = Trout, y = Proportion_Surviving)) +
   geom_point(position = position_jitter(width = 0.05), alpha = 0.5) +
@@ -67,6 +75,120 @@ ggplot(M2, aes(x = Trout, y = Proportion_Surviving)) +
 
 summary(lm(Proportion_Surviving ~ Trout, M2))
 ```
+
+## Stalkies CI
+
+## FIXME FIXME Confidence intervals
+
+We will use the same data to explore confidence intervals.
+
+
+### Activity
+
+Calculate a ~95% confidence interval for each mean (cotton & corn groups). You can use the approximate formula discussed in lecture $\mu$ +/- 2 * SEM.
+
+```{r}
+# FIXME
+
+stalk <- read_csv("../data/Stalkies.csv")
+
+mean(stalk$eye_span[stalk$food_source == 'Cotton']) -
+  2 * sd(stalk$eye_span[stalk$food_source == 'Cotton'] /
+           sqrt(length(stalk$eye_span[stalk$food_source == 'Cotton'])))
+
+mean(stalk$eye_span[stalk$food_source == 'Cotton']) +
+  2 * sd(stalk$eye_span[stalk$food_source == 'Cotton'] /
+           sqrt(length(stalk$eye_span[stalk$food_source == 'Cotton'])))
+
+mean(stalk$eye_span[stalk$food_source == 'Corn']) -
+  2 * sd(stalk$eye_span[stalk$food_source == 'Corn'] /
+           sqrt(length(stalk$eye_span[stalk$food_source == 'Corn'])))
+
+mean(stalk$eye_span[stalk$food_source == 'Corn']) +
+  2 * sd(stalk$eye_span[stalk$food_source == 'Corn'] /
+           sqrt(length(stalk$eye_span[stalk$food_source == 'Corn'])))
+
+## We can write functions to do the SEM and approximate CI
+## approx_CI returns a tibble with the lower and upper
+## bounds of the CI. Note the use of group_modify() to 
+## apply approx_CI() to each group.
+SEM <- function(x) return(sd(x) / sqrt(length(x)))
+
+approx_CI <- function(x, ...) {
+  upper <- mean(x) + 2 * SEM(x)
+  lower <- mean(x) - 2 * SEM(x)
+  return(tibble(lower, upper))
+}
+
+stalk |> 
+  group_by(food_source) |> 
+  group_modify(~ approx_CI(.x$eye_span))
+```
+
+We can simulate what we would expect for a confidence interval if we set the true mean and standard deviation for our population. Knowing these true values allows us to draw random data from a true underlying distribution. 
+
+For this simulation, we could assume our estimated means and standard deviations are representative of the population parameters. For any empirical dataset, will you ever know the true mean and standard deviation?
+
+> No. It will always be an estimate. You expect it to get closer to the truth the higher the sample size but it is still an estimate.
+
+Let's set up our simulation. Do the following:
+
+1. Generate simulated data from a normal distribution matching the number of observations, mean, and standard deviation (note sd not SEM) for each group.
+2. Calculate the mean for each group and the upper and lower bounds of the confidence interval.
+3. Put these values into a `tibble`
+4. Repeat this 1000 times
+5. Calculate the proportion of times the mean for each group falls within the confidence interval
+
+
+```{r}
+# FIXME
+# Note: need to use list() below to assign to a row of a tibble.
+
+set.seed(648273)
+niter <- 1000
+
+mu.corn <- mean(stalk$eye_span[stalk$food_source == 'Corn'])
+mu.cotton <- mean(stalk$eye_span[stalk$food_source == 'Cotton'])
+sd.corn <- sd(stalk$eye_span[stalk$food_source == 'Corn'])
+sd.cotton <- sd(stalk$eye_span[stalk$food_source == 'Cotton'])
+n.corn <- length(stalk$eye_span[stalk$food_source == 'Corn'])
+n.cotton <- length(stalk$eye_span[stalk$food_source == 'Cotton'])
+
+corn.cis <- tibble(mm = numeric(length = niter),
+                   ll = numeric(length = niter),
+                   uu = numeric(length = niter))
+cotton.cis <- tibble(mm = numeric(length = niter),
+                     ll = numeric(length = niter),
+                     uu = numeric(length = niter))
+
+for (jj in 1:niter) {
+  corn.s <- rnorm(n.corn, mu.corn, sd.corn)
+  cotton.s <- rnorm(n.cotton, mu.cotton, sd.cotton)
+
+  corn.cis[jj, ] <- list(
+    mean(corn.s),
+    mean(corn.s) - 2 * (sd(corn.s) / sqrt(n.corn)),
+    mean(corn.s) + 2 * (sd(corn.s) / sqrt(n.corn)))
+  cotton.cis[jj, ] <- list(
+    mean(cotton.s),
+    mean(cotton.s) - 2 * (sd(cotton.s) / sqrt(n.cotton)),
+    mean(cotton.s) + 2 * (sd(cotton.s) / sqrt(n.cotton)))
+}
+
+(sum(mu.corn < corn.cis$ll) + sum(mu.corn > corn.cis$uu)) / niter
+(sum(mu.cotton < cotton.cis$ll) + sum(mu.cotton > cotton.cis$uu)) / niter
+```
+
+What do you conclude based on this simulation?
+
+> The true mean is within about 95% of the resampled confidence intervals.
+
+Is it correct to say that there is a 95% probability that the true mean is within a 95% confidence interval? Why or why not? Think about what you just showed with your simulation.
+
+> No, it is not correct. CIs tell us about a range of values that we have some confidence in for *future* samples. This is a nuanced but very important point about confidence intervals.
+
+
+
 
 ## Brook trout
 
@@ -156,7 +278,7 @@ knitr::kable(M)
 
 Thinking about the assumptions of the statistical tests that we have learned, why is combining all the data for this test not appropriate? 
 
-> Your data nd the data from your collaborator are from completely different streams, which is good, but streams differ from onr another (water chemistry, abundance of food, presence of other predators, etc.). And because we have many salmon from the same streat, the observations (whether an individual salmon juvenile was alive or not) are not independent of one another. This non-independence means that all the salmon in a stream are more likely to have the same survival probability. Streams add a level of structure to the data. Later in the course, we will cover multilevel and logistic regression, which are (separately or combined) another way to correctly model survival, accounting for possible different survival rates in both streams.
+> Your data and the data from your collaborator are from completely different streams, which is good, but streams differ from onr another (water chemistry, abundance of food, presence of other predators, etc.). And because we have many salmon from the same stream, the observations (whether an individual salmon juvenile was alive or not) are not independent of one another. This non-independence means that all the salmon in a stream are more likely to have the same survival probability. Streams add a level of structure to the data. Later in the course, we will cover multilevel and logistic regression, which are (separately or combined) another way to correctly model survival, accounting for possible different survival rates in both streams.
 
 
 ## Exact confidence intervals
@@ -206,121 +328,3 @@ CIs <- BT1 |>
 knitr::kable(CIs)
 ```
 
-
-## Working with lists
-
-Lists are one of the most flexible data structures in R. They can hold any combination of other types of R objects (including other lists). R functions like `lm()` return lists.^[R functions can only return a single object (unlike languages like python and MATLAB, which can return multiple objects). So everything that needs to be returned from a function is placed into a list, which gets returned.]
-
-Lists are indexed a little differently from vectors and matrices. List indices are indexed using double brackets: `[[1]]` extracts (or assigns) the first element. Run the following code:
-
-```{r}
-mylist <- list()
-mylist[[3]] <- 24
-mylist
-```
-
-We first create an empty list, using the `list()` function. The second line assigns 24 to the 3rd element. When we print the list (last line), you can see that the 1st and 2nd elements are created and left as `NULL`. Managing lists can be harrowing:
-
-```{r}
-mylist[[1]] <- "hello world"
-mylist[[2]] <- list(x = 12, y = "y", z = seq(1, 5, by = 0.2))
-mylist
-```
-
-Now the 1st element has a string, the 2nd has a list (which itself contains a numeric, a string, and a vector). How would you extract the 3rd element from the `z` vector?
-
-```{r}
-# FIXME
-mylist[[2]]$z[3]
-```
-
-We will use lists in a much less convoluted way, which is what you should do until you get comfortable (once you are comfortable with lists, their immense flexibility makes them a great way to pass collections of different kinds of data around among code).
-
-For now, we will use a list to hold 4 plots, which we will arrange in a grid to make a usable figure.
-
-### Activity
-
-The file `mammals.xlsx` contains data for about 50 different traits. *All* 5416 species of mammals are included in the file, though none has data for all traits. We want to make some quick plots of four different traits plotted against body mass.
-
-Rather than creating separate plots, we want to make them inside a loop, where we iterate through the columns of interest. This will make it easy to modify the format of the plots all at once, reducing the amount of code to keep up with. For example, change all the points to be transparent in one line rather than in four places.
-
-1. Load the data from `mammals.xlsx`.
-2. Create a column that holds the log10 transformation of `adult_body_mass_g` and one for the log10 of `basal_met_rate_m_l_o2hr`.
-3. Create a vector of strings that we will use to iterate through the columns for analysis (we used `cols_analyze`). It should contain the following strings:
-    - `ageat_eye_opening_d`
-    - `log_BMR1 (or whatever you called the log10 of `basal_met_rate_m_l_o2hr`)
-    - `gestation_len_d`
-    - `litter_size`
-4. Create a vector of strings to use for the y axis labels. Make sure that the order matches the order in your vector #3.
-5. Create an empty list to hold plots: `pp <- list()` for example.
-
-This is all we need for the setup. At this point, you have the data, two vectors (one of columns names and one of y axis labels), and an empty list.
-
-```{r warning=FALSE}
-# FIXME
-M <- read_excel("../data/mammals.xlsx", na = "NA") |>
-  mutate(log_Mass = log10(adult_body_mass_g),
-         log_BMR = log10(basal_met_rate_m_l_o2hr))
-
-cols_analyze <- c("ageat_eye_opening_d",
-                  "log_BMR",
-                  "gestation_len_d",
-                  "litter_size")
-
-axis_labels <- c("Age at Eye Opening",
-                 "log10 BMR",
-                 "Gestation Length",
-                 "Litter Size")
-
-pp <- list()
-```
-
-No we can work on a loop to iterate through the columns, making a plot for each column. Here is the pseudocode (https://blog.usejournal.com/how-to-write-pseudocode-a-beginners-guide-29956242698):
-
-1. Create the framework for a `for` loop.
-    - We want to iterate from 1 to `length(cols_analyze)`
-2. Extract the *i*th element of the columns to analyze vector. Assign to an object.
-3. Extract the *i*th element of the y axis label.
-4. Make a bivariate plot of the column vs. log Body Mass (assign to an object). This will look a little different from ggplots you have made before, particularly the aesthetics. Because you are supplying raw strings, you need to use `aes_string`. It will look something like (`col` is the variable that holds the string with the column name):
-    - `aes_string("log_Mass", col)`
-5. Assign the plot to the *i*th element of your list.
-
-```{r warning=FALSE}
-# FIXME
-for (ii in 1:length(cols_analyze)) {
-  col <- cols_analyze[ii]
-  lab <- axis_labels[ii]
-  p <- ggplot(M, aes_string("log_Mass", col)) +
-    geom_point(alpha = 0.5, size = 0.5) +
-    labs(x = "log10 Body Mass (g)", y = lab) +
-    theme(axis.text = element_text(size = 10),
-          axis.title = element_text(size = 10))
-  pp[[ii]] <- p
-}
-```
-
-At the end of the loop you will have a list that contains 4 plots. Try printing a plot by running `pp[[1]]` at the command line. If you get warnings saying something like `Removed 4948 rows containing missing values (geom_point).`, that is just ggplot saying that there are `NA`s in the data.
-
-Now you can make a 2x2 grid of plots. The cowplot function `plot_grid()` can take a list of plots as an argument: `plotlist = ...`. Pass your list of plots, and specify 2 columns and 2 rows (check the help for `plot_grid()`).
-
-```{r warning=FALSE}
-# FIXME
-plot_grid(plotlist = pp, ncol = 2, nrow = 2,
-          labels = c("a", "b", "c", "d"),
-          label_size = 8)
-```
-
-Now you can fine tune the plots:
-
-- Add labels for x and y. The y label is the string you extracted from your vector of y axis labels.
-- Make the points smaller (`size = 0.5`) and transparent
-- Change the font size on the axis labels by adding the following code to your ggplot:
-
-```
-+ theme(axis.text = element_text(size = 10),
-        axis.title = element_text(size = 10))
-```
-
-- Pass the argument `labels = c("a", "b", "c", "d")` to `plot_grid()` to add labels for each plot.
-
-As you can see rather than sequentially editing 4 sets of code, trying to make sure they all stay in sync, we can just edit one plotting statement and change the data in each iteration.

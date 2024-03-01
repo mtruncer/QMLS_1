@@ -230,9 +230,7 @@ What do you conclude about the coin now?
 
 The Silver Fir (*Abies alba*) is a widespread evergreen conifer tree native to the mountainous regions of Europe. Csillery and colleagues carried out a very large (n > 8,000 measurements) greenhouse experiment to study the genetic adaptations to drought tolerance in *Abies*. We are going to work with a part of this dataset to explore the mean and median.
 
-<div style="width:350px">
-![](https://i.imgur.com/0KwbeIe.jpg)
-</div>
+![](https://i.imgur.com/0KwbeIe.jpg){fig-align="center"}
 
 
 ### Activity
