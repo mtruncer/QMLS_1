@@ -139,12 +139,6 @@ You may need to install the `performance` and `qqplotr` packages first.
 
 ```{r}
 
-PP <- plot(check_model(fm, panel = FALSE))
-PP
-
-check_heteroskedasticity(fm)
-check_normality(fm)
-check_outliers(fm)
 ```
 
 Do you see anything that concerns you about moving ahead?
