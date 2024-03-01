@@ -15,12 +15,6 @@ format:
 #| message: false
 #| warning: false
 
-# FIXME
-library(tidyverse)
-library(readxl)
-library(performance)
-library(cowplot)
-theme_set(theme_cowplot())
 ```
 
 <!--
@@ -45,10 +39,7 @@ The `Stalkies.csv` data file contains data for an experiment in which male stalk
 Load the `Stalkies.csv` file and examine the columns of data it contains.
 
 ```{r}
-# FIXME
 
-stalk <- read_csv("../data/Stalkies.csv", show_col_types = FALSE)
-glimpse(stalk)
 ```
 
 Visualize the dataset in two ways:
@@ -57,50 +48,32 @@ Visualize the dataset in two ways:
 2. Plot the raw data (points) for the two groups. For the points, include jitter and transparency. Include means and standard errors plotted in a different color (the code in Lecture 05-2 might help you). Try a few different values for each of these elements to find a plot you feel best communicates the structure of the data. You will find that the number of data points you have will affect how much jitter & transparency is most appropriate. Change the axis labels to what you would expect to find on a publication ready figure.
 
 ```{r}
-# FIXME
 
-ggplot(stalk, aes(x = food_source, y = eye_span)) +
-  geom_boxplot() +
-  labs(x = "Food Source", y = "Eye Span")
-
-ggplot(stalk, aes(x = food_source, y = eye_span)) +
-  geom_point(position = position_jitter(width = 0.05), alpha = 0.5) +
-  stat_summary(fun = mean, geom = "point", size = 3, color = "red") +
-  stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.05,
-               color = "red", linewidth = 0.7) +
-  labs(x = "Food Source", y = "Eye Span")
 ```
 
 Describe the distributions within each group and between groups. What do these plots tell you? Do you have a prediction for what your statistical tests will show?
 
-> The mean eye span is higher for flies reared on corn than on cotton. The variance also appears to be greater for flies reared on cotton. Based on the standard errors, I predict there will be a significant difference between these groups.
+> 
 
 We will first use a *t*-test to estimate the difference in means in the two treatments. By default, the `t.test` function will perform a test that *does not* assume equal variances (called "Welch's Correction"). You may specify equal variances with `var.equal = TRUE`, *if you decide that is appropriate here*. You maybe want to calculate the per-food source variance.
 
 ```{r}
-# FIXME
 
-stalk |> 
-  group_by(food_source) |> 
-  summarise(var_eye_span = var(eye_span))
 ```
 
 Perform a *t*-test using the formula method to specify the groups to test. Print the results.
 
 ```{r }
-# FIXME
 
-myT <- t.test(eye_span ~ food_source, data = stalk)
-myT
 ```
 
 What are the means for the Corn and Cotton groups?
 
-> Corn: 2.04; Cotton: 1.54
+> 
 
 What can you conclude from these results? Does the result of this statistical test agree with your prediction above?
 
-> The hypothesis that the means for the two groups are equal is very unlikely. There is a statistically significant difference between the groups.
+> 
 
 `t.test()` is a function that performs a very specific task: carrying out a *t*-test (by default with Welch's correction for unequal variances). `lm()` is a general function that fits many many different kinds of linear models. We will use `lm()` almost exclusvely in the coming units.
 
@@ -110,15 +83,12 @@ A *t*-test is just a special kind of linear model (1 categorical predictor with 
 2. Pass the object that you just created to the function `summary()`.
 
 ```{r}
-# FIXME
 
-fm <- lm(eye_span ~ food_source, data = stalk)
-summary(fm)
 ```
 
 Compare the results of the linear model with the results from `t.test()` above. Do you recognize any of the estimates? Can you figure out the relationship between the *t*-statistic and the *F*-statistic from the `lm()` summary?
 
-> The `(Intercept)` term from `lm()` is equal to the mean for the Corn group. The `food_sourceCotton` estimate is the *difference* between the means for the Corn and Cotton group means. $F = t^2$.
+> 
 
 
 ## Bivariate Regression
@@ -135,43 +105,26 @@ The hypothesis is that earwigs living at higher densities will be more likely to
 Load the earwigs data:
 
 ```{r}
-# FIXME
-
-
-EW <- read_csv("../data/Earwigs.csv", show_col_types = FALSE)
 
 ```
 
 Make a scatterplot of the proportion of earwigs with forceps vs. density.
 
 ```{r}
-# FIXME
 
-EW |>
-  ggplot(aes(Density, Proportion_Forceps)) +
-  geom_point() +
-  labs(x = "Population Density", y = "Proportion with Forceps")
 ```
 
 Use the following code to add an regression line through the points to your plot: `+ geom_smooth(method = "lm")`. Just add that code after `geom_point()` in your call to `ggplot()`.
 
 ```{r}
-# FIXME
-EW |>
-  ggplot(aes(Density, Proportion_Forceps)) +
-  geom_point() +
-  geom_smooth(formula = y ~ x, method = "lm") +
-  labs(x = "Population Density", y = "Proportion with Forceps")
+
 ```
 
 
 Use `lm()` to fit a linear model in which the proportion of earwigs with forceps is modeled by the density of earwigs. Assign the linear model to an object, and then pass that object to `summary()` as you did above.
 
 ```{r}
-# FIXME
 
-fm <- lm(Proportion_Forceps ~ Density, data = EW)
-summary(fm)
 ```
 
 Check the model assumptions using the `performance` package by checking the following:
@@ -196,16 +149,15 @@ check_outliers(fm)
 
 Do you see anything that concerns you about moving ahead?
 
-> There is one extreme residual, but the rest of the diagnostics look fine.
-
+> 
 
 Return to the model ouptut. See if you can figure out what the coefficients represent. You will find estimates for the slope and intercept of the line, their respective standard errors,^[Remember that standard errors tell us about the uncertainty in parameter estimates] and a *t*-test, which tests each parameter estimate vs. 0. Try to figure out how the *t*-value is calculated (divide one column by another).
 
-> The OLS line is Proportion_Forceps = 0.07 + 0.013 * Density. The standard errors are 0.18 and 0.008. The *t*-statistics are the estimates divided by their SEs. Neither the intercept nor the slope is significantly different from 0.
+> 
 
 The data we gave you here is a proportion. What is another format that the data could have been in? Think about the source of the proportion values.
 
-> A proportion could also be represented as a binomial (where "has forceps" is a "success").
+> 
 
 
 ## Working with lists
@@ -231,8 +183,7 @@ mylist
 Now the 1st element has a string, the 2nd has a list (which itself contains a numeric, a string, and a vector). How would you extract the 3rd element from the `z` vector?
 
 ```{r}
-# FIXME
-mylist[[2]]$z[3]
+
 ```
 
 We will use lists in a much less convoluted way, which is what you should do until you get comfortable (once you are comfortable with lists, their immense flexibility makes them a great way to pass collections of different kinds of data around among code).
@@ -259,26 +210,7 @@ Rather than creating separate plots, we want to make them inside a loop, where w
 This is all we need for the setup. At this point, you have the data, two vectors (one of columns names and one of y axis labels), and an empty list.
 
 ```{r}
-# FIXME
-M <- read_excel("../data/mammals.xlsx", na = "NA") |>
-  mutate(log_Mass = log10(adult_body_mass_g),
-         log_BMR = log10(basal_met_rate_m_l_o2hr))
 
-cols_analyze <- c("ageat_eye_opening_d",
-                  "log_BMR",
-                  "gestation_len_d",
-                  "litter_size")
-
-axis_labels <- c("Age at Eye Opening",
-                 "log10 BMR",
-                 "Gestation Length",
-                 "Litter Size")
-
-M <- M |> 
-  select(log_Mass, all_of(cols_analyze)) |> 
-  drop_na(log_Mass)
-
-pp <- list()
 ```
 
 No we can work on a loop to iterate through the columns, making a plot for each column. Here is the [pseudocode](https://blog.usejournal.com/how-to-write-pseudocode-a-beginners-guide-29956242698):
@@ -291,18 +223,7 @@ No we can work on a loop to iterate through the columns, making a plot for each 
 5. Assign the plot to the *ii*th element of your list.
 
 ```{r}
-# FIXME
-for (ii in 1:length(cols_analyze)) {
-  col <- cols_analyze[ii]
-  lab <- axis_labels[ii]
-  
-  p <- ggplot(M, aes(x = .data[["log_Mass"]], y = .data[[col]])) +
-    geom_point(alpha = 0.5, size = 0.5) +
-    labs(x = "log10 Body Mass (g)", y = lab) +
-    theme(axis.text = element_text(size = 10),
-          axis.title = element_text(size = 10))
-  pp[[ii]] <- p
-}
+
 ```
 
 At the end of the loop you will have a list that contains 4 plots. Try printing a plot by running `pp[[1]]` at the command line. If you get warnings saying something like `Removed ... rows containing missing values (geom_point).`, that is just ggplot saying that there are `NA`s in the data. A nice fix-up would be to go back to the data and `drop_na()` for the *ii*th column before you plot.
@@ -310,10 +231,7 @@ At the end of the loop you will have a list that contains 4 plots. Try printing 
 Now you can make a 2x2 grid of plots. The `cowplot` function `plot_grid()` can take a list of plots as an argument: `plotlist = ...`. Pass your list of plots, and specify 2 columns and 2 rows (check the help for `?plot_grid`).
 
 ```{r}
-# FIXME
-plot_grid(plotlist = pp, ncol = 2, nrow = 2,
-          labels = c("a", "b", "c", "d"),
-          label_size = 8)
+
 ```
 
 Now you can fine tune the plots in the code chunk above:
