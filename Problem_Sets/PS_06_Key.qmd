@@ -51,10 +51,10 @@ stalk <- read_csv("../data/Stalkies.csv", show_col_types = FALSE)
 glimpse(stalk)
 ```
 
-Visualize the dataset in two ways:
+Visualize the dataset in two different ways by making two different plots:
 
-1. Make a boxplot showing each food type on the x axis.
-2. Plot the raw data (points) for the two groups. For the points, include jitter and transparency. Include means and standard errors plotted in a different color (the code in Lecture 05-2 might help you). Try a few different values for each of these elements to find a plot you feel best communicates the structure of the data. You will find that the number of data points you have will affect how much jitter & transparency is most appropriate. Change the axis labels to what you would expect to find on a publication ready figure.
+1. Make a boxplot showing each food type on the x axis. Use the standard `geom_boxplot()`.
+2. Plot the raw data (points) for the two groups. For the points, include jitter and transparency. Include means and standard errors plotted in a different color (the code in Lecture 05-2 might help you). Try a few different values for each of these elements (jitter, color, transparency) to find a plot you feel best communicates the structure of the data. You will find that the number of data points you have will affect how much jitter & transparency is most appropriate. Change the axis labels to what you would expect to find on a publication ready figure.
 
 ```{r}
 # FIXME
@@ -75,39 +75,26 @@ Describe the distributions within each group and between groups. What do these p
 
 > The mean eye span is higher for flies reared on corn than on cotton. The variance also appears to be greater for flies reared on cotton. Based on the standard errors, I predict there will be a significant difference between these groups.
 
-We will first use a *t*-test to estimate the difference in means in the two treatments. By default, the `t.test` function will perform a test that *does not* assume equal variances (called "Welch's Correction"). You may specify equal variances with `var.equal = TRUE`, *if you decide that is appropriate here*. You maybe want to calculate the per-food source variance.
+Calculate the per-food source mean, standard deviation, and variance.
 
 ```{r}
 # FIXME
 
 stalk |> 
   group_by(food_source) |> 
-  summarise(var_eye_span = var(eye_span))
+  summarise(mean_eye_span = mean(eye_span),
+            sd_eye_span = sd(eye_span),
+            var_eye_span = var(eye_span))
 ```
 
-Perform a *t*-test using the formula method to specify the groups to test. Print the results.
+How do the mean, satndard deviation, and variance compare? Do they match your intuition above?
 
-```{r }
-# FIXME
+> Mean eyespan is about 0.5 higher in corn-fed flies. Standard deviation is about 4x higher in cotton, and variance is 14x higher.
 
-myT <- t.test(eye_span ~ food_source, data = stalk)
-myT
-```
+`lm()` is a general function that fits many many different kinds of linear models. We will use `lm()` almost exclusively in the coming units.
 
-What are the means for the Corn and Cotton groups?
-
-> Corn: 2.04; Cotton: 1.54
-
-What can you conclude from these results? Does the result of this statistical test agree with your prediction above?
-
-> The hypothesis that the means for the two groups are equal is very unlikely. There is a statistically significant difference between the groups.
-
-`t.test()` is a function that performs a very specific task: carrying out a *t*-test (by default with Welch's correction for unequal variances). `lm()` is a general function that fits many many different kinds of linear models. We will use `lm()` almost exclusively in the coming units.
-
-A *t*-test is just a special kind of linear model (1 categorical predictor with 2 levels), so we can also fit the same model using `lm()`.
-
-1. Use the code from above, but use `lm()` in place of `t.test()`. Assign this to a new object. Note that `lm()` always assumes equal variances (there is no `var.equal` argument).
-2. Pass the object that you just created to the function `summary()`.
+1. Fit a linear model using `lm()` where `eye_span` is modeled by `food_source`.
+2. Pass the object that you just created to the function `summary()` to generate the model summary.
 
 ```{r}
 # FIXME
@@ -116,9 +103,28 @@ fm <- lm(eye_span ~ food_source, data = stalk)
 summary(fm)
 ```
 
-Compare the results of the linear model with the results from `t.test()` above. Do you recognize any of the estimates? Can you figure out the relationship between the *t*-statistic and the *F*-statistic from the `lm()` summary?
+Examine the coefficients in the model summary. Try to reconcile the values in the `Estimate` column for the rows: `(Intercept)` and `food_sourceCotton` with the means you calculated above.
 
-> The `(Intercept)` term from `lm()` is equal to the mean for the Corn group. The `food_sourceCotton` estimate is the *difference* between the means for the Corn and Cotton group means. $F = t^2$.
+> The intercept is identical to the mean for the corn group. The second row in the coefficients `food_sourceCotton` is the same value as the difference between the mean for Corn and the mean for Cotton. So this row represents the mean difference between Corn and Cotton.
+
+We will investigate the other parts of this summary in the coming units. Next, we will use a *t*-test to estimate the difference in means in the two treatments.
+
+By default, the `t.test` function will perform a test that *does not* assume equal variances (called "Welch's Correction"). You may specify equal variances with `var.equal = TRUE`, *if you decide that is appropriate here*. Refer back to to the summaries (mean, sd, variance) you calculated above.
+
+Perform a *t*-test using the formula method to specify the groups to test. The formula will be identical to the formula for `lm()`. Print the results.
+
+```{r}
+# FIXME
+
+myT <- t.test(eye_span ~ food_source, data = stalk)
+myT
+```
+
+Study the printed output of `t.test()`. Do you find the means for the Corn and Cotton groups? Do these match your calculation above?
+
+> Corn: 2.04; Cotton: 1.54. Yes, these are identical
+
+`t.test()` is a function that performs a very specific task: carrying out a *t*-test (by default with Welch's correction for unequal variances). A *t*-test is just a special kind of linear model (1 categorical predictor with 2 levels), so we can also fit the same model using `lm()`. There are a few different kinds of *t*-test that you can do with `t.test()`, but all of them are just specific kinds of linear models.
 
 
 ## Bivariate Regression
@@ -137,35 +143,29 @@ Load the earwigs data:
 ```{r}
 # FIXME
 
-
 EW <- read_csv("../data/Earwigs.csv", show_col_types = FALSE)
-
 ```
 
-Make a scatterplot of the proportion of earwigs with forceps vs. density.
+Make a scatterplot of the proportion of earwigs with forceps vs. density. Feel free to change the point color and change the axis titles.
 
 ```{r}
 # FIXME
 
-EW |>
+P <- EW |>
   ggplot(aes(Density, Proportion_Forceps)) +
-  geom_point() +
+  geom_point(size = 3, color = "navy") +
   labs(x = "Population Density", y = "Proportion with Forceps")
+P
 ```
 
-Use the following code to add an regression line through the points to your plot: `+ geom_smooth(method = "lm")`. Just add that code after `geom_point()` in your call to `ggplot()`.
+Use the following code to add a regression line through the points to your plot: `+ geom_smooth(formula = y ~ x, method = "lm")`. Just add that code after `geom_point()` in your call to `ggplot()`. This adds a line fit to the model `y ~ x` using `lm()` (there are other options for `geom_smooth()`). By default, ggplot will add ribbons for the confidence interval around the line (`se = TRUE`).
 
 ```{r}
 # FIXME
-EW |>
-  ggplot(aes(Density, Proportion_Forceps)) +
-  geom_point() +
-  geom_smooth(formula = y ~ x, method = "lm") +
-  labs(x = "Population Density", y = "Proportion with Forceps")
+P + geom_smooth(formula = y ~ x, method = "lm")
 ```
 
-
-Use `lm()` to fit a linear model in which the proportion of earwigs with forceps is modeled by the density of earwigs. Assign the linear model to an object, and then pass that object to `summary()` as you did above.
+Use `lm()` to fit a linear model in which the proportion of earwigs with forceps is modeled by the density of earwigs. Assign the linear model to an object (name it `fm` for "fitted model"), and then pass that object to `summary()` as you did above.
 
 ```{r}
 # FIXME
@@ -174,7 +174,36 @@ fm <- lm(Proportion_Forceps ~ Density, data = EW)
 summary(fm)
 ```
 
-Check the model assumptions using the `performance` package by checking the following:
+If the data meet the assumptions, what do you expect from the Minimum, Maximum, 1st and 3rd quartiles, and median of the residuals?
+
+> The minimum and maximum should be roughly equal. The 1st and 3rd qartiles should be similar. And the median should be close to zero.
+
+Inspect the printed summary. Particularly look at the Residuals lines. Does it appear that the model meets the assumptions of bivariate regression?
+
+> Yes, it appears so. The minimum and maximum are roughly equal. The 1st and 3rd qartiles are similar. And the median should is close to zero.
+
+One plot that is useful to make when checking model diagnostics is a plot of the residuals vs. the fitted values. The fitted values are the predicted y values (proportion with forceps) at each observed x values (population density).
+
+The `lm()` object you created above (`fm`) contains these elements in `$residuals` and `$fitted.values`. In the chunk below:
+
+- Use `mutate()` to assign these values to two new columns to the earwigs data
+- Make a scatterplot of residuals vs. fitted values. Add a dotted horizontal line at 0 with the code `geom_hline(yintercept = 0, linetype = "dotted")`.
+
+```{r}
+# FIXME
+
+EW <- EW |> 
+  mutate(Residuals = fm$residuals,
+         `Fitted Values` = fm$fitted.values)
+
+ggplot(EW, aes(y = Residuals, x = `Fitted Values`)) +
+  geom_point(size = 3, color = "navy") +
+  geom_hline(yintercept = 0, linetype = "dotted")
+```
+
+If you inspect this plot, you will see that the points are scattered around the line at 0, with no obvious pattern.
+
+Finally, we will use functions to further evaluate the assumptions of this bivariate regression. Check the model assumptions using the `performance` package by checking the following:
 
 - posterior predictive check
 - linearity
@@ -196,14 +225,13 @@ check_outliers(fm)
 
 Do you see anything that concerns you about moving ahead?
 
-> There is one extreme residual, but the rest of the diagnostics look fine.
+> There is one sort-of large residual at -0.3, but the rest of the diagnostics look fine as are confirmed by the explicit tests,
 
+Return to the model output. See if you can figure out what the coefficients represent. You will find estimates for the slope and intercept of the line, their respective standard errors,^[Remember that standard errors tell us about the uncertainty in parameter estimates] and a *t*-test, which tests each parameter estimate vs. 0. Try to figure out how the *t*-value is calculated (divide one column by another). We will talk more about all these values in the next units.
 
-Return to the model output. See if you can figure out what the coefficients represent. You will find estimates for the slope and intercept of the line, their respective standard errors,^[Remember that standard errors tell us about the uncertainty in parameter estimates] and a *t*-test, which tests each parameter estimate vs. 0. Try to figure out how the *t*-value is calculated (divide one column by another).
+> The OLS line is Proportion_Forceps = 0.002 + 0.015 * Density. The standard errors are 0.11 and 0.005. The *t*-statistics are the estimates divided by their SEs.
 
-> The OLS line is Proportion_Forceps = 0.07 + 0.013 * Density. The standard errors are 0.18 and 0.008. The *t*-statistics are the estimates divided by their SEs. Neither the intercept nor the slope is significantly different from 0.
-
-The data we gave you here is a proportion. What is another format that the data could have been in? Think about the source of the proportion values.
+We have one final issue to think about. The data we gave you here is a proportion. What is another format that the data could have been in? Think about the source of the proportion values.
 
 > A proportion could also be represented as a binomial (where "has forceps" is a "success").
 
