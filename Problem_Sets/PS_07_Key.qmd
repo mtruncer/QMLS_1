@@ -22,21 +22,21 @@ library(cowplot)
 
 library(knitr)
 theme_set(theme_cowplot())
-```
 
-<!--
-Datasets
-  BrookTrout1.csv
-  BrookTrout2.csv
-  mammals.xlsx
--->
+# Datasets
+#   Stalkies.csv
+#   BrookTrout1.csv
+#   BrookTrout2.csv
+#   mammals.xlsx
+
+```
 
 ```{r}
 #| echo: false
 #| eval: false
 
 # FIXME
-# Generate data for question 1.
+# Generate data for Brook trout question.
 # P = 0.0495
 n <- 15
 set.seed(1064)
@@ -45,13 +45,14 @@ M1 <- tibble(
                            rnorm(n, 0.242, 0.07)),
   Trout = factor(rep(c("Absent", "Present"), each = n))
 )
-write_csv(M1, path = "../data/BrookTrout1.csv")
+write_csv(M1, file = "../data/BrookTrout1.csv")
 
 ggplot(M1, aes(x = Trout, y = Proportion_Surviving)) +
-  geom_point(position = position_jitter(width = 0.05), alpha = 0.5) +
+  geom_point(position = position_jitter(width = 0.05, seed = 234342),
+             alpha = 0.5) +
   stat_summary(fun = mean, geom = "point", size = 3, color = "red") +
   stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.1,
-               color = "red", size = 0.7) +
+               color = "red", linewidth = 0.7) +
   labs(x = "Trout", y = "Survival", title = "BrookTrout1")
 
 summary(lm(Proportion_Surviving ~ Trout, M1))
@@ -64,34 +65,63 @@ M2 <- tibble(
                            rnorm(n, 0.245, 0.07)),
   Trout = factor(rep(c("Absent", "Present"), each = n))
 )
-write_csv(M2, path = "../data/BrookTrout2.csv")
+write_csv(M2, file = "../data/BrookTrout2.csv")
 
 ggplot(M2, aes(x = Trout, y = Proportion_Surviving)) +
-  geom_point(position = position_jitter(width = 0.05), alpha = 0.5) +
+  geom_point(position = position_jitter(width = 0.05, seed = 234342),
+             alpha = 0.5) +
   stat_summary(fun = mean, geom = "point", size = 3, color = "red") +
   stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.1,
-               color = "red", size = 0.7) +
+               color = "red", linewidth = 0.7) +
   labs(x = "Trout", y = "Survival", title = "BrookTrout2")
 
 summary(lm(Proportion_Surviving ~ Trout, M2))
 ```
 
-## Stalkies CI
+## Confidence intervales
 
-## FIXME FIXME Confidence intervals
-
-We will use the same data to explore confidence intervals.
-
-
-### Activity
-
-Calculate a ~95% confidence interval for each mean (cotton & corn groups). You can use the approximate formula discussed in lecture $\mu$ +/- 2 * SEM.
+We will use the stalk-eyed fly data from Problem Set 6 to explore confidence intervals. Load the `Stalkies.csv` file and examine the columns of data it contains to remind yourself of the structure of the data.
 
 ```{r}
 # FIXME
 
-stalk <- read_csv("../data/Stalkies.csv")
+stalk <- read_csv("../data/Stalkies.csv", show_col_types = FALSE)
+glimpse(stalk)
+```
 
+
+### Activity
+
+We will calculate both the approximate and the exact 95% confidence intervals for the means of the two groups: flies raised on cotton and flies raised on corn.
+
+First, calculate an *approximate* ~95% confidence interval for each mean (cotton & corn groups), using the formula discussed in lecture $\mu$ +/- 2 * SEM.
+
+Among the steps that you will need to accomplish are:
+
+- Separate the Corn and Cotton groups into separate data.frames or into just a vector of values for `eye_span`
+- For each group
+    - Calculate the mean
+    - Calculate the standard error of the mean (or if you are feeling adventurous, write a short function to calculate SEM)
+- Use those values to find the *approximate* the 95% confidence interval
+
+```{r}
+# FIXME
+
+stalk <- read_csv("../data/Stalkies.csv", show_col_types = FALSE)
+
+
+# Cotton
+Cotton <- stalk |> filter(food_source == "Cotton") |> pull(eye_span)
+(Cotton_Approx <- c(mean(Cotton) - 2 * sd(Cotton) / sqrt(length(Cotton)),
+                    mean(Cotton) + 2 * sd(Cotton) / sqrt(length(Cotton))))
+
+# Corn
+Corn <- stalk |> filter(food_source == "Corn") |> pull(eye_span)
+(Corn_Approx <- c(mean(Corn) - 2 * sd(Corn) / sqrt(length(Corn)),
+                 mean(Corn) + 2 * sd(Corn) / sqrt(length(Corn))))
+
+
+# Or doing this is all one step by subsetting
 mean(stalk$eye_span[stalk$food_source == 'Cotton']) -
   2 * sd(stalk$eye_span[stalk$food_source == 'Cotton'] /
            sqrt(length(stalk$eye_span[stalk$food_source == 'Cotton'])))
@@ -125,35 +155,99 @@ stalk |>
   group_modify(~ approx_CI(.x$eye_span))
 ```
 
+Second, calculate an *exact* ~95% confidence interval for each mean (cotton & corn groups), using the formula discussed in lecture $\mu$ +/- 2 * SEM.
+
+Among the steps that you will need to accomplish are:
+
+- For each group in the separate data.frames you created above
+    - Calculate the mean
+    - Calculate the standard error of the mean
+    - Find the critical *t*-statistic for 
+- Use those values to find the *exact* 95% confidence interval
+
+```{r}
+# FIXME
+
+# Cotton
+t_crit <- qt(0.975, df = length(Cotton) - 1)
+(Cotton_Exact <- c(mean(Cotton) - t_crit * SEM(Cotton),
+                  mean(Cotton) + t_crit * SEM(Cotton)))
+
+# Corn
+t_crit <- qt(0.975, df = length(Corn) - 1)
+(Corn_Exact <- c(mean(Corn) - t_crit * SEM(Corn),
+                 mean(Corn) + t_crit * SEM(Corn)))
+
+# And using a modified version of our function
+exact_CI <- function(x, ...) {
+  t_crit <- qt(0.975, df = length(x) - 1)
+  upper <- mean(x) + t_crit * SEM(x)
+  lower <- mean(x) - t_crit * SEM(x)
+  return(tibble(lower, upper))
+}
+
+stalk |> 
+  group_by(food_source) |> 
+  group_modify(~ exact_CI(.x$eye_span)) |> 
+  ungroup() |> 
+  print(digits = 4)
+
+# Differences
+diff(Cotton_Approx)
+diff(Cotton_Exact)
+
+diff(Corn_Approx)
+diff(Corn_Exact)
+```
+
+Compare the approximate and exact 95% confidence intervals. How do the widths of the two intervals compare? What explains this difference?
+
+> The approximate CIs are slightly narrower than than exact CIs. When we use 2 for the multiplier, that is less than the correct critical *t*-statistic for the two groups (2.07 and 2.09). When the exact intervals uses the correct value, the interval ends up slghtly wider (but correct).
+
 We can simulate what we would expect for a confidence interval if we set the true mean and standard deviation for our population. Knowing these true values allows us to draw random data from a true underlying distribution. 
 
 For this simulation, we could assume our estimated means and standard deviations are representative of the population parameters. For any empirical dataset, will you ever know the true mean and standard deviation?
 
 > No. It will always be an estimate. You expect it to get closer to the truth the higher the sample size but it is still an estimate.
 
-Let's set up our simulation. Do the following:
+Let's set up our simulation. We will do the following:
 
-1. Generate simulated data from a normal distribution matching the number of observations, mean, and standard deviation (note sd not SEM) for each group.
+1. Generate simulated data from a normal distribution matching the number of observations, mean, and standard deviation (note: sd, not SEM) for each group.
 2. Calculate the mean for each group and the upper and lower bounds of the confidence interval.
 3. Put these values into a `tibble`
 4. Repeat this 1000 times
 5. Calculate the proportion of times the mean for each group falls within the confidence interval
 
+Reading other people's code and interpreting it is a cricial skill that you will want to develop. Study the code below before you execute it. Make sure you understand all the lines. Confirm your understanding by adding your own comments to the code at the "#"s.
+
+You may need to rename `stalk` below to the object name of the stalkies data. And also set `eval` to `true`.
+
+## FIXME FIXME
 
 ```{r}
-# FIXME
-# Note: need to use list() below to assign to a row of a tibble.
+#| eval: false
 
+#        ^^^^^ change to true
+
+#
 set.seed(648273)
+
+#
 niter <- 1000
 
+#
 mu.corn <- mean(stalk$eye_span[stalk$food_source == 'Corn'])
 mu.cotton <- mean(stalk$eye_span[stalk$food_source == 'Cotton'])
+
+#
 sd.corn <- sd(stalk$eye_span[stalk$food_source == 'Corn'])
 sd.cotton <- sd(stalk$eye_span[stalk$food_source == 'Cotton'])
+
+#
 n.corn <- length(stalk$eye_span[stalk$food_source == 'Corn'])
 n.cotton <- length(stalk$eye_span[stalk$food_source == 'Cotton'])
 
+# 
 corn.cis <- tibble(mm = numeric(length = niter),
                    ll = numeric(length = niter),
                    uu = numeric(length = niter))
@@ -162,20 +256,28 @@ cotton.cis <- tibble(mm = numeric(length = niter),
                      uu = numeric(length = niter))
 
 for (jj in 1:niter) {
+  #
   corn.s <- rnorm(n.corn, mu.corn, sd.corn)
   cotton.s <- rnorm(n.cotton, mu.cotton, sd.cotton)
 
+  # Note: need to use list() below to assign to a row of a tibble.
+  # 
   corn.cis[jj, ] <- list(
     mean(corn.s),
     mean(corn.s) - 2 * (sd(corn.s) / sqrt(n.corn)),
     mean(corn.s) + 2 * (sd(corn.s) / sqrt(n.corn)))
+  
+  #
   cotton.cis[jj, ] <- list(
     mean(cotton.s),
     mean(cotton.s) - 2 * (sd(cotton.s) / sqrt(n.cotton)),
     mean(cotton.s) + 2 * (sd(cotton.s) / sqrt(n.cotton)))
 }
 
+#
 (sum(mu.corn < corn.cis$ll) + sum(mu.corn > corn.cis$uu)) / niter
+
+#
 (sum(mu.cotton < cotton.cis$ll) + sum(mu.cotton > cotton.cis$uu)) / niter
 ```
 
@@ -188,11 +290,11 @@ Is it correct to say that there is a 95% probability that the true mean is withi
 > No, it is not correct. CIs tell us about a range of values that we have some confidence in for *future* samples. This is a nuanced but very important point about confidence intervals.
 
 
-
-
 ## Brook trout
 
-You and a collaborator are studying the role of an introduced species (brook trout, *Salvelinus fontinalis*) on survival of native Chinook salmon (*Oncorhynchus tshawytscha*). Because you are located at different universities, you each have a different set of streams to sample. Independently, each of you measures survivorship of Chinook salmon in 15 streams that have introduced brook trout and in 15 streams that are free of brook trout. To estimate survivorship (percent alive), you released an equal number of tagged juvenile Chinook salmon into each stream and then resampled over the course of a year.
+You and a collaborator are studying the role of an introduced species (brook trout, *Salvelinus fontinalis*) on survival of native Chinook salmon (*Oncorhynchus tshawytscha*). Because you are located at different universities, you each have a different set of streams to sample. Independently, each of you measures survivorship of Chinook salmon in 15 streams that have introduced brook trout and in 15 streams that are free of brook trout (you each study 30 total streams).
+
+To estimate survivorship (percent alive), you released an equal number of tagged juvenile Chinook salmon into each stream and then resampled over the course of a year.
 
 The two data files are:
 
@@ -205,11 +307,13 @@ Load each of the files into R.
 
 ```{r}
 # FIXME
-BT1 <- read_csv("../data/BrookTrout1.csv")
-BT2 <- read_csv("../data/BrookTrout2.csv")
+BT1 <- read_csv("../data/BrookTrout1.csv", show_col_types = FALSE)
+BT2 <- read_csv("../data/BrookTrout2.csv", show_col_types = FALSE)
 ```
 
-Make a plot of each data set using the same ggplot code you used to visualized the stalk-eyed fly data in the previous problem set. Plot the raw data (points) for the two groups (trout `Absent` and `Present`). For the points, include jitter and transparency. Include means and standard errors plotted in a different color.
+Make a plot of each data set using the same ggplot code you used to visualized the stalk-eyed fly data in the previous problem set. Plot the raw data (points) for the two groups (trout `Absent` and `Present`). For the points, include jitter and transparency. Include means and standard errors plotted in a different color. 
+
+Re-use and adapt your code rather than starting from scratch.
 
 Assign each plot to an R object (we like to use `p1` and `p2` for plot 1 and plot 2). Then use the `plot_grid()` function in the `cowplot` package to stack the two plots on top of one another. You code for the last step will look something like: `plot_grid(p1, p2, nrow = 2)`. If you used `ncol = 2` instead, you would get plots side by side.
 
@@ -233,7 +337,7 @@ p2 <- ggplot(BT2, aes(x = Trout, y = Proportion_Surviving)) +
 plot_grid(p1, p2, nrow = 2)
 ```
 
-Considering the plot you just made, do you think that mean survivorship is significantly different in the Absent/Present treatment groups? Do you think that the two sets of data are different from one another?
+Considering the plot you just made, do you think that mean survivorship is significantly different in the Absent/Present treatment groups? I.e., do you think that the two sets of data are different from one another?
 
 > There is much variability, but survival does appear to be higher in the trout absent treatment group. The SEMs don't overlap it seems. There might be a significant different between treatments. The patterns look the same across locations.
 
@@ -245,7 +349,7 @@ fm1 <- lm(Proportion_Surviving ~ Trout, BT1)
 summary(fm1)
 ```
 
-Note that, although these data are proportions (and thus bounded by 0 and 1), the observed values are normally distributed enough within in group to analyze with a regular linear model. If the values are clumped either close to 0 or to 1, then a different model is likely needed. For example, if you are trying to analyze student exam scores, you often run into problems because they are often heavily skewed and often run up against 1. Technically, it is the residuals that need to be normally distributed, but if the predictors are not normal then often the residuals won't be either.
+Note that, although these data are proportions (and thus bounded by 0 and 1), the observed values are normally distributed enough within in group to analyze with a regular linear model. If the values are clumped either close to 0 or to 1, then a different model is likely needed. For example, if you are trying to analyze student exam scores, you often run into problems because they are often heavily skewed and often are bounded at 1 (i.e., 100% correct). Technically, it is the residuals that need to be normally distributed, but if the predictors are not normal then often the residuals won't be either.
 
 All that being said, how do you interpret the output of the linear model? Is there is significant difference in mean survival between the groups? Choose the $\alpha$-level you feel is appropriate.
 
@@ -278,10 +382,10 @@ knitr::kable(M)
 
 Thinking about the assumptions of the statistical tests that we have learned, why is combining all the data for this test not appropriate? 
 
-> Your data and the data from your collaborator are from completely different streams, which is good, but streams differ from onr another (water chemistry, abundance of food, presence of other predators, etc.). And because we have many salmon from the same stream, the observations (whether an individual salmon juvenile was alive or not) are not independent of one another. This non-independence means that all the salmon in a stream are more likely to have the same survival probability. Streams add a level of structure to the data. Later in the course, we will cover multilevel and logistic regression, which are (separately or combined) another way to correctly model survival, accounting for possible different survival rates in both streams.
+> Your data and the data from your collaborator are from completely different streams, which is good, but streams differ from one another (water chemistry, abundance of food, presence of other predators, etc.). And because we have many salmon from the same stream, the observations (whether an individual salmon juvenile was alive or not) are not independent of one another. This non-independence means that all the salmon in a stream are more likely to have the same survival probability. Streams add a level of structure to the data. Later in the course, we will cover multilevel and logistic regression, which are (separately or combined) another way to correctly model survival, accounting for possible different survival rates in both streams.
 
 
-## Exact confidence intervals
+## Exact confidence intervals for proportions FIXME FIXME
 
 We ultimately want to calculate exact confidence intervals for the proportion surviving in your data. First, we want to explore the adjustment for degrees of freedom (the critical *t*-value). Originally, we showed you how to calculate the approximate CI, using twice the standard error of the mean. Using 2 will result in too narrow CIs for small degrees of freedom and too wide CIs for large degrees of freedom.
 
