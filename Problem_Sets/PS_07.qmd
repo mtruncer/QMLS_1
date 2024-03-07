@@ -15,13 +15,6 @@ format:
 #| message: false
 #| warning: false
 
-# FIXME
-library(tidyverse)
-library(readxl)
-library(cowplot)
-
-library(knitr)
-theme_set(theme_cowplot())
 
 # Datasets
 #   Stalkies.csv
@@ -31,62 +24,13 @@ theme_set(theme_cowplot())
 
 ```
 
-```{r}
-#| echo: false
-#| eval: false
-
-# FIXME
-# Generate data for Brook trout question.
-# P = 0.0495
-n <- 15
-set.seed(1064)
-M1 <- tibble(
-  Proportion_Surviving = c(rnorm(n, 0.28, 0.07),
-                           rnorm(n, 0.242, 0.07)),
-  Trout = factor(rep(c("Absent", "Present"), each = n))
-)
-write_csv(M1, file = "../data/BrookTrout1.csv")
-
-ggplot(M1, aes(x = Trout, y = Proportion_Surviving)) +
-  geom_point(position = position_jitter(width = 0.05, seed = 234342),
-             alpha = 0.5) +
-  stat_summary(fun = mean, geom = "point", size = 3, color = "red") +
-  stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.1,
-               color = "red", linewidth = 0.7) +
-  labs(x = "Trout", y = "Survival", title = "BrookTrout1")
-
-summary(lm(Proportion_Surviving ~ Trout, M1))
-
-# P = 0.0536
-n <- 15
-set.seed(1064)
-M2 <- tibble(
-  Proportion_Surviving = c(rnorm(n, 0.282, 0.07),
-                           rnorm(n, 0.245, 0.07)),
-  Trout = factor(rep(c("Absent", "Present"), each = n))
-)
-write_csv(M2, file = "../data/BrookTrout2.csv")
-
-ggplot(M2, aes(x = Trout, y = Proportion_Surviving)) +
-  geom_point(position = position_jitter(width = 0.05, seed = 234342),
-             alpha = 0.5) +
-  stat_summary(fun = mean, geom = "point", size = 3, color = "red") +
-  stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.1,
-               color = "red", linewidth = 0.7) +
-  labs(x = "Trout", y = "Survival", title = "BrookTrout2")
-
-summary(lm(Proportion_Surviving ~ Trout, M2))
-```
 
 ## Confidence intervals
 
 We will use the stalk-eyed fly data from Problem Set 6 to explore confidence intervals. Load the `Stalkies.csv` file and examine the columns of data it contains to remind yourself of the structure of the data.
 
 ```{r}
-# FIXME
 
-stalk <- read_csv("../data/Stalkies.csv", show_col_types = FALSE)
-glimpse(stalk)
 ```
 
 
@@ -105,54 +49,7 @@ Among the steps that you will need to accomplish are:
 - Use those values to find the *approximate* the 95% confidence interval
 
 ```{r}
-# FIXME
 
-stalk <- read_csv("../data/Stalkies.csv", show_col_types = FALSE)
-
-
-# Cotton
-Cotton <- stalk |> filter(food_source == "Cotton") |> pull(eye_span)
-(Cotton_Approx <- c(mean(Cotton) - 2 * sd(Cotton) / sqrt(length(Cotton)),
-                    mean(Cotton) + 2 * sd(Cotton) / sqrt(length(Cotton))))
-
-# Corn
-Corn <- stalk |> filter(food_source == "Corn") |> pull(eye_span)
-(Corn_Approx <- c(mean(Corn) - 2 * sd(Corn) / sqrt(length(Corn)),
-                 mean(Corn) + 2 * sd(Corn) / sqrt(length(Corn))))
-
-
-# Or doing this is all one step by subsetting
-mean(stalk$eye_span[stalk$food_source == 'Cotton']) -
-  2 * sd(stalk$eye_span[stalk$food_source == 'Cotton'] /
-           sqrt(length(stalk$eye_span[stalk$food_source == 'Cotton'])))
-
-mean(stalk$eye_span[stalk$food_source == 'Cotton']) +
-  2 * sd(stalk$eye_span[stalk$food_source == 'Cotton'] /
-           sqrt(length(stalk$eye_span[stalk$food_source == 'Cotton'])))
-
-mean(stalk$eye_span[stalk$food_source == 'Corn']) -
-  2 * sd(stalk$eye_span[stalk$food_source == 'Corn'] /
-           sqrt(length(stalk$eye_span[stalk$food_source == 'Corn'])))
-
-mean(stalk$eye_span[stalk$food_source == 'Corn']) +
-  2 * sd(stalk$eye_span[stalk$food_source == 'Corn'] /
-           sqrt(length(stalk$eye_span[stalk$food_source == 'Corn'])))
-
-## We can write functions to do the SEM and approximate CI
-## approx_CI returns a tibble with the lower and upper
-## bounds of the CI. Note the use of group_modify() to 
-## apply approx_CI() to each group.
-SEM <- function(x) return(sd(x) / sqrt(length(x)))
-
-approx_CI <- function(x, ...) {
-  upper <- mean(x) + 2 * SEM(x)
-  lower <- mean(x) - 2 * SEM(x)
-  return(tibble(lower, upper))
-}
-
-stalk |> 
-  group_by(food_source) |> 
-  group_modify(~ approx_CI(.x$eye_span))
 ```
 
 Let's explore the distribution of critical *t*-values ($t_{crit}$) that we will use to calculate an exact confidence interval.
@@ -162,16 +59,7 @@ Make a plot of the critical value for a *t*-distribution for the 0.975 quantile 
 Make a tibble and plot the results. Then add a differently colored horizontal line at the critical value for the 0.975 quantile for a *standard normal distribution*. Observe that the critical value approaches the asymptotic limit as the degrees of freedom increases.
 
 ```{r}
-# FIXME
-CVs <- tibble(dfs = 2:100,
-              crit_vals = qt(0.975, df = dfs, lower.tail = TRUE))
 
-CVs |>
-  ggplot(aes(dfs, crit_vals)) +
-  geom_line() +
-  geom_hline(yintercept = qnorm(0.025, lower.tail = FALSE),
-             color = "blue") +
-  labs(x = "Degrees of Freedom", y = "Critical t value (0.975)")
 ```
 
 
@@ -186,49 +74,20 @@ Among the steps that you will need to accomplish are:
 - Use those values to find the *exact* 95% confidence interval
 
 ```{r}
-# FIXME
 
-# Cotton
-t_crit <- qt(0.975, df = length(Cotton) - 1)
-(Cotton_Exact <- c(mean(Cotton) - t_crit * SEM(Cotton),
-                  mean(Cotton) + t_crit * SEM(Cotton)))
-
-# Corn
-t_crit <- qt(0.975, df = length(Corn) - 1)
-(Corn_Exact <- c(mean(Corn) - t_crit * SEM(Corn),
-                 mean(Corn) + t_crit * SEM(Corn)))
-
-# And using a modified version of our function
-exact_CI <- function(x, ...) {
-  t_crit <- qt(0.975, df = length(x) - 1)
-  upper <- mean(x) + t_crit * SEM(x)
-  lower <- mean(x) - t_crit * SEM(x)
-  return(tibble(lower, upper))
-}
-
-stalk |> 
-  group_by(food_source) |> 
-  group_modify(~ exact_CI(.x$eye_span)) |> 
-  ungroup() |> 
-  print(digits = 4)
-
-# Differences
-diff(Cotton_Approx)
-diff(Cotton_Exact)
-
-diff(Corn_Approx)
-diff(Corn_Exact)
 ```
 
 Compare the approximate and exact 95% confidence intervals. How do the widths of the two intervals compare? What explains this difference?
 
-> The approximate CIs are slightly narrower than than exact CIs. When we use 2 for the multiplier, that is less than the correct critical *t*-statistic for the two groups (2.07 and 2.09). When the exact intervals uses the correct value, the interval ends up slghtly wider (but correct).
+> 
+
 
 We can simulate what we would expect for a confidence interval if we set the true mean and standard deviation for our population. Knowing these true values allows us to draw random data from a true underlying distribution. 
 
 For this simulation, we could assume our estimated means and standard deviations are representative of the population parameters. For any empirical dataset, will you ever know the true mean and standard deviation?
 
-> No. It will always be an estimate. You expect it to get closer to the truth the higher the sample size but it is still an estimate.
+> 
+
 
 Let's set up our simulation. We will do the following:
 
@@ -244,7 +103,6 @@ You may need to rename `stalk` below to the object name of the stalkies data. An
 
 ```{r}
 #| eval: false
-
 #        ^^^^^ change to true
 
 #
@@ -301,11 +159,12 @@ for (jj in 1:niter) {
 
 What do you conclude based on this simulation?
 
-> The true mean is within about 95% of the resampled confidence intervals.
+> 
+
 
 Is it correct to say that there is a 95% probability that the true mean is within a 95% confidence interval? Why or why not? Think about what you just showed with your simulation.
 
-> No, it is not correct. CIs tell us about a range of values that we have some confidence in for *future* samples. This is a nuanced but very important point about confidence intervals.
+> 
 
 
 ## Brook trout
@@ -325,9 +184,7 @@ The two data files are:
 Load each of the files into R.
 
 ```{r}
-# FIXME
-BT1 <- read_csv("../data/BrookTrout1.csv", show_col_types = FALSE)
-BT2 <- read_csv("../data/BrookTrout2.csv", show_col_types = FALSE)
+
 ```
 
 Make a plot of each data set using the same ggplot code you used to visualized the stalk-eyed fly data in the previous problem set. Plot the raw data (points) for the two groups (trout `Absent` and `Present`). For the points, include jitter and transparency. Include means and standard errors plotted in a different color. 
@@ -339,56 +196,42 @@ Assign each plot to an R object (we like to use `p1` and `p2` for plot 1 and plo
 `plot_grid()` is a really handy function for combining different ggplots into a single figure. It has facilities for adding labels ("a.", "b.", etc.), changing the spacing between plots, and much more. For us, it is indispensable for making publication-ready figures.
 
 ```{r}
-# FIXME
-p1 <- ggplot(BT1, aes(x = Trout, y = Proportion_Surviving)) +
-  geom_point(position = position_jitter(width = 0.05), alpha = 0.5) +
-  stat_summary(fun = mean, geom = "point", size = 3, color = "red") +
-  stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.1,
-               color = "red", linewidth = 0.7) +
-  labs(x = "Trout", y = "Survival", title = "My Data")
-p2 <- ggplot(BT2, aes(x = Trout, y = Proportion_Surviving)) +
-  geom_point(position = position_jitter(width = 0.05), alpha = 0.5) +
-  stat_summary(fun = mean, geom = "point", size = 3, color = "red") +
-  stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.1,
-               color = "red", linewidth = 0.7) +
-  labs(x = "Trout", y = "Survival", title = "My Collaborator's Data")
 
-plot_grid(p1, p2, nrow = 2)
 ```
 
 Considering the plot you just made, do you think that mean survivorship is significantly different in the Absent/Present treatment groups? I.e., do you think that the two sets of data are different from one another?
 
-> There is much variability, but survival does appear to be higher in the trout absent treatment group. The SEMs don't overlap it seems. There might be a significant different between treatments. The patterns look the same across locations.
+> 
+
 
 First, fit a linear model to **your data** (from `BrookTrout1.csv`), in which the proportion of salmon surviving is modeled by presence or absence of trout. Print out the `summary()` of this linear model.
 
 ```{r}
-# FIXME
-fm1 <- lm(Proportion_Surviving ~ Trout, BT1)
-summary(fm1)
+
 ```
 
 Note that, although these data are proportions (and thus bounded by 0 and 1), the observed values are normally distributed enough within in group to analyze with a regular linear model. If the values are clumped either close to 0 or to 1, then a different model is likely needed. For example, if you are trying to analyze student exam scores, you often run into problems because they are often heavily skewed and often are bounded at 1 (i.e., 100% correct). Technically, it is the residuals that need to be normally distributed, but if the predictors are not normal then often the residuals won't be either.
 
 All that being said, how do you interpret the output of the linear model? Is there is significant difference in mean survival between the groups? Choose the $\alpha$-level you feel is appropriate.
 
-> At $\alpha = 0.05$, there is a significant difference between the groups with lower salmon survivorship in the presence of trout (mean difference = 0.055 or 5.5%; P = 0.0495).
+> 
+
 
 Now fit the same model to your **collaborator's data** (from `BrookTrout2.csv`).
 
 ```{r}
-# FIXME
-fm2 <- lm(Proportion_Surviving ~ Trout, BT2)
-summary(fm2)
+
 ```
 
 What do you conclude about your collaborator's data?
 
-> $P = 0.054$ here. So we conclude, based on $\alpha = 0.05$, that there is not a significant difference in means.
+> 
+
 
 How do you feel about the differing results of these two studies?
 
-> They are nearly identical (5.5% vs. 5.3% difference in survivorship), but the arbitrarily chosen $\alpha$ level leads you to two different conclusions.
+> 
+
 
 Because you have data on individual-level survival of salmon, which were used to make calculate the survival proportions, you might be tempted to use a [$\chi^2$ test of association](http://www.stat.yale.edu/Courses/1997-98/101/chisq.htm) on the combined data. That table would look something like this table, where you have aggregated counts for numbers of surviving salmon in the presence or absence of trout:
 
@@ -401,4 +244,5 @@ knitr::kable(M)
 
 Thinking about the assumptions of the statistical tests that we have learned, why is combining all the data for this test not appropriate? 
 
-> Your data and the data from your collaborator are from completely different streams, which is good, but streams differ from one another (water chemistry, abundance of food, presence of other predators, etc.). And because we have many salmon from the same stream, the observations (whether an individual salmon juvenile was alive or not) are not independent of one another. This non-independence means that all the salmon in a stream are more likely to have the same survival probability. Streams add a level of structure to the data. Later in the course, we will cover multilevel and logistic regression, which are (separately or combined) another way to correctly model survival, accounting for possible different survival rates in both streams.
+> 
+
