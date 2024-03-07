@@ -87,7 +87,7 @@ stalk |>
             var_eye_span = var(eye_span))
 ```
 
-How do the mean, satndard deviation, and variance compare? Do they match your intuition above?
+How do the mean, standard deviation, and variance compare? Do they match your intuition above?
 
 > Mean eyespan is about 0.5 higher in corn-fed flies. Standard deviation is about 4x higher in cotton, and variance is 14x higher.
 
