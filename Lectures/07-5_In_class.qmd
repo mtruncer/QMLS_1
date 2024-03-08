@@ -32,7 +32,7 @@ theme_set(theme_cowplot())
 ## Problem set 6
 
 - Lists
-- Fine tuning plots
+- Final tuning plots
 
 
 ## Quiz 7-3
@@ -56,15 +56,15 @@ theme_set(theme_cowplot())
 
 > What is the difference between confidence level and probability?
 
-## What CIs can't answer
+## Questions confidence intervals can't answer
 
 - The *probability* that the true mean is greater than 0 is at least 95%.
 - The *probability* that the true mean equals 0 is smaller than 5%
-- The "null *hypothesis*" that the true mean equals 0 is likely to be incorrect.
 - There is a 95% *probability* that the true mean lies between 0.1 and 0.4.
+- The "null *hypothesis*" that the true mean equals 0 is likely to be incorrect.
 
 
-## What CIs can answer
+## Question confidence intervals can answer
 
 - If we were to *repeat* the *experiment* over and over, then 95% of the time the confidence intervals *contain the true mean*.
 
@@ -76,13 +76,12 @@ theme_set(theme_cowplot())
 
 ## P-values
 
-> What are common methods of p value fusion (combining p-values from multiple statistical tests) and is there a benefit to doing such?
+> What are common methods of p-value fusion (combining p-values from multiple statistical tests) and is there a benefit to doing such?
 
 
 ## MCMC
 
 > I am having some difficulty figuring out how to integrate some of the previous lessons with the more recent ones, especially when it comes to using priors or Bayesian approaches (like one of the examples in 7-1 MCMC model this week). Is it possible to use priors in any model, or is it more useful for some models than others depending on the type of data you are using?
 
-> Had trouble reading the MCMC trace plot. how does it help with bayesian inference?
-
+> Had trouble reading the MCMC trace plot. How does it help with bayesian inference?
 
