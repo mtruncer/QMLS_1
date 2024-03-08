@@ -1,0 +1,88 @@
+---
+title: "Unit 7 In Class Discussion"
+author:
+  - Elizabeth King
+  - Kevin Middleton
+format:
+  revealjs:
+    theme: [default, custom.scss]
+    standalone: true
+    self-contained: true
+    logo: QMLS_Logo.png
+    slide-number: true
+    show-slide-number: all
+code-annotations: hover
+bibliography: QMLS_Bibliography.bib
+csl: evolution.csl
+---
+
+```{r}
+#| label: setup
+#| message: false
+#| warning: false
+
+library(tidyverse)
+library(cowplot)
+
+theme_set(theme_cowplot())
+
+```
+
+
+## Problem set 6
+
+- Lists
+- Fine tuning plots
+
+
+## Quiz 7-3
+
+
+## Terminology
+
+> I sometimes get caught up in trying to remember the definitions of these new terms (tests, values, etc.), especially when they are very similar in practice. Is there a resource that has a quick summary/definition of terms that I can refer back to when I get stuck, or is it too complicated to summarize in that way? I have skimmed through a few links on the resources page already, but I definitely could have missed it.
+
+>  I'm getting a little lost in my thoughts for the difference between mean, standard error, standard deviation, CI, t-statistic, f-statistic, and how this all applies to each other. Can you lay this out? 
+
+
+## Designing a statistical model
+
+> Most statistical tests give the same or similar information. How does one identify what fits best for their study? I'm still confused about that
+
+> When to use ANOVA vs t test?
+
+
+## Confidence Intervals
+
+> What is the difference between confidence level and probability?
+
+## What CIs can't answer
+
+- The *probability* that the true mean is greater than 0 is at least 95%.
+- The *probability* that the true mean equals 0 is smaller than 5%
+- The "null *hypothesis*" that the true mean equals 0 is likely to be incorrect.
+- There is a 95% *probability* that the true mean lies between 0.1 and 0.4.
+
+
+## What CIs can answer
+
+- If we were to *repeat* the *experiment* over and over, then 95% of the time the confidence intervals *contain the true mean*.
+
+
+## Degrees of Freedom
+
+> I'm wondering what exactly are degrees of freedom? I've used the term in stats classes before, but does the term "degrees of freedom" always mean the same thing, conceptually?
+
+
+## P-values
+
+> What are common methods of p value fusion (combining p-values from multiple statistical tests) and is there a benefit to doing such?
+
+
+## MCMC
+
+> I am having some difficulty figuring out how to integrate some of the previous lessons with the more recent ones, especially when it comes to using priors or Bayesian approaches (like one of the examples in 7-1 MCMC model this week). Is it possible to use priors in any model, or is it more useful for some models than others depending on the type of data you are using?
+
+> Had trouble reading the MCMC trace plot. how does it help with bayesian inference?
+
+
