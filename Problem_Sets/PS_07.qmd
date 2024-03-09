@@ -63,7 +63,7 @@ Make a tibble and plot the results. Then add a differently colored horizontal li
 ```
 
 
-Now, calculate an *exact* ~95% confidence interval for each mean (cotton & corn groups), using the formula discussed in lecture $\mu$ +/- $t_{crit} * SEM.
+Now, calculate an *exact* ~95% confidence interval for each mean (cotton & corn groups), using the formula discussed in lecture $\mu$ +/- $t_{crit}$ * SEM.
 
 Among the steps that you will need to accomplish are:
 
