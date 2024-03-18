@@ -92,15 +92,15 @@ Now let's try our simulation. We will simulate two groups that have different me
 
 1) Write a function called `getF`. (Hint: try getting this to work for one set of values before making it a function)
 
-- Pass the function the following: mean for group 1 (`mu1`), mean for group 2 (`mu2`), a single standard deviation for both groups (`sd_both`), a single number of observations in the groups (`nobs`).
-- Inside the function, create a `data.frame` with two columns: `y` and `x`.
-    - `x` is the group id (repeat 1 and 2 each for the number of observations).
-    - `y` is the outcome.
-- Draw random values for the number of observations from a normal distribution with the mean for each group and the shared the standard deviation.
-- Fit a linear model and then ANOVA using `anova(lm())` and assign this to an object named `aa`.
-- Look at the structure of `aa`. Try to figure out how to extract just the *F*-value from this object.
-    - Alternately, use `broom::tidy()` to convert the ANOVA table to a tibble.
-- Set up the function to return the *F*-value
+    - Pass the function the following: mean for group 1 (`mu1`), mean for group 2 (`mu2`), a single standard deviation for both groups (`sd_both`), a single number of observations in the groups (`nobs`).
+    - Inside the function, create a `data.frame` with two columns: `y` and `x`.
+        - `x` is the group id (repeat 1 and 2 each for the number of observations).
+        - `y` is the outcome.
+    - Draw random values for the number of observations from a normal distribution with the mean for each group and the shared the standard deviation.
+    - Fit a linear model and then ANOVA using `anova(lm())` and assign this to an object named `aa`.
+    - Look at the structure of `aa`. Try to figure out how to extract just the *F*-value from this object.
+        - Alternately, use `broom::tidy()` to convert the ANOVA table to a tibble.
+    - Set up the function to return the *F*-value
 
 Test out your function to see that it works.
 
