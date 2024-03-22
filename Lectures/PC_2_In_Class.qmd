@@ -28,9 +28,11 @@ theme_set(theme_cowplot())
 
 1. Data wrangling
 1. Plotting
-1. PS 7
+1. CIs - PS 7
 1. PS 8
+1. Functions
 1. Linear models
+
 
 
 ## Data wrangling
