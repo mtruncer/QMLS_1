@@ -1,0 +1,140 @@
+---
+title: "Progress Check 2 Review Session"
+author:
+  - Elizabeth King
+  - Kevin Middleton
+format:
+  revealjs:
+    theme: [default, custom.scss]
+    standalone: true
+    self-contained: true
+    logo: QMLS_Logo.png
+    slide-number: true
+    show-slide-number: all
+code-annotations: hover
+bibliography: QMLS_Bibliography.bib
+csl: evolution.csl
+---
+
+
+## Data wrangling
+
+> I am having trouble pivoting my data wider, I'm not sure what columns to keep/which columns to pivot.
+
+> Different variable types and when to use them (dbl vs factor vs numeric vs logical, etc.) and also when to know to change them if not prompted in the question.
+
+> Can you explain how to make something "base level"? Is this just re-ordering the variables (like we did in PS-08 ordering low, medium and high so it wasn't in alphabetical?)"
+
+> This may be a silly question but can you review what you mean when you ask us to make something like a "base level of a factor?"
+
+
+## Plotting
+
+> Another question I have is regarding the plot for the second hypothesis of the mouse data. I have everything else that I'm supposed to have on the plots except for the connections between the dots. When I try to add these with the group aesthetic, I only get vertical lines connecting the dots in the same variable. How can I fix this?"
+
+> How do you make a line dotted?
+
+> If you are creating a plot with three variables should you pair one group together?
+
+
+## Topics for Today
+
+1. PS 7
+1. PS 8
+
+
+## PS 7
+
+CIs
+
+
+## PS 8
+
+> I would like to go over functions and for loops more in depth. Specifically the for loop within the function for PS_08.
+
+> What is a "lower limit of the F statistic"?
+
+> Can we go over transformations and how they affect data and analysis again?
+
+> When we analyze data for a group which does not logically make sense, like in PS 08 the heart transplant survival data, what's the right way of analyzing it?
+
+
+## Linear models
+
+> I'm having trouble deciding what linear models are meant to be used when.
+
+> One question I have regarding the progress check pertains to choosing an appropriate linear model for the first hypothesis. We've gone over these in problem sets and lectures, but there are so many that it is a bit hard to keep their differences straight. Can we briefly go over some of these?
+
+
+## Linear models
+
+> I would like to review interpreting correlation in scatterplots. How many data points are necessary to trust a given correlation or discount outliers?
+
+> What are the key considerations that one would think can influence the selection of the number of variables to be simultaneously included in a multiple regression model.
+
+
+## Linear models
+
+> I am still not confident about predicting the diagnostic models, specifically homogeneity of variance
+
+> In what way categorical predictors differ from continuous predictors? Do categorical predictors have interaction with each other and affect the outcome just like in multiple regression with two or more continuous predictors with multicollinearity?
+
+
+## Models with 1 normally distributed outcome variable
+
+1. Continuous ~ $\ge$ 1 Continuous:  **OLS, correlation (Pearson r), multiple correlation (R)**
+1. Continuous ~ $\ge$ 1 Categorical: **ANOVA, *t*-test**
+1. Continuous ~ 1 Continuous + 1 Categorical: **ANCOVA**
+1. Continuous ~ $\ge$ 1 Continuous + $\ge$ 1 Categorical: **Multiple regression**
+
+
+## Parts of a linear model summary
+
+> Could we review how to read the summary results of a linear model? How do we interpret the p values, and what does that mean for significance?
+
+> I still don't get the concept of the intercept when it comes to the summary. I get that it is the y intercept in a y=mx + b graph, but what does that number mean? What does it tell me about a model?
+
+> I would like to review how to read and make conclusions from the summary tables of linear models. I have the overall test's p value down and the mean estimate when doing ANOVAs, but still get confused about the other variables and how to interpret them, especially when there are multiple factors.
+
+
+## Parts of a linear model summary
+
+![](https://i.imgur.com/P8034XE.jpg){fig-align="center" width=90%}
+
+
+## Parts of a linear model summary
+
+![](https://i.imgur.com/38J8BwL.jpg){fig-align="center" width=90%}
+
+
+## Parts of a linear model summary
+
+![](https://i.imgur.com/oIqWNJg.jpg){fig-align="center" width=90%}
+
+
+## Functions
+
+> Making functions and lists in a practical setting. Possibly making some step by step in class. I have a hard time reading the code for a loop and function so making them is even harder.
+
+> I would like to go over writing functions. I get the general idea of how they work but I've been struggling with the code and getting it to work. Also, Faye says hello from the AABAs!
+
+> Could y'all go over another example of how to use function()? I'm having a hard time understanding how to set it up from scratch, and when it would be appropriate to assign variables outside of the { }
+
+
+## Multicollinearity and Masking
+
+> I'm still a bit confused about the difference between multicollinearity and masking in models?
+
+
+## Mixed/Multilevel/Hierarchical Models
+
+> Are mixed models only used when comparing continuous variables with categorical ones? It's still a bit unclear to me as to when this is used. Is it every time these 2 kinds of variables are predictors?
+
+
+## Planned vs. post-hoc comparisons
+
+> I am not understanding when/how to choose whether or not to use a regular Tukey test or Planned set of comparisons. You mentioned in the lectures that doing Planned set of comparisons can sometimes lead to "p-hacking", so I am still not sure when it is or isn't okay to pick and choose a specific set of comparisons. 
+
+
+## Developing intuition about null models
+
