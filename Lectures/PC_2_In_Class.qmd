@@ -16,6 +16,22 @@ bibliography: QMLS_Bibliography.bib
 csl: evolution.csl
 ---
 
+## Topics for Today
+
+```{r}
+library(mvtnorm)
+library(tidyverse)
+library(cowplot)
+theme_set(theme_cowplot())
+
+```
+
+1. Data wrangling
+1. Plotting
+1. PS 7
+1. PS 8
+1. Linear models
+
 
 ## Data wrangling
 
@@ -35,12 +51,6 @@ csl: evolution.csl
 > How do you make a line dotted?
 
 > If you are creating a plot with three variables should you pair one group together?
-
-
-## Topics for Today
-
-1. PS 7
-1. PS 8
 
 
 ## PS 7
@@ -82,11 +92,12 @@ CIs
 
 ## Models with 1 normally distributed outcome variable
 
-1. Continuous ~ $\ge$ 1 Continuous:  **OLS, correlation (Pearson r), multiple correlation (R)**
+1. Continuous ~ $\ge$ 1 Continuous:  **OLS, correlation (Pearson r)**
 1. Continuous ~ $\ge$ 1 Categorical: **ANOVA, *t*-test**
 1. Continuous ~ 1 Continuous + 1 Categorical: **ANCOVA**
 1. Continuous ~ $\ge$ 1 Continuous + $\ge$ 1 Categorical: **Multiple regression**
 
+See lectures 06-1, 07-4, ...
 
 ## Parts of a linear model summary
 
@@ -116,7 +127,7 @@ CIs
 
 > Making functions and lists in a practical setting. Possibly making some step by step in class. I have a hard time reading the code for a loop and function so making them is even harder.
 
-> I would like to go over writing functions. I get the general idea of how they work but I've been struggling with the code and getting it to work. Also, Faye says hello from the AABAs!
+> I would like to go over writing functions. I get the general idea of how they work but I've been struggling with the code and getting it to work. 
 
 > Could y'all go over another example of how to use function()? I'm having a hard time understanding how to set it up from scratch, and when it would be appropriate to assign variables outside of the { }
 
@@ -124,6 +135,40 @@ CIs
 ## Multicollinearity and Masking
 
 > I'm still a bit confused about the difference between multicollinearity and masking in models?
+
+## Masking
+
+```{r}
+set.seed(32742)
+
+sigma <- matrix(c(1, -0.7, -0.7, 1), ncol = 2)
+
+DD <- rbind(rmvnorm(n = 30, mean = c(1, 1), sigma = sigma),
+        rmvnorm(n = 30, mean = c(3, 3), sigma = sigma),
+        rmvnorm(n = 30, mean = c(4, 4), sigma = sigma))
+
+MM <- tibble("OvaryMass"=DD[,1],
+             "MuscleMass" = DD[,2],
+             "Food" = rep(c("L","M","H"),each = 30))
+
+MM |>
+  ggplot(aes(OvaryMass, MuscleMass)) +
+  geom_point() +
+  geom_smooth(method = "lm", se=FALSE)
+
+```
+
+## Masking
+
+```{r}
+
+
+MM |>
+  ggplot(aes(OvaryMass, MuscleMass, color = Food)) +
+  geom_point() +
+  geom_smooth(method = "lm", se=FALSE)
+
+```
 
 
 ## Mixed/Multilevel/Hierarchical Models
