@@ -10,6 +10,18 @@ format:
     embed-resources: true
 ---
 
+## README
+
+- Use lme4 and lmer for mixed models. Don't worry about P values
+    - Or glmmTMB which seems to be the new way
+- gls() does not actually fit a mixed model, so don't use the squid example here. Maybe somewhere else.
+
+- Problem set
+    - Teach them to uniquely label everything that is really different
+
+- Sitka data for tree growth
+
+
 ```{r setup, message=FALSE, warning=FALSE}
 # FIXME
 library(tidyverse)
