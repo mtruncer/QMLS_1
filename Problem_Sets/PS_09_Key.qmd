@@ -12,6 +12,7 @@ format:
 
 ## README
 
+- Don't use sjPlot. See if there is a different package
 - Use lme4 and lmer for mixed models. Don't worry about P values
     - Or glmmTMB which seems to be the new way
 - gls() does not actually fit a mixed model, so don't use the squid example here. Maybe somewhere else.
@@ -22,7 +23,11 @@ format:
 - Sitka data for tree growth
 
 
-```{r setup, message=FALSE, warning=FALSE}
+```{r}
+#| label: setup
+#| message: false
+#| warning: false
+
 # FIXME
 library(tidyverse)
 library(readxl)
@@ -70,7 +75,7 @@ Is this a balanced factorial design?
 
 > Yes, all combinations of `Sex` and `Treatment` are present and all groups have n = 5.
 
-Create interaction plots of the calcium concentration data. Use the code from lecture as a template. Make two plots, one with `Treatment` on the x axis and one with `Sex` on the x axis. Use `plot_grid()` to place them side by side. 
+Create interaction plots of the calcium concentration data. Use the code from lecture as a template. Make two plots, one with `Treatment` on the x-axis and one with `Sex` on the-x axis. Use `plot_grid()` to place them side by side. 
 
 An additional thing to keep in mind is that `sjPlot`, which we use later in this problem set, also has a function `plot_grid()`. If you load `sjPlot` after you load `cowplot`, the `cowplot` version of `plot_grid()` will be masked and not directly accessible (and you will get an error if you use `cowplot` syntax). You make sure to use the `cowplot` version by calling the function with `cowplot::plot_grid()`. The syntax is `package::function()` to specifically use a function from a certain package.
 
@@ -233,7 +238,7 @@ Describe the results. Do they make sense biologically?
 
 ## Grass Species Richness
 
-At the Conard Environmental Research Area (Grinnell, IA), there are 20 experimental plots with 10 burned each fall and 10 left unburned. The following data are grass species richness data from 5 separate, haphazardly chosen, 10 meter^2^  plots within each of these 20 experimental plots. The hypothesis to be tested is that burning increases species richness.
+At the Conard Environmental Research Area (Grinnell, IA), there are 20 experimental plots with 10 burned each fall and 10 left as unburned controls. The following data are grass species richness data from 5 separate, randomly chosen, 10 meter^2^  plots within each of these 20 experimental plots. The hypothesis to be tested is that burning increases species richness.
 
 ```{r}
 # FIXME
