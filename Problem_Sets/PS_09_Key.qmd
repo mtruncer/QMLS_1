@@ -10,19 +10,6 @@ format:
     embed-resources: true
 ---
 
-## README
-
-- Don't use sjPlot. See if there is a different package
-- Use lme4 and lmer for mixed models. Don't worry about P values
-    - Or glmmTMB which seems to be the new way
-- gls() does not actually fit a mixed model, so don't use the squid example here. Maybe somewhere else.
-
-- Problem set
-    - Teach them to uniquely label everything that is really different
-
-- Sitka data for tree growth
-
-
 ```{r}
 #| label: setup
 #| message: false
@@ -33,7 +20,7 @@ library(tidyverse)
 library(readxl)
 library(cowplot)
 library(car)
-library(nlme)
+library(glmmTMB)
 library(knitr)
 library(sjPlot)
 library(multcomp)
@@ -49,7 +36,7 @@ theme_set(theme_cowplot())
 
 ## Calcium concentration in bird plasma
 
-The file `Bird_Plasma.xlsx` contains factorial data on blood plasma calcium concentration (`Calcium`, mg / 100 mL) in male and female birds (`Sex`) each of which was treated or not with a hormone (`Treatment`).
+The file `Bird_Plasma.xlsx` contains factorial data on blood plasma calcium concentration (`Calcium`, mg / 100 mL) in male and female birds (`Sex`) each of which was either treated or not treated with a hormone (`Treatment`).
 
 
 ### Activity
@@ -58,22 +45,22 @@ Load the Excel file, and convert hormone and sex to factors. The levels of `Trea
 
 ```{r, message = FALSE}
 # FIXME
-M <- read_excel("../data/Bird_Plasma.xlsx") |>
+BP <- read_excel("../data/Bird_Plasma.xlsx") |>
   mutate(Treatment = factor(Treatment),
-         Sex = factor(Sex),
-         Treatment = fct_relevel(Treatment, "None"))
+         Treatment = fct_relevel(Treatment, "None"),
+         Sex = factor(Sex))
 ```
 
-Use `group_by()` and `tally()` to determine the sample size in each of the groups.
+Use `count()` to determine the sample size in each of the `Treatment` and `Sex` groups.
 
 ```{r}
 # FIXME
-M |> group_by(Treatment, Sex) |> tally()
+BP |> count(Treatment, Sex)
 ```
 
 Is this a balanced factorial design?
 
-> Yes, all combinations of `Sex` and `Treatment` are present and all groups have n = 5.
+> Yes, all combinations of `Sex` and `Treatment` are present and all groups have n = 5 observations.
 
 Create interaction plots of the calcium concentration data. Use the code from lecture as a template. Make two plots, one with `Treatment` on the x-axis and one with `Sex` on the-x axis. Use `plot_grid()` to place them side by side. 
 
@@ -81,18 +68,18 @@ An additional thing to keep in mind is that `sjPlot`, which we use later in this
 
 ```{r}
 # FIXME
-p1  <- ggplot(M, aes(x = Sex,
-              y = Calcium,
-              color = Treatment,
-              group = Treatment)) +
+p1  <- ggplot(BP, aes(x = Sex,
+                      y = Calcium,
+                      color = Treatment,
+                      group = Treatment)) +
   geom_point(position = position_jitter(width = 0.1)) +
   stat_summary(fun = mean, geom = "point", pch = 5, size = 5) +
   stat_summary(fun = mean, geom = "line")
 
-p2 <- ggplot(M, aes(x = Treatment,
-              y = Calcium,
-              color = Sex,
-              group = Sex)) +
+p2 <- ggplot(BP, aes(x = Treatment,
+                     y = Calcium,
+                     color = Sex,
+                     group = Sex)) +
   geom_point(position = position_jitter(width = 0.1)) +
   stat_summary(fun = mean, geom = "point", pch = 5, size = 5) +
   stat_summary(fun = mean, geom = "line")
@@ -107,7 +94,7 @@ Fit a factorial linear model (both main effects and the interaction term) and sa
 
 ```{r}
 # FIXME
-fm <- lm(Calcium ~ Sex * Treatment, data = M)
+fm <- lm(Calcium ~ Sex * Treatment, data = BP)
 ```
 
 Using the `summary()` function, determine the R^2^ for the linear model.
@@ -159,7 +146,7 @@ Read in the data and convert both Treatment and Block into factors. It is especi
 
 ```{r, message = FALSE}
 # FIXME
-M <- read_csv("../data/Zooplankton.csv", col_types = "cdd") |>
+ZP <- read_csv("../data/Zooplankton.csv", col_types = "cdd") |>
   mutate(Treatment = factor(Treatment),
          Block = factor(Block))
 ```
@@ -168,7 +155,7 @@ Print the data to confirm that each treatment was present in each block.
 
 ```{r}
 # FIXME
-M
+ZP
 ```
 
 This is a very good experimental design, because a multilevel model will allow each block to have it's own intercept and assess the difference(s) among treatments as a deviation from the block mean.
@@ -179,12 +166,12 @@ Make two plots, one in which Treatment is on the x-axis and Block is encoded by 
 
 ```{r}
 # FIXME
-M |>
+ZP |>
   ggplot(aes(x = Treatment, y = Zooplankton, color = Block)) +
-  geom_point()
-M |>
+  geom_point(size = 5)
+ZP |>
   ggplot(aes(x = Block, y = Zooplankton, color = Treatment)) +
-  geom_point()
+  geom_point(size = 5)
 ```
 
 Notice how you learn different things about the data from each of these plots.
@@ -193,7 +180,8 @@ Summarize the mean and standard deviation of each group in a table.
 
 ```{r}
 # FIXME
-M |> 
+
+ZP |> 
   group_by(Treatment) |> 
   summarize(Mean = mean(Zooplankton),
             `Std. Dev.` = sd(Zooplankton),
@@ -206,20 +194,21 @@ We want to test for significant differences in Treatment while accounting for th
 
 ```{r}
 # FIXME
-fm_lme <- lme(Zooplankton ~ Treatment,
-              random = ~ 1 | Block, M)
+
+fm_multi <- glmmTMB(Zooplankton ~ Treatment + (1 | Block), data = ZP)
 ```
 
-Now use `anova()` to generate the ANOVA table for the model.
+Now use `car::Anova()` to generate the ANOVA table for the model. This is a balanced design, so Type I, II, and III sums of squares are all equal. Note that for this type of model, the default test uses a $\chi^2$ distribution (`Chisq`). The details are not important, and you can interpret the resulting *P*-value as you are accustomed to.
 
 ```{r}
 # FIXME
-anova(fm_lme)
+
+Anova(fm_multi)
 ```
 
 Is the overall ANOVA significant? You can determine this by examining the `Treatment` effect (since there is only one predictor).
 
-> Yes, the P-value for Treatment is 0.002.
+> Yes, the P-value for Treatment is very small.
 
 If the overall ANOVA is significant, all we know is that at least one mean is different from the others. Perform a Tukey's HSD post-hoc test on the pairwise combinations of all the levels of Treatment.
 
@@ -227,18 +216,19 @@ Refer to Lecture 08-2 for a reminder of how to code Tukey's HSD with the `multco
 
 ```{r}
 # FIXME
-tukey <- glht(fm_lme, linfct = mcp(Treatment = "Tukey"))
+
+tukey <- glht(fm_multi, linfct = mcp(Treatment = "Tukey"))
 summary(tukey)
 ```
 
 Describe the results. Do they make sense biologically?
 
-> Overall there is a significant effect of predator level (P = 0.002). The pairwise post-hoc test shows that both high (P < 0.001) and low (P = 0.001) treatments are significantly different than control, but that high and low are not significantly different from each other (P = 0.08). Strangely, both high and low predation levels are associated with lower levels of zooplankton.
+> Overall there is a significant effect of predator level (P << 0.0001). The pairwise post-hoc test shows that both high (P < 0.001) and low (P = 0.001) treatments are significantly different than control, but that high and low are only slightly different from each other (P = 0.044). Strangely, both high and low predation levels are associated with lower levels of zooplankton.
 
 
 ## Grass Species Richness
 
-At the Conard Environmental Research Area (Grinnell, IA), there are 20 experimental plots with 10 burned each fall and 10 left as unburned controls. The following data are grass species richness data from 5 separate, randomly chosen, 10 meter^2^  plots within each of these 20 experimental plots. The hypothesis to be tested is that burning increases species richness.
+At the Conard Environmental Research Area (Grinnell, IA), there are 20 experimental plots with 10 burned each fall and 10 left unburned. The following data are grass species richness data from 5 separate, randomly chosen, 10 meter^2^  plots within each of these 20 experimental plots. The hypothesis to be tested is that burning increases species richness.
 
 ```{r}
 # FIXME
@@ -249,72 +239,83 @@ for(ii in mms) {
   all.rich <- c(all.rich, as.integer(rnorm(5, ii, 1)))
 }
 
-rich.dat <- data.frame('plot' = as.factor(rep(seq(1, 20), each = 5)), 
+SR <- data.frame('plot' = as.factor(rep(seq(1, 20), each = 5)), 
                        'treatment' = rep(c('burned', 'unburned'), each = 50), 
                        'richness' = all.rich)
-write.table(rich.dat, file="../data/richness.txt",
+write.table(SR, file="../data/richness.txt",
             sep="\t", row.names = FALSE)
 ```
 
 ### Activity
 
-Load in the richness data (`richness.txt`), which is a tab-delimited text file (use `read_delim()` and look at the help to determine how to set the field delimiter to tab). Plot species richness vs. treatment. Include an appropriate amount of jitter and transparency and color points by plot. 
+Load in the richness data (`richness.txt`), which is a tab-delimited text file (use `read_delim()` and look at the help to determine how to set the field delimiter to tab).
+
+Then plot species richness vs. treatment. Include an appropriate amount of jitter and transparency and color points by `plot`. 
 
 ```{r}
-rich.dat <- read_delim("../data/richness.txt",
-                       col_types = "dcd",
-                       delim = "\t") |> 
+# FIXME
+
+SR <- read_delim("../data/richness.txt",
+                 col_types = "dcd",
+                 delim = "\t") |> 
   mutate(plot = factor(plot))
 
-ggplot(rich.dat, aes(x = treatment, y = richness, color = plot)) +
+ggplot(SR, aes(x = treatment, y = richness, color = plot)) +
   geom_point(position = position_jitter(0.1), alpha = 0.5) +
-    guides(colour = guide_legend(ncol = 2, byrow = FALSE))
+  guides(colour = guide_legend(ncol = 2, byrow = FALSE))
 ```
 
 Do you think there is a relationship between species richness and burning?
 
 > Probably not. It doesn't look like a strong relationship.
 
-First, fit a model predicting species richness from treatment without considering plot membership. 
+First, fit a linear model predicting species richness from treatment without considering plot membership. 
 
 ```{r}
-anova(lm(richness ~ treatment, data = rich.dat))
+# FIXME
+
+anova(lm(richness ~ treatment, data = SR))
 ```
 
 What can you conclude from the results of this model?
 
-> It is difficult to interpret without considering plot as there is pseudoreplication.
+> It is difficult to interpret without considering plot as there is pseudoreplication. At face value, treatment is significant.
 
 Now, calculate the mean species richness value for each plot. Fit a model predicting mean species richness from treatment. This is how you would approach this statistical problem if you did not want to use a multilevel model.
 
 ```{r}
-mean.plot <- rich.dat |>
+# FIXME
+
+plot_means <- SR |>
   group_by(plot, treatment) |>
   summarize(meanrich = mean(richness),
             .groups = "drop")
-anova(lm(meanrich ~ treatment, data = mean.plot))
+
+anova(lm(meanrich ~ treatment, data = plot_means))
 ```
 
 What can you conclude from this model?
 
 > There is no effect of treatment on species richness.
 
-Use the `lme()` function to fit a model predicting richness from treatment with plot as a random effect. 
+Use the `glmmTMB()` function to fit a multilevel model predicting richness from treatment with plot as a random effect. 
 
 ```{r}
-summary(lme(richness ~ treatment, random = ~1 | plot,
-            data = rich.dat))
+# FIXME
+
+summary(glmmTMB(richness ~ treatment + (1 | plot),
+                data = SR))
 ```
 
 Compare your results to the approach using the mean value. What can you conclude from this model? 
 
 > The results are consistent with the model using the mean values. This will not necesarily always happen.
 
-Why would you use `lme()` versus means per group?
+Why would you use a multilevel model for these data compared to a "regular" linear model with the means per group?
 
 > The multilevel model is preferred because it includes all the variation associated with replicate plots. By calculating and using only the means, all the plot-to-plot variation is ignored. Furthermore, there are many patterns of variation than can give the same mean values.
 
-These 20 plots exist in an alternating pattern going from south to north on either side of an access road. What other source of non-independence should you consider? How would you account for this factor?
+These 20 plots exist in an alternating pattern going from South to North on either side of an access road. What other source of non-independence should you consider? How would you account for this factor?
 
 > The spatial relationship between plots needs to be accounted for. You could include a continuous variable coding for position along the south to north axis and/or side of the road.
 
