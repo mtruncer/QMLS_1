@@ -223,7 +223,7 @@ summary(tukey)
 
 Describe the results. Do they make sense biologically?
 
-> Overall there is a significant effect of predator level (P << 0.0001). The pairwise post-hoc test shows that both high (P < 0.001) and low (P = 0.001) treatments are significantly different than control, but that high and low are only slightly different from each other (P = 0.044). Strangely, both high and low predation levels are associated with lower levels of zooplankton.
+> Overall there is a significant effect of predator level (P < 0.001). The pairwise post-hoc test shows that both high (P < 0.001) and low (P < 0.001) treatments are significantly different than control, but that high and low are only slightly different from each other (P = 0.044). Strangely, both high and low predation levels are associated with lower levels of zooplankton.
 
 
 ## Grass Species Richness
