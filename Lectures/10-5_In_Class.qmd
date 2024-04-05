@@ -29,6 +29,8 @@ library(lme4)
 theme_set(theme_cowplot())
 ```
 
+Do mixed model example where we show benefit of comparing within groups
+
 ## Fixed vs. Random
 
 ```{r}
