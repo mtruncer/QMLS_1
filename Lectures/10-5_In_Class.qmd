@@ -1,0 +1,140 @@
+---
+title: "Unit 10: In Class Discussion"
+author:
+  - Elizabeth King
+  - Kevin Middleton
+format:
+  revealjs:
+    theme: [default, custom.scss]
+    standalone: true
+    self-contained: true
+    logo: QMLS_Logo.png
+    slide-number: true
+    show-slide-number: all
+code-annotations: hover
+bibliography: QMLS_Bibliography.bib
+csl: evolution.csl
+---
+
+```{r setup, echo=FALSE, message=FALSE, warning=FALSE}
+#| label: setup
+#| message: false
+#| warning: false
+
+library(tidyverse)
+library(cowplot)
+library(wesanderson)
+library(lme4)
+
+theme_set(theme_cowplot())
+```
+
+## Fixed vs. Random
+
+```{r}
+library(glmmTMB)
+library(gt)
+
+set.seed(123)  # Set seed for reproducibility
+
+# Number of samples per group
+num_samples_per_group <- 4
+
+# Number of replicate measurements per group
+num_replicates_per_sample <- 3
+
+# Generate data for Group 1
+group1 <- matrix(rnorm(num_samples_per_group * num_replicates_per_sample,
+                       mean = 10, sd = 1.5),
+                 nrow = num_samples_per_group,
+                 ncol = num_replicates_per_sample) |> 
+  as.data.frame() |> 
+  rename(Rep1 = V1, Rep2 = V2, Rep3 = V3) |> 
+  mutate(Sample = paste0("S", 1:4),
+         Group = "Control")
+
+# Generate data for Group 2
+group2 <- matrix(rnorm(num_samples_per_group * num_replicates_per_sample,
+                       mean = 22, sd = 4),
+                 nrow = num_samples_per_group,
+                 ncol = num_replicates_per_sample) |> 
+  as.data.frame() |> 
+  rename(Rep1 = V1, Rep2 = V2, Rep3 = V3) |> 
+  mutate(Sample = paste0("S", 5:8),
+         Group = "Treatment")
+
+# Combine the data for both groups
+all_data <- bind_rows(group1, group2) |> 
+  relocate(Sample) |> 
+  relocate(Group)
+
+all_data_long <- all_data |> 
+  pivot_longer(cols = -c(Sample, Group),
+               names_to = "Replicate", values_to = "Absorbance")
+
+ggplot(all_data_long,
+       aes(x = Group, y = Absorbance, group = Sample)) +
+  geom_point(position = position_dodge(width = 0.75),
+             size = 4) +
+  theme(axis.title.x = element_blank(),
+        legend.position = "none")
+```
+
+
+## Model 1
+
+```{r}
+fm <- lm(Absorbance ~ Group,
+         data = all_data_long)
+summary(fm)
+```
+
+$\sigma = 2.962$
+
+
+## Model 2
+
+```{r}
+#| echo: true
+
+fm2 <- glmmTMB(Absorbance ~ Group + (1 | Sample),
+              data = all_data_long)
+summary(fm2)
+```
+
+
+## Group means
+
+```{r}
+all_data_long |> 
+  group_by(Sample) |> 
+  summarize(Sample_Mean = mean(Absorbance))
+```
+
+
+## Deviations
+
+```{r}
+all_data_long |> 
+  group_by(Sample) |> 
+  group_map(.f = function(.x, ..) {
+    .x$Absorbance - mean(.x$Absorbance)
+  })
+```
+
+
+## Model 3
+
+```{r}
+#| echo: true
+
+library(rstanarm)
+fm3 <- stan_lmer(Absorbance ~ Group + (1 | Sample),
+                 data = all_data_long,
+                 refresh = 0)
+summary(fm3, digits = 4)
+```
+
+
+
+
