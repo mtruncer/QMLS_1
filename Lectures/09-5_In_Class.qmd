@@ -30,12 +30,24 @@ theme_set(theme_cowplot())
 ```
 
 
-## $R^2$ and $P$
+## General questions
 
-> What is the relationship between the p-value and R squared? Say the p-value is really small, but so is the R-squared value, what does that mean? Also, is there a typical way that sample size effect the R-squared value (i.e., does larger sample size tend to make smaller R-squared values)?
+- PS 2: next week
 
 
-## Example Questions
+## Quiz 9-1 {.smaller}
+
+- Regarding the process of determining important estimates from the interaction plots, could you assist me in reaching these conclusions, are there any particular patterns or trends that I should be searching for in the graphs?"
+- You discussed interaction plots and the "power to detect interactions" and showed the power to detect main effect and interaction. I'm a bit confused on the power to detect, the significance, and how to find it.
+- You mentioned that the main effects are not interpretable without clarification of an ANOVA table and, further, that the power to detect interactions is relatively low.  How exactly does ANOVA help make this interpretable?
+
+
+## Quiz 9-3
+
+- There was a low R^2^ value which indicates low correlation, but a low P value which indicates a statistically significant model.  How is it that we can have a low P value and still not be confident in either variable as a good predictor of our estimated value?  How can the overall model be statistically significant if only a small percentage of variability can be explained by the variables input in the formula?
+
+
+## R^2^, *P*-values, and effect size {.smaller}
 
 *Arabidopsis* growth
 
@@ -43,104 +55,46 @@ We measured above ground biomass of plants after six weeks of growth in each of 
 
 *Drosophila* larval density
 
-You perform a multiple regression predicting wing area in Drosophila melanogaster using larval density and temperature. You have a very large data set (n = >1,000 observations). The R2 value for the regression is 0.02, and the overall P value for the linear model is 0.0003.
+You perform a multiple regression predicting wing area in *Drosophila melanogaster* using larval density and temperature. You have a very large data set (n = >1,000 observations). The R^2^ value for the regression is 0.02, and the overall *P*-value for the linear model is 0.0003.
 
 
-## Review Quiz 09-2
+## `anova()` vs. `Anova()`
+
+- In lecture 9-3, you mentioned that there is `Anova` and `anova.` How are they different from one another, and in what cases would we want to use each one in?
+- How do we determine which anova analysis we should use for a certain purpose?
 
 
-## Means and Intercepts
+## Balanced experimental design {.smaller}
 
-> I was getting confused in the lecture videos where when we allow for a random intercept effect it was stated that "we're allowing for each group to have a different mean, or intercept".  Maybe this is just a wording issue for me, but does that mean that we allow the groups to have different means and different intercepts, and in the graphs we see the effect on different intercepts more quickly?  The mean and the intercept are not the *same* values for each group though, correct?  But in building a model that allows for random intercept, it inherently is accompanied by the allowance of different means for each group?
-
-
-## Intercepts as group means
-
-```{r}
-M <- read_csv("../data/Molerats.csv", col_types = c("cdd")) %>% 
-  rename(Caste = caste,
-         Mass = ln.mass,
-         Energy = ln.energy) %>% 
-  mutate(Caste = if_else(Caste == "worker", "Worker", "Non-worker") %>% 
-           factor())
-```
+- In the case of technical replicates, what should you do if one of the technical replicates is an outlier (either by experimenter error or equipment error)? Remove it and have unbalanced sample replicates? Or leave it in? I am struggling to figure out which would be the better route to go. (I come across this issue in my own research, which is why I am curious).
+- I also had this question when looking at the cranial growth rates example during the lecture. I assume the answer for fixing it or leaving it would be situational, but I was also curious what is recommended when the outliers are heavily influencing the results of the model.
 
 
-## ANOVA
+## Multilevel/Hierarchical/Mixed models
 
-```{r}
-fm <- lm(Energy ~ Caste - 1, data = M)
-```
-
-```{r echo=FALSE}
-M <- M %>% mutate(pred2 = predict(fm))
-ggplot(M, aes(x = Mass, y = Energy, color = Caste)) +
-  geom_point(size = 4) +
-  geom_line(aes(x = Mass, y = pred2, color = Caste), lwd = 2) +
-  scale_color_manual(values = wes_palette("Cavalcanti1")) +
-  theme(legend.justification = c(0, 1), legend.position = c(0.05, 0.95)) +
-  labs(x = "ln Body Mass (g)", y = "ln Daily Energy Expenditure (kJ)")
-```
+- In section 09-04, there are different options for multilevel models like `nlme`, `lme4`, `glmmTMB`. How do I decide which model is correct for my analysis?
+- Lecture 09-04: What did you mean by "random" slopes and intercepts in the visualization example?
+- How does the use of blocking and nesting in experimental design affect the validity and efficiency of statistical analyses, particularly in the context of complex experimental setups or hierarchical data structures?
 
 
-## Intercepts as group means
+## Multilevel/Hierarchical/Mixed models
 
-```{r}
-coef(fm)
-
-M %>% 
-  group_by(Caste) %>% 
-  summarize(`Mean Energy Expenditure` = mean(Energy),
-            .groups = "drop")
-```
+- How does sample size impact interaction effect and multilevel models? Are there any corrective tests that can be used to address a small sample size and make a model fit better?
+- I have seen models that will include the same variable as both a fixed and random effect. I'm wondering if/when this is appropriate.
+- Could you explain the multilevel formula syntax 1 more time? I did not understand what to use in place of effect expression and groups. 
 
 
-## Thinking about coefficients
+## Multilevel/Hierarchical/Mixed models
 
-1. Categorical predictors
-    - Group means or offsets from the `(Intercept)`
-2. Continuous predictors
-    - slopes measuring the change in the outcome resulting from a  unit increase in the predictor.
-
-
-## ANCOVA, intercepts varying
-
-```{r}
-fm4 <- lm(Energy ~ Mass + Caste, data = M)
-```
-
-```{r echo=FALSE}
-M <- M %>% mutate(pred4 = predict(fm4))
-ggplot(M, aes(x = Mass, y = Energy, color = Caste)) +
-  geom_point(size = 4) +
-  geom_line(aes(x = Mass, y = pred4, color = Caste), lwd = 2) +
-  scale_color_manual(values = wes_palette("Cavalcanti1")) +
-  theme(legend.justification = c(0, 1), legend.position = c(0.05, 0.95)) +
-  labs(x = "ln Body Mass (g)", y = "ln Daily Energy Expenditure (kJ)")
-```
-
-
-## ANCOVA, intercepts varying
-
-```
-Coefficients:
-            Estimate Std. Error t value Pr(>|t|)
-(Intercept) -0.09687    0.94230  -0.103   0.9188
-Mass         0.89282    0.19303   4.625 5.89e-05
-CasteWorker  0.39334    0.14611   2.692   0.0112
-```
-
-- `(Intercept)`: Intercept for non-workers
-- `Mass`: Slope for both groups
-- `CasteWorker`: *Offset* for the Worker group (difference in intercepts)
+- In slides 17 & 18 of lecture 9-4, you say that the multilevel model formula is two functions separated by a "|". In slide 18 you set one of those functions equal to 1 and say it is to account for the random effect of the technical replicate, and then you say that it is referring to the intercept for the samples. So in this case, we are just forcing that intercept to 1, and that's how we take a rough average of the technical samples? Why don't we take a true average? What would be a scenario where that function would be `x` or `x+1`?
 
 
 ## Visualization of Hierarchical Modeling
 
-http://mfviz.com/hierarchical-models/
+[http://mfviz.com/hierarchical-models/](http://mfviz.com/hierarchical-models/)
 
 
-## Generate data
+## Data
 
 ```{r}
 set.seed(543675)
@@ -154,30 +108,30 @@ total.faculty <- faculty.per.dept * length(departments)
 ids <- 1:total.faculty
 department <- rep(departments, faculty.per.dept)
 experience <- floor(runif(total.faculty, 0, 10))
-bases <- rep(base.salaries, faculty.per.dept) * runif(total.faculty, .9, 1.1) # noise
-raises <- rep(annual.raises, faculty.per.dept) * runif(total.faculty, .9, 1.1) # noise
+bases <- rep(base.salaries, faculty.per.dept) * 
+  runif(total.faculty, 0.9, 1.1) # noise
+raises <- rep(annual.raises, faculty.per.dept) * 
+  runif(total.faculty, 0.9, 1.1) # noise
 df <- data.frame(ids, department, bases, experience, raises)
 
 # Generate salaries (base + experience * raise)
-df <- df %>% mutate(
+df <- df |> mutate(
     salary = bases + experience * raises)
-```
 
-
-## Plotting
-
-```{r, echo=FALSE}
 p <- ggplot(df, aes(x = experience, y = salary, color = department)) +
-  geom_point()
+  geom_point(size = 3)
 p
 ```
 
 
-## No grouping
+## `Salary ~ 1 + Exp`
 
-`salary ~ 1 + experience`
+- No difference in starting salary by department
+- No difference in rate of change between departments
 
-```{r, echo=FALSE}
+```{r}
+#| fig-align: center
+
 fm1 <- lm(salary ~ 1 + experience, data = df)
 
 preds <- crossing(department = unique(df$department),
@@ -187,15 +141,19 @@ preds <- preds |>
 
 p +
   geom_line(data = preds, aes(x = experience, y = fm1), color = "firebrick4",
-            linewidth = 1)
+            linewidth = 1.5)
 ```
 
 
-## Group by department
+## `Salary ~ 1 + Exp + Dept`
 
-`salary ~ 1 + experience + department`
+- Different starting salary by department
+- No difference in rate of change between departments
 
-```{r, echo=FALSE}
+
+```{r}
+#| fig-align: center
+
 fm2 <- lm(salary ~ 1 + experience + department, data = df)
 
 preds <- preds |> 
@@ -203,42 +161,59 @@ preds <- preds |>
 
 p +
   geom_line(data = preds, aes(x = experience, y = fm2, color = department),
-            linewidth = 1) +
+            linewidth = 1.5) +
   geom_line(data = preds, aes(x = experience, y = fm1), color = "firebrick4",
-            linewidth = 1)
+            linewidth = 1.5)
 ```
 
 
-## Group by department, partial pooling
+## `Salary ~ 1 + Exp + (1 | Dept)`
 
-`salary ~ 1 + experience + (1 | department)`
+- Different starting salary by department *also using information from other departments*
+- No difference in rate of change between departments
 
-```{r, echo=FALSE}
+```{r}
 fm3 <- lmer(salary ~ 1 + experience + (1 | department), data = df)
 
 preds <- preds |> 
   mutate(fm3 = predict(fm3, newdata = preds))
+```
+
+
+## `Salary ~ 1 + Exp + (1 | Dept)`
+
+```{r}
+#| fig-align: center
 
 p +
   geom_line(data = preds, aes(x = experience, y = fm3, color = department),
-            linewidth = 1) +
+            linewidth = 2, linetype = "dotted") +
+  geom_line(data = preds, aes(x = experience, y = fm2, color = department),
+            linewidth = 1, alpha = 0.5) +
   geom_line(data = preds, aes(x = experience, y = fm1), color = "firebrick4",
-            linewidth = 1)
+            linewidth = 1.5)
 ```
 
 
 ## Predictions
 
-```{r, echo=FALSE}
-preds |> knitr::kable()
+```{r}
+preds |> filter(department %in% c("sociology", "statistics")) |> knitr::kable()
 ```
 
 
-## Slope by department
+## `Salary ~ 1 + Exp * Dept`
 
-`salary ~ 1 + experience * department`
+- Back to `lm()`
+- Different starting salary by department
+- Different rate of change between departments
 
-```{r, echo=FALSE}
+
+## `Salary ~ 1 + Exp * Dept`
+
+```{r}
+#| fig-align: center
+
 fm4 <- lm(salary ~ 1 + experience * department, data = df)
 
 preds <- preds |> 
@@ -246,15 +221,21 @@ preds <- preds |>
 
 p +
   geom_line(data = preds, aes(x = experience, y = fm4, color = department),
-            linewidth = 1)
+            linewidth = 1.5)
 ```
 
 
-## Slope by department, partial pooling
+## `Salary ~ 1 + Exp + (1 + Exp | Dept)`
 
-`salary ~ 1 + experience + (1 + experience | department)`
+- Different starting salary by department *also using information from other departments*
+- Different rate of change between departments *also using information from other departments*
 
-```{r, echo=FALSE}
+
+## `Salary ~ 1 + Exp + (1 + Exp | Dept)`
+
+```{r}
+#| fig-align: center
+
 fm5 <- lmer(salary ~ 1 + experience + (1 + experience | department), data = df)
 
 preds <- preds |> 
@@ -262,11 +243,11 @@ preds <- preds |>
 
 p +
   geom_line(data = preds, aes(x = experience, y = fm5, color = department),
-            linewidth = 1) +
+            linewidth = 1, alpha = 0.5) +
   geom_line(data = preds, aes(x = experience, y = fm4, color = department),
-            linewidth = 1, linetype = "dashed") +
+            linewidth = 2, linetype = "dashed") +
   geom_line(data = preds, aes(x = experience, y = fm1), color = "firebrick4",
-            linewidth = 1)
+            linewidth = 1.5)
 ```
 
 
