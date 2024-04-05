@@ -29,6 +29,11 @@ library(lme4)
 theme_set(theme_cowplot())
 ```
 
+## Upcoming Events
+
+- Course Evaluations
+- Last Review Session
+  - Change time?
 
 ## General questions
 
