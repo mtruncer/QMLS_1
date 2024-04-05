@@ -1,0 +1,215 @@
+---
+title: 'Problem Set 09'
+author: "Your Name Here: Group X"
+date: 'Last updated: `r Sys.Date()`'
+format:
+  html:
+    toc: true
+    number-depth: 3
+    toc-location: left
+    embed-resources: true
+---
+
+```{r}
+#| label: setup
+#| message: false
+#| warning: false
+
+# Required datasets:
+#   - Bird_Plasma.xlsx
+#   - Zooplankton.csv
+#   - richness.txt
+```
+
+
+## Calcium concentration in bird plasma
+
+The file `Bird_Plasma.xlsx` contains factorial data on blood plasma calcium concentration (`Calcium`, mg / 100 mL) in male and female birds (`Sex`) each of which was either treated or not treated with a hormone (`Treatment`).
+
+
+### Activity
+
+Load the Excel file, and convert hormone and sex to factors. The levels of `Treatment` are "Hormone" and "None". Because "Hormone" is first alphabetically, it becomes the base level of the factor. Use `fct_relevel` from the `forcats` package to make "None" the base level.
+
+```{r}
+```
+
+Use `count()` to determine the sample size in each of the `Treatment` and `Sex` groups.
+
+```{r}
+```
+
+Is this a balanced factorial design?
+
+> 
+
+Create interaction plots of the calcium concentration data. Use the code from lecture as a template. Make two plots, one with `Treatment` on the x-axis and one with `Sex` on the-x axis. Use `plot_grid()` to place them side by side. 
+
+An additional thing to keep in mind is that `sjPlot`, which we use later in this problem set, also has a function `plot_grid()`. If you load `sjPlot` after you load `cowplot`, the `cowplot` version of `plot_grid()` will be masked and not directly accessible (and you will get an error if you use `cowplot` syntax). You make sure to use the `cowplot` version by calling the function with `cowplot::plot_grid()`. The syntax is `package::function()` to specifically use a function from a certain package.
+
+```{r}
+
+```
+
+What do you learn from these plots?
+
+> 
+
+Fit a factorial linear model (both main effects and the interaction term) and save the result to an R object.
+
+```{r}
+
+```
+
+Using the `summary()` function, determine the R^2^ for the linear model.
+
+```{r}
+
+```
+
+How much of the variance in calcium level can be explained by the predictors?
+
+> 
+
+Using the `Anova()` function in the `car` package, calculate an ANOVA table with type III sums of squares. You might have to install `car` first.
+
+```{r}
+
+```
+
+The package [`sjPlot`](https://strengejacke.github.io/sjPlot/index.html) has lots of useful functions for making tables and plotting regression results. You will probably need to install this package before you use it.
+
+Spend a few minutes looking at the documentation/examples online. An alternative is the [gtsummary](http://www.danieldsjoberg.com/gtsummary/) package.
+
+Use the `tab_model()` function from `sjPlot` to crate a publication-style ANOVA table for the model. Be sure to pass the original model fit object (from `lm()`,) rather than the `Anova()` object. 
+
+There are a lot of options for this function. Start with the defaults and change it as you see fit. Include whatever regression information you want.
+
+```{r}
+
+```
+
+
+Describe the results of the analysis, writing a brief paragraph describing the goal of the analysis, what analysis was carried out, and the results. This is similar to how you would write part of an abstract.
+
+> 
+
+## Effect of predation on zooplankton
+
+The file `Zooplankton.csv` contains data on the concentration of zooplankton in three predator treatment groups (control, low, and high levels of predators in an enclosure). Each of the three treatments were measured in five replicate blocks.
+
+### Activity
+
+Read in the data and convert both Treatment and Block into factors. It is especially important to make sure that Block is a factor, because Blocks are coded 1-5. We need to make sure that R converts them to a model matrix (0's and 1's) rather than using them as numeric 1 to 5, because the numbering is arbitrary ("exchangeable" in statistical terminology).
+
+```{r}
+```
+
+Print the data to confirm that each treatment was present in each block.
+
+```{r}
+```
+
+This is a very good experimental design, because a multilevel model will allow each block to have it's own intercept and assess the difference(s) among treatments as a deviation from the block mean.
+
+An alternative experimental design would be if the researcher had used 15 different plots and randomly assigned them to one of the three treatments. This would also work, but the multilevel "block" model is more powerful.
+
+Make two plots, one in which Treatment is on the x-axis and Block is encoded by color, and the second in which Block is on the x-axis and Treatment is encoded by color.
+
+```{r}
+```
+
+Notice how you learn different things about the data from each of these plots.
+
+Summarize the mean and standard deviation of each group in a table.
+
+```{r}
+```
+
+We want to test for significant differences in Treatment while accounting for the replicated blocks. We will fit this model using the `lme()` function from the `nlme` package with `Block` as a random effect.
+
+
+```{r}
+```
+
+Now use `car::Anova()` to generate the ANOVA table for the model. This is a balanced design, so Type I, II, and III sums of squares are all equal. Note that for this type of model, the default test uses a $\chi^2$ distribution (`Chisq`). The details are not important, and you can interpret the resulting *P*-value as you are accustomed to.
+
+```{r}
+```
+
+Is the overall ANOVA significant? You can determine this by examining the `Treatment` effect (since there is only one predictor).
+
+> 
+
+If the overall ANOVA is significant, all we know is that at least one mean is different from the others. Perform a Tukey's HSD post-hoc test on the pairwise combinations of all the levels of Treatment.
+
+Refer to Lecture 08-2 for a reminder of how to code Tukey's HSD with the `multcomp` package.
+
+```{r}
+```
+
+Describe the results. Do they make sense biologically?
+
+> 
+
+
+## Grass Species Richness
+
+At the Conard Environmental Research Area (Grinnell, IA), there are 20 experimental plots with 10 burned each fall and 10 left unburned. The following data are grass species richness data from 5 separate, randomly chosen, 10 meter^2^  plots within each of these 20 experimental plots. The hypothesis to be tested is that burning increases species richness.
+
+```{r}
+
+```
+
+### Activity
+
+Load in the richness data (`richness.txt`), which is a tab-delimited text file (use `read_delim()` and look at the help to determine how to set the field delimiter to tab).
+
+Then plot species richness vs. treatment. Include an appropriate amount of jitter and transparency and color points by `plot`. 
+
+```{r}
+
+```
+
+Do you think there is a relationship between species richness and burning?
+
+> 
+
+First, fit a linear model predicting species richness from treatment without considering plot membership. 
+
+```{r}
+
+```
+
+What can you conclude from the results of this model?
+
+> 
+
+Now, calculate the mean species richness value for each plot. Fit a model predicting mean species richness from treatment. This is how you would approach this statistical problem if you did not want to use a multilevel model.
+
+```{r}
+
+```
+
+What can you conclude from this model?
+
+> 
+
+Use the `glmmTMB()` function to fit a multilevel model predicting richness from treatment with plot as a random effect. 
+
+```{r}
+
+```
+
+Compare your results to the approach using the mean value. What can you conclude from this model? 
+
+> 
+
+Why would you use a multilevel model for these data compared to a "regular" linear model with the means per group?
+
+> 
+
+These 20 plots exist in an alternating pattern going from South to North on either side of an access road. What other source of non-independence should you consider? How would you account for this factor?
+
+> 
+
