@@ -196,6 +196,10 @@ We want to test for significant differences in Treatment while accounting for th
 # FIXME
 
 fm_multi <- glmmTMB(Zooplankton ~ Treatment + (1 | Block), data = ZP)
+
+# Alternately:
+# fm_multi <- lme4::lmer(Zooplankton ~ Treatment + (1 | Block), data = ZP)
+
 ```
 
 Now use `car::Anova()` to generate the ANOVA table for the model. This is a balanced design, so Type I, II, and III sums of squares are all equal. Note that for this type of model, the default test uses a $\chi^2$ distribution (`Chisq`). The details are not important, and you can interpret the resulting *P*-value as you are accustomed to.
