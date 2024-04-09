@@ -189,7 +189,8 @@ ZP |>
   knitr::kable(digits = c(2, 2))
 ```
 
-We want to test for significant differences in Treatment while accounting for the replicated blocks. We will fit this model using the `lme()` function from the `nlme` package with `Block` as a random effect.
+We want to test for significant differences in Treatment while accounting for the replicated blocks. We will fit this model using the `glmmTMB()` function from the `glmmTMB` package with `Block` as a random effect.
+
 
 
 ```{r}
