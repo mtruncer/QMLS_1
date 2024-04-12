@@ -16,7 +16,7 @@ bibliography: QMLS_Bibliography.bib
 csl: evolution.csl
 ---
 
-```{r setup, echo=FALSE, message=FALSE, warning=FALSE}
+```{r}
 #| label: setup
 #| message: false
 #| warning: false
@@ -29,7 +29,12 @@ library(lme4)
 theme_set(theme_cowplot())
 ```
 
-## Zooplankton Example
+## PC-2
+
+- Simulation
+
+
+## What do multilevel models do?
 
 ```{r}
 ZP <- read_csv("../data/Zooplankton.csv", col_types = "cdd") |>
@@ -42,5 +47,95 @@ ZP |>
 
 ```
 
+## What do multilevel models do?
 
+$$Zooplankton~\sim~Treatment + (1 | Block)$$
+
+vs.
+
+$$Zooplankton~\sim~Treatment + Block$$
+
+
+## Why does lmer() not give P-values?
+
+- In the last section of PS-09, when I used the lme4::lmer function to get my results for the multilevel model, the output looked a bit different from the example in lecture. If we want to extract p-values from this output, would we take the t-values provided and treat those like t-scores, with the DF being 99 in this case?
+
+
+## Likelihood Ratio Tests
+
+- I know that we were given a general approach of comparing likelihoods in lecture, but could we possibly go over that a little more? Specifically, looking at the data and chi squared and determining what's "best". 
+- Is there a reason for why adding the noise kept "improving" the models like with the AIC Table?  Is there a way to work backwards to identify that a given model was artificially inflated by totally unrelated data?
+
+Lecture 10-2
+
+
+## AIC
+
+- When evaluating models via AIC the lecture covers both delta_AIC and AIC weights. Are there possible pitfalls in relying on weights alone for model selection?
+- I am confused on how the weighted AICc value compares to the delta_AIC.
+
+
+## AIC
+
+```
+Model selection based on AICc:
+
+    K   AICc Delta_AICc AICcWt Cum.Wt     LL
+fm2 4 100.21       0.00   0.91   0.91 -43.88
+fm3 5 105.21       5.01   0.07   0.99 -43.86
+fm0 2 110.25      10.04   0.01   0.99 -52.58
+fm4 6 110.82      10.61   0.00   1.00 -43.41
+fm1 3 113.30      13.09   0.00   1.00 -52.45
+fm5 7 119.48      19.27   0.00   1.00 -43.40
+```
+
+
+## AIC
+
+- When looking at model summaries for multilevel models, I usually get a "BIC" value in addition to the AIC value. Are these two numbers representing the same thing, and if not what is BIC used for?
+
+
+## AIC vs. BIC
+
+$$\mbox{AIC} = -2 \log\left(\mathcal{L}[\theta | \mbox{data}]\right) + 2 k$$
+
+Bayesian Information Criterion (Schwarz Information Criterion)
+
+$$\mbox{BIC} = -2 \log\left(\mathcal{L}[\theta | \mbox{data}]\right) + \log(n)~k$$
+
+```{r}
+#| echo: true
+log(7)
+log(8)
+```
+
+
+## Cross-validation
+
+- I have always struggled to understand the "point" of k-fold cross-validation.  Logically, I understand the splitting the data into training and testing groups with the purpose of quantifying error.  Aren't we just predicting what the MSE for each model would be and how would that tell us anything different from the other methods which use less code?  
+- Quiz 10-4
+
+
+## Model Comparison
+
+- When you compare models, how do you know that you HAVE to compare models? If that makes sense... 
+- When comparing models, is it worth the time to use more than one of the methods? Or is it usually suitable to just use one?
+- Are there any criteria for using one model comparison to another? I mean when to choose likelihood test ratios vs AIC vs CV.
+
+
+## Model Comparison
+
+- I understand that having less error is better in terms of a mean squared value, however, is there like a set of parameters that describes what values are more supported, or is it just based on a set of models and choosing the one that has the lesser mean squared value? 
+- When we use AIC and get LL values very close in case of two best models, does that mean we could potentially use both the models? 
+
+
+## Underfitting and Overfitting
+
+- What is the major cause of overfitting of a model?  The use of too many predictors or the use of predictors that may not have so much to contribute towards the model?
+- Can you go over the concept of overfitting and model complexity and its implications for predictive accuracy.
+
+
+## What is Machine Learning?
+
+In slide 9 of 10-3 you mention that this is not machine learning since we are not looking at millions of predictors. I still don't exactly understand what machine learning is so my question might not make sense, but I have been told a lot of machine learning is based on linear models, and some of the language used this week (i.e., test set, training set) are things I associate with machine learning. So my question is, are the topics we cover this week essentially the basis of machine learning, just performed on a small scale?
 
