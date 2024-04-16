@@ -51,7 +51,7 @@ ZP |>
 
 $$Zooplankton~\sim~Treatment + (1 | Block)$$
 
-vs.
+Why not?
 
 $$Zooplankton~\sim~Treatment + Block$$
 
