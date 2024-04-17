@@ -10,7 +10,11 @@ format:
     embed-resources: true
 ---
 
-```{r setup, message=FALSE, warning=FALSE}
+```{r}
+#| label: setup
+#| message: false
+#| warning: false
+
 # FIXME
 library(tidyverse)
 library(readxl)
@@ -24,6 +28,10 @@ library(nlme)
 library(cvTools)
 
 theme_set(theme_cowplot())
+
+# Data
+#   - Streams.xlsx
+#   - NeandertalBrainSize.csv
 ```
 
 
@@ -96,7 +104,7 @@ The correlation should be pretty high (*r* = 0.95). So this means that we can sa
 
 Let's plot: make a line plot with day on the x-axis and predicted air temp on the-y axis. Then facet by `Stream_Name`.
 
-One more thing we need to add to `aes()` is `group = Site`. This code will tell ggplot to treat each `Site` separately when plotting lines. If your plot has a bunch of jagged vertical lines, you haven't set the group correctly. The plot should look something like this: https://imgur.com/J0lD2cp.png
+One more thing we need to add to `aes()` is `group = Site`. This code will tell ggplot to treat each `Site` separately when plotting lines. If your plot has a bunch of jagged vertical lines, you haven't set the group correctly. [The plot should look something like this](https://imgur.com/J0lD2cp.png).
 
 Once you get your plot working, make the same plot for water temperature (copy the code and change the y variable).
 
@@ -126,7 +134,13 @@ We have an added wrinkle with these data that we have not yet encountered: nesti
 1. Fit a multilevel model where the intercept for site nested in stream is random (`~ 1 | ...`). This model allows each `Site` to have it's own intercept, which is nested within `Stream_Name`. But this value does not change over time.
 2. Fit a multilevel model where the intercept for site nested in stream is random and day is also included as a continuous random predictor (`~ Day | ...`).
 
-Use `lme()` and be sure to include the option `method = "ML"` to use maximum likelihood instead of the default of restricted maximum likelihood^[We need to use ML instead of REML so that the resulting likelihoods are comparable]. Save both models to objects and take a look at the summaries to make sure that you are getting output that makes sense. 
+We will use the `lme()` function from the `nlme` packages. This is an older package, but it is stable and reliable. The model specification for `lme()` is a little different than `glmmTMB()` and `lmer()`. `lme()` has a parameter `random` that you set like this:
+
+`lme(Zooplankton ~ Treatment, random = ~ 1 | Block), data = ZooPlankton)`
+
+This is the zooplankton data from PS 09. This model has a main effect of `Treatment` and a random intercept effect for `Block`.
+
+When you fit the model using `lme()`, include the option `method = "ML"` to use maximum likelihood instead of the default of restricted maximum likelihood^[We need to use ML instead of REML so that the resulting likelihoods are comparable]. Save both models to objects and take a look at the summaries to make sure that you are getting output that makes sense. 
 
 ```{r}
 # FIXME
@@ -194,15 +208,17 @@ Make a scatterplot of brain size vs. body mass, with points colored by species. 
 
 ```{r}
 # FIXME
-M |> ggplot(aes(ln_Mass, ln_Brain, color = Species)) +
+P <- M |> ggplot(aes(ln_Mass, ln_Brain, color = Species)) +
   geom_point(size = 3) +
   scale_color_d3() +
+  guides(color = guide_legend(position = "inside")) +
   theme(legend.position = c(0.75, 0.12),
         legend.background = element_rect(linewidth = 0.5,
                                          color = "black",
                                          linetype = "solid"),
         legend.margin=margin(c(2, 2, 2, 2))) +
   labs(x = "ln Body Mass", y = "ln Brain Size")
+P
 ```
 
 Fit three linear models and assign each to an object:
@@ -286,6 +302,8 @@ Finally, let's add predicted lines for the additive model. To do this, you need 
 Study the code and see if you can figure out what it is doing.
 
 ```{r, eval=TRUE, echo=FALSE}
+#| eval: false
+#| echo: false
 ## FIXME set above to eval=FALSE
 
 pred <- crossing(ln_Mass = seq(3.9, 4.5, length.out = 100),
@@ -293,16 +311,8 @@ pred <- crossing(ln_Mass = seq(3.9, 4.5, length.out = 100),
 pred <- pred |> 
   mutate(ln_Brain_pred = predict(fm2, newdata = pred))
 
-ggplot() +
-  geom_point(data = M, aes(ln_Mass, ln_Brain, color = Species), size = 3) +
+P +
   geom_line(data = pred, aes(ln_Mass, ln_Brain_pred, color = Species),
-            linewidth = 1.5) +
-  scale_color_d3() +
-  theme(legend.position = c(0.75, 0.12),
-        legend.background = element_rect(linewidth = 0.5,
-                                         color = "black",
-                                         linetype = "solid"),
-        legend.margin=margin(c(2, 2, 2, 2))) +
-  labs(x = "ln Body Mass", y = "ln Brain Size")
+            linewidth = 1.5)
 ```
 
