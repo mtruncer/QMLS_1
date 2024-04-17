@@ -15,19 +15,6 @@ format:
 #| message: false
 #| warning: false
 
-# FIXME
-library(tidyverse)
-library(readxl)
-library(cowplot)
-library(ggsci)
-
-library(lmtest)
-library(AICcmodavg)
-
-library(nlme)
-library(cvTools)
-
-theme_set(theme_cowplot())
 
 # Data
 #   - Streams.xlsx
@@ -52,9 +39,7 @@ One goal is to be able to predict water temperature only using air temperature (
 Load the `TemperatureData` sheet from the `Streams.xlsx` file. Look at the structure of the file. You should have 5 columns: `Site`, `Date`, `AirTemp_observed`, `AirTempPredicted`, and `WaterTemp`. If you don't, then you probably did not load the correct sheet. Check the `read_excel()` help to see how to do this.
 
 ```{r}
-# FIXME
-Temp_Data <- read_excel("../data/Streams.xlsx",
-                        sheet = "TemperatureData")
+
 ```
 
 Now load the `SiteData` sheet from the Excel file. It has four columns, including the mapping from `Stream_Name` to `Site`. We need to merge the two tibbles together. Because they share a column `Site`, we can match rows, yielding a single tibble.
@@ -68,13 +53,7 @@ We covered joining tibbles in Unit 03-3, but here is a brief review. Base R has 
 `left_join()` the temperature data and the site data and assign to a new object. This will add the columns of one to the other, matching on `Site`. You should end up with a 3,744 x 8 tibble.
 
 ```{r}
-# FIXME
-Site_Data <- read_excel("../data/Streams.xlsx", sheet = "SiteData")
-M <- left_join(Temp_Data, Site_Data)
 
-glimpse(M)
-
-M |> count(Site, Stream_Name)
 ```
 
 Data were collected for 78 different sites across 48 days. The 78 sites are nested within 9 different watersheds (`Stream_Name`). So this is a large, multilevel dataset.
@@ -84,20 +63,13 @@ Ultimately, we want to assess the ability to predict water temperature from pred
 We then need to do one more thing: make a new variable that converts `Date` into a day number. We can do this with the function `as.numeric()`. Make a new variable `Day`, which is the numeric representation of `Date`. It will look something like: `mutate(Day = as.numeric(Date))`.
 
 ```{r}
-# FIXME
-M <- M |>
-  mutate(Site = factor(Site),
-         Date = factor(Date),
-         Stream_Name = factor(Stream_Name),
-         Day = as.numeric(Date))
+
 ```
 
 Because not all observations have observed air temperature, first we should check for correlation between observed and predicted air temperatures. Calculate the correlation between the two. We could filter out missing data, but instead just provide the argument `use = "pairwise.complete.obs"` to `cor()`, which will tell the function to use only complete pairs for the calculation. If you find that the correlation is `NA`, that means R is using incomplete cases. Any correlation between data with `NA`s is `NA`.
 
 ```{r}
-# FIXME
-cor(M$AirTemp_observed, M$AirTempPredicted,
-    use = "pairwise.complete.obs")
+
 ```
 
 The correlation should be pretty high (*r* = 0.95). So this means that we can safely use predicted air temperature (data which is complete) as a proxy for actual air temperature (data which is incomplete).
@@ -109,23 +81,13 @@ One more thing we need to add to `aes()` is `group = Site`. This code will tell 
 Once you get your plot working, make the same plot for water temperature (copy the code and change the y variable).
 
 ```{r fig.height = 10}
-# FIXME
-ggplot(M, aes(Day, AirTempPredicted, group = Site)) +
-  geom_line() +
-  theme(legend.position = "none") +
-  facet_grid(Stream_Name ~ .) +
-  labs(title = "Air Temperature")
 
-ggplot(M, aes(Day, WaterTemp, group = Site)) +
-  geom_line() +
-  theme(legend.position = "none") +
-  facet_grid(Stream_Name ~ .) +
-  labs(title = "Water Temperature")
 ```
 
 What general patterns do you see, comparing the two plots?
 
-> Air temperature appears to vary more day to day than water temperature does. Air temperatures at a given stream are highly conserved, but water temperature varies much more within a stream.
+> 
+
 
 We want to fit two models to these data. In both models we want to model water temperature by predicted air temperature. The difference between the models will be in the random effects.
 
@@ -143,51 +105,36 @@ This is the zooplankton data from PS 09. This model has a main effect of `Treatm
 When you fit the model using `lme()`, include the option `method = "ML"` to use maximum likelihood instead of the default of restricted maximum likelihood^[We need to use ML instead of REML so that the resulting likelihoods are comparable]. Save both models to objects and take a look at the summaries to make sure that you are getting output that makes sense. 
 
 ```{r}
-# FIXME
-fm1 <- lme(WaterTemp ~ AirTempPredicted,
-           random = ~ 1 | Stream_Name/Site,
-           data = M,
-           method = "ML")
-summary(fm1)
 
-fm2 <- lme(WaterTemp ~ AirTempPredicted,
-           random = ~ Day | Stream_Name/Site,
-           data = M,
-           method = "ML")
-summary(fm2)
 ```
 
 Looking at the `summary()` of each, you should see sections in the random effects for `Stream_Name` and `Site %in% Stream_Name`.
 
 Explain in non-mathematical terms what the addition of `Day` in the random effects part of the formula accomplishes.
 
-> Addition of day in the random effects part of the model allows the linear relationship (slope) of the water temperature relationship to change on a daily basis. Each day can essentially have its own trajectory. The second model allows each `Site` to have it's own intercept, which is nested within `Stream_Name`, and the slope is allowed to also vary within each site. This model allows temperature to increase or decrease as a function of `Day`. Model 2 is a fairly crude way to model temperature changing with time. There are more nuanced approaches to this that you could explore if you have similar data: time-series model, autoregressive models, Gaussian processes.
+> 
+
 
 Load the `AICcmodavg` package and use the `aictab()` function to compare the two models you fit above.
 
 ```{r}
-# FIXME
-library(AICcmodavg)
-aictab(list(fm1, fm2))
+
 ```
 
 Interpret the difference in AICc values and Akaike weights (`AICcWt`). Does the model comparison make sense in light of your understanding of the difference between the two models?
 
-> The second model is very highly preferred ($\Delta$AIC > 2500). This makes sense because there is a lot of day to day variation in temperature. We could probably do even better by adding a main effect of day to model the overall trend of increasing temperature.
+> 
+
 
 Fit a third model that is the same as model 2, but with the addition of `Day` as an additive, main effect. This model fits an overall slope to `Day` that is shared across all streams, with the random effects slope now an offset from the overall slope. Then use `aictab()` to compare all three models.
 
 ```{r}
-# FIXME
-fm3 <- lme(WaterTemp ~ AirTempPredicted + Day,
-           random = ~ Day | Stream_Name/Site,
-           data = M, method = "ML")
-aictab(list(fm1, fm2, fm3))
+
 ```
 
 What do you learn? Remember that AIC can only compare models that you fit.
 
-> This model is much preferred ($\Delta$AIC = 40) over the first two, with 100% of the Akaike model weight. So there appears to be a strong pattern of increasing water temperature with day (slope = 0.05, but with a very small standard error, and $P$ is < 0.001). Modeling this relationship as a global slope with deviations by site is prefered over modeling each site separately, which makes sense from a biological standpoint: it's likely that there is an overall pattern of increasing temperature with variations from site to site.
+> 
 
 
 ## Neandertal Brains
@@ -199,26 +146,13 @@ There are well-known differences in both body size between modern humans and Nea
 The file `NeandertalBrainSize.csv` contains data on estimated log body mass, log brain size, and `Species`. Load the file, and convert `Species` to a factor.
 
 ```{r}
-# FIXME
-NBS <- read_csv("../data/NeandertalBrainSize.csv", col_types = "ddc") |> 
-  mutate(Species = fct_relevel(Species, "Recent"))
+
 ```
 
 Make a scatterplot of brain size vs. body mass, with points colored by species. See if you can find information on the internet about how to move the legend from the side of the plot into the lower right hand corner. Your plot should look something like this https://imgur.com/CVgQ9RU.png.
 
 ```{r}
-# FIXME
-P <- NBS |> ggplot(aes(ln_Mass, ln_Brain, color = Species)) +
-  geom_point(size = 3) +
-  scale_color_d3() +
-  guides(color = guide_legend(position = "inside")) +
-  theme(legend.position = c(0.75, 0.12),
-        legend.background = element_rect(linewidth = 0.5,
-                                         color = "black",
-                                         linetype = "solid"),
-        legend.margin=margin(c(2, 2, 2, 2))) +
-  labs(x = "ln Body Mass", y = "ln Brain Size")
-P
+
 ```
 
 Fit three linear models and assign each to an object:
@@ -228,35 +162,30 @@ Fit three linear models and assign each to an object:
 3. Brain size modeled by body mass and species with the mass X species interaction
 
 ```{r}
-# FIXME
-fm1 <- lm(ln_Brain ~ ln_Mass, data = NBS)
-fm2 <- lm(ln_Brain ~ ln_Mass + Species, data = NBS)
-fm3 <- lm(ln_Brain ~ ln_Mass * Species, data = NBS)
+
 ```
 
 Use the `lrtest()` function from the `lmtest` package to perform a likelihood ratio test on the three models.
 
 ```{r}
-# FIXME
-library(lmtest)
-lrtest(fm1, fm2, fm3)
+
 ```
 
 What is your interpretation of the likelihood ratio test?
 
-> The additive model is significantly better than then mass only model (P = 0.01). The interaction is not significantly better than the additive model (P = 0.27).
+> 
+
 
 Now use the `aictab()` function from the `AICcmodavg` package to compare AICc for the three models.
 
 ```{r}
-# FIXME
-library(AICcmodavg)
-aictab(list(fm1, fm2, fm3))
+
 ```
 
 What is your interpretation of the results?
 
-> The additive and interaction models are both well supported. 61% of the Akaike weight is on the additive model, and 30% on the interaction model. They both deserve discussion. 
+> 
+
 
 In lecture, we wrote out own code to do cross-validation. In practice, you would use code from others to automate this process, which is more general than any specific code you would write. A good package for cross-validation is `cvTools`. Install this package.
 
@@ -269,52 +198,46 @@ The basic parts are a fitted model (`fm1`), a source for the data, the ID of the
 Run 10-fold cross-validation on the three models with 100 replicates of each.
 
 ```{r, 10foldCV}
-# FIXME
-set.seed(342876)
-cvFit(fm1, data = NBS, y = NBS$ln_Brain, K = 10, R = 100)
-cvFit(fm2, data = NBS, y = NBS$ln_Brain, K = 10, R = 100)
-cvFit(fm3, data = NBS, y = NBS$ln_Brain, K = 10, R = 100)
+
 ```
 
 What do the results indicate? Which model has the lowest error?
 
-> The additive model has the lowest root mean squared error (RMSE = 0.071) relative to the other models (0.073 and 0.73). Your results might differ slightly due to sampling variation resulting from the random splits of the data.
+> 
+
 
 Try comparing the models with leave-one-out cross-validating, by setting `K` to the number of rows of data. 
 
 ```{r}
-# FIXME
-cvFit(fm1, data = NBS, y = NBS$ln_Brain, K = nrow(NBS))
-cvFit(fm2, data = NBS, y = NBS$ln_Brain, K = nrow(NBS))
-cvFit(fm3, data = NBS, y = NBS$ln_Brain, K = nrow(NBS))
+
 ```
 
 How do these results compare to 10-fold CV?
 
-> The results are very similar. The additive model has the lowest average prediction error of the three.
+> 
+
 
 Compare the results of the likelihood ratio test, the AICc comparison, and cross-validation. What information does each provide you?
 
-> They all agree in the model comparison results and interpretation, while providing different information. LRT gives you a yes/no *P*-value comparison among models (and not much else). AICc and Akaike model weights give a little more nuance: most of the model weight is on the additive model, but ~30% is on the interaction model, so it deserves discussion as well. Finally, cross-validation gives a comparison of out of sample prediction error for the models. This final comparison shows that the root mean squared error is actually pretty small across all models.
+> 
+
 
 Finally, let's add predicted lines for the additive model. To do this, you need to predict brain size across a range of body masses for each species. The code below does this. Change `eval: false` to `eval: true` to have R run the code when you knit. 
 
 Study the code and see if you can figure out what it is doing. Note that we have called the data `NBS`, so you might need to change that below to get this code to run.
 
 ```{r}
-#| eval: true
-## FIXME set above to eval: false
+#| eval: false
 
 pred <- crossing(ln_Mass = seq(3.9, 4.5, length.out = 100),
-                 Species = levels(NBS$Species))
+                 Species = levels(M$Species))
 pred <- pred |> 
   mutate(ln_Brain_pred = predict(fm2, newdata = pred))
 
-ggplot() +
-  geom_point(data = NBS, aes(ln_Mass, ln_Brain, color = Species),
-             size = 3) +
+ggplot(aes(ln_Mass, ln_Brain, color = Species)) +
+  geom_point(size = 3) +
   geom_line(data = pred, aes(ln_Mass, ln_Brain_pred, color = Species),
-            linewidth = 1.5) +
+          linewidth = 1.5) +
   labs(x = "ln Body Mass", y = "ln Brain Size")
 
 ```
