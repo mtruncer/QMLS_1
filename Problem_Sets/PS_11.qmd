@@ -15,13 +15,6 @@ format:
 #| message: false
 #| warning: false
 
-library(tidyverse)
-library(readxl)
-library(cowplot)
-library(ICC)
-library(pwr)
-
-theme_set(theme_cowplot())
 
 # Datasets
 #   WalkingStickFemurs.csv
@@ -50,10 +43,7 @@ You take 2 measurements each on 25 different walking stick femurs, which are inc
 Load the data in `WalkingStickFemurs.csv`. Convert `Specimen` to a factor so that R will treat it as categorical rather than as numeric.
 
 ```{r}
-# FIXME
 
-WSF <- read_csv("../data/WalkingStickFemurs.csv", col_types = "ddd") |> 
-  mutate(Specimen = factor(Specimen))
 ```
 
 Look at the structure of the data. The data are in long format, with one measurement per row. We want to be able to plot Measurement 1 vs. Measurement 2 to visualize the paired relationship. To do so, we need to convert the data into wide format, with 2 columns per Specimen: Measurement 1 and Measurement 2.
@@ -66,14 +56,7 @@ Pivot the data to wide format:
 - Use the `names_prefix =` option to place the string "Measurement_" before the column name
 
 ```{r}
-# FIXME
-glimpse(WSF)
 
-WSF_wide <- WSF |> 
-  pivot_wider(id_cols = Specimen,
-              values_from = Femur_length,
-              names_from = Measurement,
-              names_prefix = "Measurement_")
 ```
 
 The top of the resulting tibble should look like:
@@ -95,47 +78,40 @@ Plot the pairs of observations as a scatterplot.
 - Set the axis coordinates to equal scaling with `coord_equal()`
 
 ```{r}
-# FIXME
-ggplot(WSF_wide, aes(Measurement_1, Measurement_2)) +
-  geom_point() +
-  geom_abline(slope = 1, intercept = 0) +
-  coord_equal()
+
 ```
 
 Based on your plot, do you expect repeatability to be high or low? Give an estimate?
 
-> The points are fairly close to the line, so repeatability should be ok.
+> 
+
 
 Follow the example from lecture to calculate repeatability of the femur length  measurement using `aov()`. As in the lecture, you can just manually copy the values from the `aov()` summary rather than trying to extract them programmatically. You will use the original "long" format data here, rather than the wide format you just created (we only needed that format for plotting).
 
 ```{r}
-# FIXME
 
-fm <- summary(aov(Femur_length ~ Specimen, data = WSF))
-
-var_a <- (0.002464 - 0.000356) / 2
-var_a / (var_a + 0.000356)
 ```
 
 What value of repeatability (intraclass correlation) to you find?
 
-> ~0.75
+> 
+
 
 Calculate repeatability of the femur length (`Femur_length`) measurement using `ICCest()` from the `ICC` package (you might need to install the package first).
 
 ```{r}
-# FIXME
 
-ICCest(x = WSF$Specimen, y = WSF$Femur_length)
 ```
 
 Compare the results
 
-> The numbers are very similar. This is probably just due to rounding error introduced by manually copying the values from the first model. Overally, the measurements are pretty repeatable.
+> 
+
 
 Would you be comfortable going forward with data collection given this value for ICC?
 
-> Maybe or maybe not. If we expect fairly large differences between groups, then it's probably fine. But if the differences are small, then there may be so much variation associated with taking measurements that it will swamp out the variation between groups. It's probably fine.
+> 
+
 
 
 ## Planning experiments
@@ -147,89 +123,40 @@ Consider that you are planning some experiments, use the `pwr` package to calcul
 Use `cohen.ES()` to look up the effect size for a "small" effect for a *t*-test.
 
 ```{r}
-# FIXME
-cohen.ES(test = "t", size = "small")
+
 ```
 
 Before we do the calculation. Take a guess how many individuals you would need in each independent group (a "two-sample t-test") to detect a small effect size with alpha = 0.05 and power = 0.80.
 
-> You answer may vary.
+> 
+
 
 Calculate the sample size (*n*) needed in each group of a two-sample *t*-test with power = 0.80 to detect a small effect (use the effect size from above).
 
 ```{r}
-# FIXME
-pwr.t.test(d = 0.2, power = 0.80, type = "two.sample")
+
 ```
 
 Repeat the test above but for a paired *t*-test.
 
 ```{r}
-# FIXME
-pwr.t.test(d = 0.2, power = 0.80, type = "paired")
+
 ```
 
 Calculate the number of observations for a correlation test where you estimate a correlation coefficient of 0.6. Power should be 0.80.
 
 ```{r}
-# FIXME
-pwr.r.test(r = 0.6, power = 0.8)
+
 ```
 
 Calculate the power for a correlation test where you estimate the correlation coefficient to be 0.4, for a sample size of 15.
 
 ```{r}
-# FIXME
-pwr.r.test(r = 0.4, n = 15)
+
 ```
 
 
 ## Gene expression (RNAseq) on males and females of the Glanville Fritillary
-
-```{r}
-## FIXME
-# Data preparation
-# set.seed(28462)
-# 
-# quant.norm <- function(y) {
-#   nn <- qqnorm(y, plot.it = FALSE)
-#   return(nn$x)
-# }
-# 
-# sid <- read_csv("../data/Butteryfly_IDs.csv",
-#                 col_names = c("ID", "Treatment", "Sex", "Population"))
-# sid <- sid |>
-#   mutate(Treatment = str_replace(Treatment, "treatment: ", ""),
-#          Sex = str_replace(Sex, "Sex: ", ""),
-#          Population = str_replace(Population, "population: ", ""),
-#          ID2 = str_split(ID, "_", simplify = TRUE)[, 2],
-#          ID = str_split(ID, "_", simplify = TRUE)[, 1],
-#          ID = str_replace_all(ID, "-", "_")) |>
-#   filter(ID2 == 450) |>
-#   dplyr::select(-ID2)
-# 
-# gg <- read_delim("../data/Butterfly_NormalizedCountsGenes.txt",
-#                  delim = "\t")
-# samp.names <- colnames(gg)[-1]
-# gene.names <- gg$gene
-# gg <- t(gg[, -1])
-# rr.temp <- row.names(gg)
-# gg <- apply(gg, 2, function(x) quant.norm(x))
-# colnames(gg) <- gene.names
-# rownames(gg) <- rr.temp
-# gg <- bind_cols(
-#   tibble(ID = str_replace_all(row.names(gg), "-", "_")),
-#   as.data.frame(gg))
-# 
-# ngenes <- 100
-# gg_samp <- gg[, c(1, sample(size = ngenes, x = 2:ncol(gg)))]
-# 
-# M <- left_join(sid, gg_samp)
-# M <- M[,-c(2,4)]
-# 
-# write_csv(M, file = "../data/Butterfly_Gene_Expression.csv")
-
-```
 
 Glanville Fritillary butterflies are a model organism for studying dispersal and metapopulation dynamics, because they live in isolated meadows.
 
@@ -245,8 +172,7 @@ Note this method produces a list of `lm()` results. We have written a function (
 Change `eval: false` to `eval: true` and run the chunk below. You might need to change the path to `Butterfly_Gene_Expression.csv`.
 
 ```{r}
-#| eval: true
-# FIXME true -> false
+#| eval: false
 
 getP <- function(fm) {
   sum.set <- summary(fm)
@@ -267,16 +193,13 @@ We will visualize the *P*-values by plotting a histogram and a q-q plot.
 First plot a histogram with 20 `bins`. This will conveniently make bins that are 0.05 wide.
 
 ```{r}
-# FIXME 
-
-ggplot(obsP, aes(P)) +
-  geom_histogram(bins = 20)
 
 ```
 
 Does it look like there is a signal in the data? I.e., are there more observations in the 0 - 0.05 bin than in the other bins?
 
-> Yes, the first bin is about 2x as large as the next largest.
+> 
+
 
 For the q-q plot:
 
@@ -287,46 +210,25 @@ For the q-q plot:
 Finally, plot observed versus expected values and add a 1:1 line (intercept = 0, slope = 1).
 
 ```{r}
-# FIXME
-set.seed(273645)
-
-qqP <- tibble('observed' = sort(-log10(obsP$P)),
-              'expected' = sort(-log10(runif(length(obsP$P), 0, 1))))
-
-ggplot(qqP, aes(x = expected, y = observed)) +
-  geom_point() +
-  geom_abline(intercept = 0, slope = 1)
 
 ```
 
 Based on this visualization, do you think there are *true positives* in this data set?
 
-> Probably. The P-values deviate pretty strongly from the expected line.
+> 
 
 Use R's built-in `p.adjust()` function to adjust the P-values using the sequential Bonferroni correction (Holm procedure). You don't have to sort the P-values first, but it can make it easier to pick out ones that remain significant. Print a `tibble` with the observed P-value and sequential Bonferroni corrected P-value. Finally, count the number of P-values that are less than 0.05.
 
 Look at the help for `p.adjust()` for the appropriate syntax.
 
 ```{r}
-# FIXME
-seq_bonf <- p.adjust(obsP$P, method = "holm")
-tibble(P = obsP$P,
-       seq_bonf) |>
-  arrange(P) |>
-  filter(seq_bonf <= 0.05)
-sum(seq_bonf < 0.05)
+
 ```
 
 Repeat the procedure above, but now use the false discovery rate procedure of Benjamini and Hochberg.
 
 ```{r}
-# FIXME
-fdr <- p.adjust(obsP$P, method = "fdr")
-tibble(P = obsP$P,
-       fdr) |>
-  arrange(P) |>
-  filter(fdr <= 0.05)
-sum(fdr < 0.05)
+
 ```
 
 Follow the code in lecture to carry out a pFDR analysis of these *P*-values. You will probably need to install the `qvalue` package, which is available through Bioconductor (rather than CRAN). https://www.bioconductor.org/packages/release/bioc/html/qvalue.html The webpage for qvalue has the code you need to run in order to install the package.
@@ -334,27 +236,23 @@ Follow the code in lecture to carry out a pFDR analysis of these *P*-values. You
 **Note**: When you install from bioconductor, it will ask you if you want to update your packages, expecting a response at the command line. You can enter "y" or "n", but you need to enter something. Otherwise, R will appear to be frozen.
 
 ```{r}
-# FIXME
 
-library(qvalue)
-qobj <- qvalue(obsP$P, fdr.level = 0.05, pi0.method = "smoother")
-summary(qobj)
 ```
 
 What is the value of $\pi_0$? What does this value represent?
 
-> 0.39. This means that only 39% of the null hypotheses are true.
+> 
+
 
 How many P-values are associated with q-values less than 0.05?
 
-> 29 (of 32 nominally less than 0.05)
+> 
+
 
 What is an adjusted $\alpha$-level that will control pDFR at 0.05?
 
 ```{r}
-# FIXME
 
-max(qobj$pvalues[qobj$qvalues <= 0.05])
 ```
 
 The code below shows a randomization that we can use to estimate the number of expected false positives for this experiment.
@@ -369,8 +267,7 @@ Change `eval: false` to `eval: true` before you run. `cache: true` tells RStudio
 ```{r}
 #| label: randomization
 #| cache: true
-#| eval: true
-# FIXME true -> false
+#| eval: false
 
 set.seed(874628)
 niter <- 1000
@@ -393,24 +290,13 @@ saveRDS(allP, file="../data/Shuffle_Expression.rds")
 Load the matrix we generated above and saved to `Shuffle_Expression.rds` using the `readRDS` function (this is a new function for you that reads an R object in directly) and assign it to an object called `allP`.
 
 ```{r}
-# FIXME
-allP <- readRDS(file="../data/Shuffle_Expression.rds")
+
 ```
 
 Visualize the *P*-values from one or a few of these iterations as you did above with a histogram and a q-q plot.
 
 ```{r}
-# FIXME
-it1 <- tibble('P' = allP[, 5])
-ggplot(it1, aes(P)) +
-  geom_histogram(bins = 20)
 
-qqP <- tibble('observed' = sort(-log10(it1$P)),
-              'expected' = sort(-log10(runif(100, 0, 1))))
-
-ggplot(qqP, aes(x = expected, y = observed)) +
-  geom_point() +
-  geom_abline(intercept = 0, slope = 1)
 ```
 
 For each iteration, get a count of the number of positives at a threshold of 0.05. Visualize the number of positives with a histogram. Keep in mind, because you have randomized the data, *all positives here are false positives*.
@@ -421,68 +307,21 @@ For each iteration, get a count of the number of positives at a threshold of 0.0
 
 
 ```{r}
-# FIXME
-th <- 0.05
 
-pos.counts <- tibble(
-  'counts' = apply(allP, 2, function(x) sum(x < th)))
-
-ggplot(pos.counts, aes(counts)) +
-  geom_histogram(bins = 20)
-
-mean(pos.counts$counts)
-
-mean(pos.counts$counts) / 100
-
-sum(pos.counts >= 1) / 1000
-
-mean(pos.counts$counts) / sum(obsP$P < th)
 ```
 
 Now use this same procedure to calculate the false positive rate, FWER, and false discovery rate at the range of thresholds given below. Store your output (including the threshold) in a `tibble`.
 
 ```{r}
-# FIXME
 thresholds <- seq(0.0005, 0.05 , length = 200)
 
-#FIXME
-output <- tibble(threshold = thresholds,
-                 FP = numeric(length(thresholds)),
-                 FWER = numeric(length(thresholds)),
-                 FDR = numeric(length(thresholds)))
 
-for (tt in 1:length(thresholds)) {
-  th <- thresholds[tt]
-  pos.counts <- tibble(
-    'counts' = apply(allP, 2, function(x) sum(x < th)))
-  output[tt,'FP'] <- mean(pos.counts$counts) / 100
-  output[tt,'FWER'] <- sum(pos.counts >= 1) / 1000
-  output[tt,'FDR'] <- mean(pos.counts$counts) / sum(obsP$P < th)
-}
-
-output
-max(output$threshold[output$FDR <= 0.05])
 ```
 
 Make plots of the FDR, FP, and FWER plotted against the threshold (feel free to make three separate plots). In each, draw a horizontal line at 5%.
 
 ```{r}
-#FIXME
-P1 <- output |>
-  ggplot(aes(threshold, FDR)) +
-  geom_point() +
-  geom_hline(yintercept = 0.05)
 
-P2 <- output |>
-  ggplot(aes(threshold, FP)) +
-  geom_point() +
-  geom_hline(yintercept = 0.05)
-
-P3 <- output |>
-  ggplot(aes(threshold, FWER)) +
-  geom_point() +
-  geom_hline(yintercept = 0.05)
-plot_grid(P1, P2, P3)
 ```
 
 Inspecting the data you made above, what P-value threshold should you use if you want a false discovery rate of 5%?
@@ -492,8 +331,5 @@ Inspecting the data you made above, what P-value threshold should you use if you
 Calculate the FWER corresponding to an alpha of 5% by calculating the lowest P-value for each iteration. Then, use the `quantile()` function to calculate the 5% quantile. hint: you will want to use `apply()` here.
 
 ```{r}
-# FIXME
 
-minP <- apply(allP, 2, min)
-quantile(minP, 0.05)
 ```
