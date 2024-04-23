@@ -10,7 +10,11 @@ format:
     embed-resources: true
 ---
 
-```{r setup, message=FALSE, warning=FALSE}
+```{r}
+#| label: setup
+#| message: false
+#| warning: false
+
 library(tidyverse)
 library(readxl)
 library(cowplot)
@@ -21,18 +25,206 @@ theme_set(theme_cowplot())
 # speed up knitting, because only chunks that have changed will
 # be recompiled.
 knitr::opts_chunk$set(cache = TRUE)
+
+# Datasets
+#   Sole.xlsx
+#   Stalkies.csv
+#   Heart_Transplants.xlsx
 ```
 
-<!--
-Datasets
-  Sole.xlsx
-  Stalkies.csv
-  Heart_Transplants.xlsx
--->
+
+## Randomization and Empirical *P*-values
+
+Randomization is an approach hypothesis testing that doesn't rely on the same set of assumption as the "original" test. The general procedure is:
+
+1. Fit the model to the observed data.
+2. Decide on a test statistic to use for the randomization (mean, difference of means, *t*, *F*, etc.).
+3. Perform the randomization:
+    - Calculate the test statistic for the *observed* data
+    - Randomly shuffle the observations
+    - Calculate the test statistic for that group
+    - Repeat thousands of times
+4. Plot a histogram of the resulting set of test statistics and add a line denoting your observed value
+5. Determine the proportion of random combinations resulting in a test statistic more extreme than the observed value ("empirical *P*")
+
+Remember to start with a small number of iterations (10 or 100) until you get the code working correctly. Then increase to 10,000 for a final analysis.
+
+
+### Worked example: Stalk-eyed flies
+
+We will start with a worked example: compare the mean eye span in stalk-eyed flies raised on two food sources. This model is a good candidate for randomization because the variances are unequal (there is about 4x difference).
+
+Study the code below, and make sure that you understand what each line does.
+
+```{r}
+#| label: stalkies1
+
+# Use the tictoc package to time how long the code takes.
+library(tictoc)
+
+# Read data
+stalk <- read_csv("../data/Stalkies.csv", col_types = "cd")
+
+# Check standard deviations
+stalk |> 
+  group_by(food_source) |> 
+  summarize(st_dev = sd(eye_span),
+            .groups = "drop")
+
+# Some thoughtful plotting
+ggplot(stalk, aes(x = food_source, y = eye_span)) +
+  geom_point(position = position_jitter(width = 0.05, seed = 4588), alpha = 0.5) +
+  stat_summary(fun = mean, geom = "point", size = 3, color = "firebrick4") +
+  stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.05,
+               color = "firebrick4", linewidth = 1) +
+  labs(x = "Food Source", y = "Eye Span")
+
+set.seed(8987324)
+nreps <- 1e5
+t_stats <- numeric(nreps)
+t_stats[1] <- t.test(eye_span ~ food_source, data = stalk)$statistic
+
+tic() # Start timer
+for (ii in 2:nreps) {
+  t_stats[ii] <- t.test(sample(eye_span) ~ food_source, data = stalk)$statistic
+}
+toc() # Stop timer
+
+tibble(t_stats) |>
+  ggplot(aes(t_stats)) +
+  geom_histogram(bins = 30) +
+  geom_vline(xintercept = t_stats[1], color = "firebrick4") +
+  labs(x = "t statistics", y = "Count")
+
+# Calculate the empirical P-value as the mean of the inequality
+# Because t is positive, we want the number of times that the 
+# randomized data was more extreme (larger) than the observed value.
+# This is converted to 0 (false) and 1 (true), and the mean is the
+# proportion of trues. The value is doubled for a 2-tailed test.
+2 * mean(t_stats >= t_stats[1])
+
+# Compare to the observed P-value
+t.test(eye_span ~ food_source, data = stalk)
+```
+
+10^5^ iterations took ~28.6 seconds on a single processor (on this computer). We don't need to run that many iterations to get a good sense that the empirical P-value is going to be very low. The analytical *P* is 6^-10^, so we expect the empirical *P* to be on the same scale.
+
+We can use parallel processing to speed things up considerably, taking advantage of the fact that we are really just doing the same kind of calculation over and over.
+
+The code below implements a simple parallel loop using some straightforward R packages. Some of this code will look unfamiliar, but we have commented it for you, in case you want to try something like this with your own data. But rather than doing a for loop, we will use the `furrr` package (https://furrr.futureverse.org/), which handle the parallelization and collection of the results.
+
+The following chunk will not run during knitting.
+
+```{r}
+#| label: stalkies2
+#| eval: false
+
+# Load packages
+library(furrr)
+
+# Calculate observed t-statistic
+t_obs <- t.test(eye_span ~ food_source, data = stalk)$statistic
+
+# Set up iterations
+nreps <- 1e5 - 1
+
+# Set up parallel processor
+# Use the number of cores minus one to reserve some processing power for
+# system processes.
+n_cores <- availableCores() - 1
+message("Using ", n_cores, " cores.")
+
+# Setup parallelization
+plan(multisession, workers = n_cores)
+
+# Function to do the randomized t-test and return the t-statistic only.
+t_rand <- function(.x, stalk) { # the 1st parameter is the iterator .x
+  rnd_t <- t.test(sample(eye_span) ~ food_source, data = stalk)
+  return(as.numeric(rnd_t$statistic))
+}
+
+# Parallel randomization execute t_rand(), and combine the output into
+# t_stats (numeric vector).
+tic()
+rand_ts <- future_map_dbl(.x = 1:nreps,
+                          .f = t_rand,
+                          stalk = stalk,
+                          .options = furrr_options(seed = TRUE))
+toc()
+
+# Stop cluster
+plan(sequential)
+
+# Combine observed and randomized
+t_stats <- c(t_obs, rand_ts)
+
+2 * mean(t_stats >= t_stats[1])
+```
+
+The same number of iterations but using 7 processors takes 5.8 seconds (on this computer).
+
+```{r}
+# Iterations per second, 1 processor
+(p1 <- 28.6 / nreps)
+
+# Iterations per second, 7 processors
+(p7 <- 5.8 / nreps)
+
+p1 / p7
+```
+
+We get a speed-up of about 5 times. There is some overhead in the parallelization, passing data back and forth between the processes, so we don't get 7x the speed that we might expect.
+
+
+### Heart Transplant Survivorship (PS 08)
+
+For the data on survivorship after heart transplant, we had to transform the data due to unequal variances. That is not necessary when we use randomization. Reanalyze these data without transformation, testing the same hypothesis as you did in PS 08.
+
+Refer to the key for PS 08 to refresh yourself with the question and adapt the code from the example above (either sequential or parallel). Otherwise we will leave this exercise undirected.
+
+```{r}
+# FIXME
+HT <- read_excel("../data/Heart_Transplants.xlsx") |>
+  mutate(Mismatch_Degree = fct_inorder(Mismatch_Degree))
+
+ggplot(HT, aes(x = Mismatch_Degree, y = Survival_Days)) +
+  geom_point(position = position_jitter(width = 0.05, seed = 3648), alpha = 0.5) +
+  stat_summary(fun.y = mean, geom = "point", size = 3, color = "firebrick4") +
+  stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.05,
+               color = "firebrick4", linewidth = 1) +
+  labs(x = "Mismatch Degree", y = "Survival (days)")
+
+fm <- lm(Survival_Days ~ Mismatch_Degree, data = HT)
+obs <- summary(fm)
+
+set.seed(823476)
+nreps <- 1e4
+F_stats <- numeric(nreps)
+F_stats[1] <- obs$fstatistic["value"]
+
+for (ii in 2:nreps) {
+  fm_rand <- lm(sample(Survival_Days) ~ Mismatch_Degree,
+                    data = HT)
+  F_stats[ii] <- summary(fm_rand)$fstatistic["value"]
+}
+
+tibble(F_stats) |>
+  ggplot(aes(F_stats)) +
+  geom_histogram(bins = 30) +
+  geom_vline(xintercept = F_stats[1], color = "firebrick4") +
+  labs(x = "F statistics", y = "Count")
+
+mean(F_stats >= F_stats[1])
+```
+
+Based on this analysis via randomization, is there a significant difference in survival time? HOw does this results compare to the analysis you did on the transformed data in PS 08?
+
+> The empirical P-value is ~0.166 (your answer will vary slightly due to sampling variation). The P-value for the overall ANOVA on the transformed data was 0.224. So the results are quite similar.
+
 
 ## Return of the Sole
 
-In lecture, we looked at presence/absence data for the common sole ([*Solea solea*](https://en.wikipedia.org/wiki/Common_sole)) predicted by different factors such as the salinity of the water. Here we will focus on the composition of the substrate.  
+In lecture, we looked at presence/absence data for the common sole ([*Solea solea*](https://en.wikipedia.org/wiki/Common_sole)) predicted by the salinity of the water. Here we will focus on the composition of the substrate.  
 
 ### Activity
 
@@ -92,15 +284,17 @@ summary(fm2)
 
 > PC is basically as axis of sand with values in negative PC1 scores to mud in positive PC1 scores. Gravel doesn't load appreciably on PC1. Logistic regression shows that as PC1 score increases, sole are less likely to be present (negative coefficient estimate). So sole are less likely to be present as the substrate gets more muddy. They are more likely to be present as the substrate gets more sandy.
 
-The code below plots the outcome. Change `eval=FALSE` to `eval=TRUE` to run this chunk when knitting.
+The code below plots the outcome. Change `eval: false` to `eval: false` to run this chunk when knitting.
 
-```{r, eval=FALSE}
+```{r}
+#| eval: true
+
 # Plotting the outcome.
 # FIXME
 
-M$PC1 <- z$x[, 1]
+Sole$PC1 <- z$x[, 1]
 
-ggplot(M, aes(x = PC1,
+ggplot(Sole, aes(x = PC1,
               y = as.numeric(Solea_solea) - 1)) +
   geom_hline(yintercept = 0.5, linetype = "dotted", linewidth = 0.5) +
   geom_smooth(method = "glm",
@@ -112,185 +306,5 @@ ggplot(M, aes(x = PC1,
   scale_y_continuous(breaks = seq(0, 1, by = 0.1)) +
   annotate("text", x = -3, y = -0.2, label = "Sandy") +
   annotate("text", x = 3, y = -0.2, label = "Muddy")
-```
-
-
-## Randomization and Empirical *P*-values
-
-Randomization is an approach hypothesis testing that doesn't rely on the same set of assumption as the "original" test. The general procedure is:
-
-1. Fit the model to the observed data.
-2. Decide on a test statistic to use for the randomization (mean, difference of means, *t*, *F*, etc.).
-3. Perform the randomization:
-    - Calculate the test statistic for the *observed* data
-    - Randomly shuffle the observations
-    - Calculate the test statistic for that group
-    - Repeat thousands of times
-4. Plot a histogram of the resulting set of test statistics and add a line denoting your observed value
-5. Determine the proportion of random combinations resulting in a test statistic more extreme than the observed value ("empirical *P*")
-
-Remember to start with a small number of iterations (10 or 100) until you get the code working correctly. Then increase to 10,000 for a final analysis.
-
-
-### Worked example: Stalk-eyed flies
-
-We will start with a worked example: compare the mean eye span in stalk-eyed flies raised on two food sources. This model is a good candidate for randomization because the variances are unequal (there is about 4x difference).
-
-Study the code below, and make sure that you understand what each line does.
-
-```{r, flies1, message=FALSE}
-# Use the tictoc package to time how long the code takes.
-library(tictoc)
-
-# Read data
-stalk <- read_csv("../data/Stalkies.csv", col_types = "cd")
-
-# Check standard deviations
-stalk |> 
-  group_by(food_source) |> 
-  summarize(st_dev = sd(eye_span),
-            .groups = "drop")
-
-# Some thoughtful plotting
-ggplot(stalk, aes(x = food_source, y = eye_span)) +
-  geom_point(position = position_jitter(width = 0.05), alpha = 0.5) +
-  stat_summary(fun = mean, geom = "point", size = 3, color = "red") +
-  stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.1,
-               color = "red", linewidth = 0.7) +
-  labs(x = "Food Source", y = "Eye Span")
-
-set.seed(8987324)
-nreps <- 1e5
-t_stats <- numeric(nreps)
-t_stats[1] <- t.test(eye_span ~ food_source, data = stalk)$statistic
-
-tic() # Start timer
-for (ii in 2:nreps) {
-  t_stats[ii] <- t.test(sample(eye_span) ~ food_source, data = stalk)$statistic
-}
-toc() # Stop timer
-
-tibble(t_stats) |>
-  ggplot(aes(t_stats)) +
-  geom_histogram(bins = 30) +
-  geom_vline(xintercept = t_stats[1], color = "red") +
-  labs(x = "t statistics", y = "Count")
-
-# Calculate the empirical P-value as the mean of the inequality
-# Because t is positive, we want the number of times that the 
-# randomized data was more extreme (larger) than the observed value.
-# This is converted to 0 (false) and 1 (true), and the mean is the
-# proportion of trues. The value is doubled for a 2-tailed test.
-2 * mean(t_stats >= t_stats[1])
-
-# Compare to the observed P-value
-t.test(eye_span ~ food_source, data = stalk)
-```
-
-10^5^ iterations took ~84 seconds on a single processor (on this computer). We don't need to run that many iterations to get a good sense that the empirical P-value is going to be very low. The analytical *P* is 6^-10^, so we expect the empirical *P* to be on the same scale.
-
-We can use parallel processing to speed things up considerably, taking advantage of the fact that we are really just doing the same kind of calculation over and over.
-
-The code below implements a simple parallel loop using some straightforward R packages. Some of this code will look unfamiliar, but we have commented it for you, in case you want to try something like this with your own data. But rather than doing a for loop, we will use the `furrr` package (https://furrr.futureverse.org/), which handle the parallelization and collection of the results.
-
-The following chunk will not run during knitting.
-
-```{r, flies2, eval=FALSE}
-# Load packages
-library(furrr)
-
-# Calculate observed t-statistic
-t_obs <- t.test(eye_span ~ food_source, data = stalk)$statistic
-
-# Set up iterations
-nreps <- 1e5 - 1
-
-# Set up parallel processor
-# Use the number of cores minus one to reserve some processing power for
-# system processes.
-n_cores <- availableCores() - 1
-message("Using ", n_cores, " cores.")
-
-# Setup parallelization
-plan(multisession, workers = n_cores)
-
-# Function to do the randomized t-test and return the t-statistic only.
-t_rand <- function(.x, stalk) { # the 1st parameter is the iterator .x
-  rnd_t <- t.test(sample(eye_span) ~ food_source, data = stalk)
-  return(as.numeric(rnd_t$statistic))
-}
-
-# Parallel randomization execute t_rand(), and combine the output into
-# t_stats (numeric vector).
-tic()
-rand_ts <- future_map_dbl(.x = 1:nreps,
-                          .f = t_rand,
-                          stalk = stalk,
-                          .options = furrr_options(seed = TRUE))
-toc()
-
-# Stop cluster
-plan(sequential)
-
-# Combine observed and randomized
-t_stats <- c(t_obs, rand_ts)
-
-2 * mean(t_stats >= t_stats[1])
-```
-
-The same number of iterations but using 7 processors takes 16.9 seconds (on this computer).
-
-```{r}
-# Iterations per second, 1 processor
-(p1 <- 80 / nreps)
-
-# Iterations per second, 7 processors
-(p7 <- 16.9 / nreps)
-
-p1 / p7
-```
-
-We get a speed-up of about 4.7 times. There is some overhead in the parallelization, passing data back and forth between the processes, so we don't get 7x the speed that we might expect.
-
-
-### Heart Transplant Survivorship (PS 08)
-
-For the data on survivorship after heart transplant, we had to transform the data due to unequal variances. That is not necessary when we use randomization. Reanalyze these data without transformation, testing the same hypothesis as you did in PS 08.
-
-Refer to the key for PS 08 to refresh yourself with the question and adapt the code from the example above (either sequential or parallel). Otherwise we will leave this exercise undirected.
-
-```{r, heart_transplants}
-# FIXME
-HT <- read_excel("../data/Heart_Transplants.xlsx") |>
-  mutate(Mismatch_Degree = fct_inorder(Mismatch_Degree))
-
-ggplot(HT, aes(x = Mismatch_Degree, y = Survival_Days)) +
-  geom_point(position = position_jitter(width = 0.05), alpha = 0.5) +
-  stat_summary(fun.y = mean, geom = "point", size = 3, color = "red") +
-  stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.1,
-               color = "red", size = 0.7) +
-  labs(x = "Mismatch Degree", y = "Survival (days)")
-
-fm <- lm(Survival_Days ~ Mismatch_Degree, data = HT)
-obs <- summary(fm)
-
-set.seed(823476)
-nreps <- 1e4
-F_stats <- numeric(nreps)
-F_stats[1] <- obs$fstatistic["value"]
-
-for (ii in 2:nreps) {
-  fm_rand <- lm(sample(Survival_Days) ~ Mismatch_Degree,
-                    data = HT)
-  F_stats[ii] <- summary(fm_rand)$fstatistic["value"]
-}
-
-tibble(F_stats) |>
-  ggplot(aes(F_stats)) +
-  geom_histogram(bins = 30) +
-  geom_vline(xintercept = F_stats[1], color = "red") +
-  labs(x = "F statistics", y = "Count")
-
-mean(F_stats >= F_stats[1])
 ```
 
