@@ -362,7 +362,7 @@ The code below shows a randomization that we can use to estimate the number of e
 1. We want to keep the correlation structure of the gene expression measures. An easy way to do this is to shuffle the sex labels and leave the expression measures the same.
 2. We performed our set of 100 tests in the same way that we did above. 
 3. We collected the associated *P*-values using the `getP` function. 
-4. These were put into a 1000 x 100 matrix with each column as one iteration. 
+4. These were put into a 100 x 1000 matrix with each column as one iteration. 
 
 Change `eval: false` to `eval: true` before you run. `cache: true` tells RStudio to save the results of the simulation locally and only rerun the code block if it changes.
 
