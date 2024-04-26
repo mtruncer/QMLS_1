@@ -16,18 +16,6 @@ bibliography: QMLS_Bibliography.bib
 csl: evolution.csl
 ---
 
-```{r}
-#| label: setup
-#| message: false
-#| warning: false
-
-library(tidyverse)
-library(cowplot)
-library(readxl)
-library(lme4)
-
-theme_set(theme_cowplot())
-```
 
 ## Course Evaluations
 
@@ -46,19 +34,36 @@ theme_set(theme_cowplot())
     - Optional
     - Recorded
 
-## Non-independence {.smaller}
+
+## Phylogenetic non-independence
 
 I am curious about how to create a multilevel model in cases when the groups are staggered unevenly in how individuals within the group are related to each other. ... Phylogenetic relationships can get complicated quickly and different taxa will have a different shared evolutionary history with other taxa in the dataset, so I would expect that the kinds of grouped examples from lecture 9-4 would only work in a few specific circumstances regarding phylogenetic comparisons. Is there a standard way of weighting the contribution of each datapoint based on known non-independence (or a proxy for non-independence) to the other datapoints within the dataset?
 
 
-## PS 11
+## Repeatability and ICC
 
 - Let's say I am using ICC for data with a small sample size which may lead to a less stable estimate of reliability. Are there models that I can apply to get a more reliable estimate from data with small sample size?
+
+
+## PS 11
+
 - I am somewhat confused with the pFDR analysis. Could we go over setting up a pFDR analysis? 
 - I struggled with the last several chunks of PS_11, where we use the code for randomization.  
 - Also, could we maybe go over plotting FPR, FWER, FDR against the threshold?  
 
+
 ## Dimensionality reduction
+
+- In regards to PCA, during lecture it appears the number of principal components is equal to the number of variables being measured on the small scale examples. Would that still be true when looking at datasets with very large numbers of measured variables? If not, why?
+
+
+## Dimensionality reduction
+
+- I'm still pretty confused about how to read PCA plots, specifically the circle graphs (quiz 12-3). Could you go over this quiz?
+    - Quiz 12-3
+
+
+## Non-linear dimensionality reduction
 
 - I sometimes see that other dimensionality reduction techniques should only be used for data visualization and not used as inputs for modeling or in downstream analyses. Is this the case for UMAP and t-SNE? If so, why?
 - I typically have very large data sets, and in papers that utilize similar data sets, I see variations of PCA, t-SNE, and UMAP utilized. I think I understand that PCA is typically linear vs the other two, but then you add in PCoA and it’s just confusing for my brain on which one is appropriate for which type of data set
@@ -66,23 +71,31 @@ I am curious about how to create a multilevel model in cases when the groups are
 
 ## Dimensionality reduction
 
-- One thing I've wondered about presenting PCA plots is whether it would make sense to scale the plot axes to be proportional to the percentages they represent (for example, if PC1 represents 50% of variance and PC2 represents 25%, making the PC1 axis twice as long as the PC2 axis) instead of setting them to the same heights. I usually see PCAs plotted as squares, which makes sense for space reasons in a publication, but if PC1 and PC2 are very different from one another, it feels like setting the axes equal to each other would distort the smaller one to make it seem like it has a larger relative influence on the data.
+> A good [dimensionality reduction analysis] "makes sense"; a bad one does not.
+
+<div class="ref">
+Tabachnick and Fidell (2019)
+</div>
+
 
 ## Dimensionality reduction
 
-- In regards to PCA, during lecture it appears the number of principal components is equal to the number of variables being measured on the small scale examples. Would that still be true when looking at datasets with very large numbers of measured variables? If not, why?
+- One thing I've wondered about presenting PCA plots is whether it would make sense to scale the plot axes to be proportional to the percentages they represent (for example, if PC1 represents 50% of variance and PC2 represents 25%, making the PC1 axis twice as long as the PC2 axis) instead of setting them to the same heights. I usually see PCAs plotted as squares, which makes sense for space reasons in a publication, but if PC1 and PC2 are very different from one another, it feels like setting the axes equal to each other would distort the smaller one to make it seem like it has a larger relative influence on the data.
+
+
+## Dimensionality reduction
+
+![](https://cdn.masto.host/ecoevosocial/cache/media_attachments/files/112/282/149/649/616/584/original/814b287441628caf.png)
+
 
 ## Randomization
 
-- How do we interpret the results of the randomization histograms from 12-01.  Is the vertical red line being closer to the edge of the plot better or worse. 
+- How do we interpret the results of the randomization histograms from 12-01.  Is the vertical red line being closer to the edge of the plot better or worse.
+    - Quiz and Lecture 12-1
+
 
 ## Odds ratios
 
-In reference to the 12-2 lecture, why would it be beneficial to visualize odd ratios in a graph? It seems very abstract and less clear than a single numeric value. 
+- In reference to the 12-2 lecture, why would it be beneficial to visualize odd ratios in a graph? It seems very abstract and less clear than a single numeric value. 
+    - Lecture 12-2
 
-
-## Unit 12 quizzes
-
-- Most questions this week were general about each topic
-
-## References
