@@ -15,11 +15,6 @@ format:
 #| message: false
 #| warning: false
 
-library(tidyverse)
-library(readxl)
-library(cowplot)
-
-theme_set(theme_cowplot())
 
 # This option turn on caching of chunks. This will dramatically
 # speed up knitting, because only chunks that have changed will
@@ -64,6 +59,8 @@ library(tictoc)
 
 # Read data
 stalk <- read_csv("../data/Stalkies.csv", col_types = "cd")
+#                 ^^^^^^^^^^^^^^^^^^^^
+# Update the path for your computer
 
 # Check standard deviations
 stalk |> 
@@ -183,44 +180,12 @@ For the data on survivorship after heart transplant, we had to transform the dat
 Refer to the key for PS 08 to refresh yourself with the question and adapt the code from the example above (either sequential or parallel). Otherwise we will leave this exercise undirected.
 
 ```{r}
-# FIXME
-HT <- read_excel("../data/Heart_Transplants.xlsx") |>
-  mutate(Mismatch_Degree = fct_inorder(Mismatch_Degree))
 
-ggplot(HT, aes(x = Mismatch_Degree, y = Survival_Days)) +
-  geom_point(position = position_jitter(width = 0.05, seed = 3648), alpha = 0.5) +
-  stat_summary(fun.y = mean, geom = "point", size = 3, color = "firebrick4") +
-  stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.05,
-               color = "firebrick4", linewidth = 1) +
-  labs(x = "Mismatch Degree", y = "Survival (days)")
-
-fm <- lm(Survival_Days ~ Mismatch_Degree, data = HT)
-obs <- summary(fm)
-
-set.seed(823476)
-nreps <- 1e4
-F_stats <- numeric(nreps)
-F_stats[1] <- obs$fstatistic["value"]
-
-for (ii in 2:nreps) {
-  fm_rand <- lm(sample(Survival_Days) ~ Mismatch_Degree,
-                    data = HT)
-  F_stats[ii] <- summary(fm_rand)$fstatistic["value"]
-}
-
-tibble(F_stats) |>
-  ggplot(aes(F_stats)) +
-  geom_histogram(bins = 30) +
-  geom_vline(xintercept = F_stats[1], color = "firebrick4") +
-  labs(x = "F statistics", y = "Count")
-
-mean(F_stats >= F_stats[1])
 ```
 
 Based on this analysis via randomization, is there a significant difference in survival time? HOw does this results compare to the analysis you did on the transformed data in PS 08?
 
-> The empirical P-value is ~0.166 (your answer will vary slightly due to sampling variation). The P-value for the overall ANOVA on the transformed data was 0.224. So the results are quite similar.
-
+> 
 
 ## Return of the Sole
 
@@ -231,66 +196,45 @@ In lecture, we looked at presence/absence data for the common sole ([*Solea sole
 Load the sole data from the file `Sole.xlsx`. Several of the variables are categorical and should be converted into factors: season, month, area, and Solea_solea. Go ahead and do this now. As a final step, convert your object with the data into a `data.frame` with `as.data.frame()`.
 
 ```{r}
-# FIXME
 
-Sole <- read_excel("../data/Sole.xlsx") |>
-  mutate(season = factor(season),
-         month = factor(month),
-         area = factor(area),
-         Solea_solea = factor(Solea_solea)) |> 
-  as.data.frame()
-str(Sole)
 ```
 
 The columns `gravel`, `large_sand`, `med_fine_sand`, and `mud` represent their proportional concentrations in the substrate (they sum to 100). Calculate a composite score for "substrate". Use principal components analysis on these columns.
 
 ```{r}
-# FIXME
 
-z <- prcomp(~ gravel + large_sand + med_fine_sand + mud,
-              data = Sole,
-              scale. = TRUE,
-              center = TRUE)
 ```
 
 Use the `summary()` and `print()` methods to determine the percent of variance accounted for by each PC and the relative loadings of each variable.
 
 ```{r}
-# FIXME
 
-summary(z)
-print(z)
 ```
 
 What is your interpretation of the PCA?
 
-> PC 1 accounts for 62% of the variation, which is fairly high. Mud loads positively, whereas two kinds of sand load negatively. Gravel doesn't load at all really. So PC represents a mud vs. sand axis.
+> 
 
 Fit a logistic regression where presence of sole is predicted by the first PC from the PCA above. Refer to the lecture slides if you need to.
 
 ```{r}
-# FIXME
 
-fm2 <- glm(Solea_solea ~ z$x[, 1], data = Sole, family = "binomial")
 ```
 
 Try to interpret the output of the summary of the fitted model. What kind of substrate do sole appear to prefer?
 
 ```{r}
-# FIXME
 
-summary(fm2)
 ```
 
-> PC is basically as axis of sand with values in negative PC1 scores to mud in positive PC1 scores. Gravel doesn't load appreciably on PC1. Logistic regression shows that as PC1 score increases, sole are less likely to be present (negative coefficient estimate). So sole are less likely to be present as the substrate gets more muddy. They are more likely to be present as the substrate gets more sandy.
+> 
 
-The code below plots the outcome. Change `eval: false` to `eval: false` to run this chunk when knitting.
+The code below plots the outcome. Change `eval: false` to `eval: true` to run this chunk when knitting.
 
 ```{r}
-#| eval: true
+#| eval: false
 
 # Plotting the outcome.
-# FIXME
 
 Sole$PC1 <- z$x[, 1]
 
