@@ -14,7 +14,7 @@ format:
 #| label: setup
 #| message: false
 #| warning: false
-
+library(tidyverse)
 
 # This option turn on caching of chunks. This will dramatically
 # speed up knitting, because only chunks that have changed will
