@@ -106,11 +106,6 @@ theme_set(theme_cowplot())
 ::::
 
 
-## Randomization
-
-- In PS_12, when I try the first randomization activity, it takes much longer on my PC than it indicates in the problem set.  Further, when I try randomization on the heart transplant data it also takes forever (428.61 seconds).  Is this a computer memory issue on my part or should I expect longer processing times the higher the reps are? 
-
-
 ## Factorial models
 
 > "We wish to determine if the rate of interactions varies with sex of the focal animal, the sex of the animal it interacts with, and the interaction between the two (a factorial ANOVA type of linear model). Load the data and generate any plots that you think will help you visualize the patterns in the data." 
