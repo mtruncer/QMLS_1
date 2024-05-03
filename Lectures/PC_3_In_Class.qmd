@@ -1,0 +1,134 @@
+---
+title: "Progress Check 3 Review Session"
+author:
+  - Elizabeth King
+  - Kevin Middleton
+format:
+  revealjs:
+    theme: [default, custom.scss]
+    standalone: true
+    self-contained: true
+    logo: QMLS_Logo.png
+    slide-number: true
+    show-slide-number: all
+code-annotations: hover
+bibliography: QMLS_Bibliography.bib
+csl: evolution.csl
+---
+
+```{r}
+library(tidyverse)
+library(cowplot)
+theme_set(theme_cowplot())
+
+```
+
+
+## Course Materials
+
+- [Github](https://github.com/QM-Life-Sci/QMLS_1)
+    - Slides
+    - Code
+    - Problem sets, keys
+- [YouTube](https://www.youtube.com/watch?v=bMRfrufqu28&list=PLeIk-G-wZpqyys1lUuWQDxeMQA1ICncmH)
+
+
+## Quant Methods 2 (BIO_SC 8642)
+
+- Current modules (5 weeks; 1 unit each)
+    - Advanced data visualization
+    - Bayesian inference 1
+    - Randomization and simulation methods
+    - Multivariate methods
+
+
+## Quant Methods 2
+
+- Possible future modules
+    - Bayesian inference 2
+    - Multilevel models (e.g., GWAS, spatial, kinship, phylogenetic)
+    - Reproducible Research Methods
+    - Advanced R Programming
+
+
+## PS 11 FDR / pFDR
+
+- I struggled with the question from problem set 11 related to calculating the FPR, FDR, and FWER over a range of thresholds given the Shuffle_Expression.rds data. I got lost in the weeds on this one when working with the multiple iterations.
+
+
+## lm / lme / etc.
+
+- I am still having trouble fully understanding the difference between `lm()` and `lme()` and when to use them.
+
+
+## What to use when
+
+:::: {.columns}
+
+::: {.column width="40%"}
+`lm()`: Linear models
+
+- OLS regression
+- *t*-tests
+- ANOVA
+- Multiple regression 
+:::
+
+::: {.column width="60%"}
+`lme()`, `lme4()`, `glmmTMB()`
+
+- Multilevel linear models 
+
+---
+
+`glm()`: Generalized linear models
+
+- Logistic
+- Poisson
+- Others
+
+:::
+
+::::
+
+
+## Randomization
+
+- In PS_12, when I try the first randomization activity, it takes much longer on my PC than it indicates in the problem set.  Further, when I try randomization on the heart transplant data it also takes forever (428.61 seconds).  Is this a computer memory issue on my part or should I expect longer processing times the higher the reps are? 
+
+
+## Factorial models
+
+> "We wish to determine if the rate of interactions varies with sex of the focal animal, the sex of the animal it interacts with, and the interaction between the two (a factorial ANOVA type of linear model). Load the data and generate any plots that you think will help you visualize the patterns in the data." 
+
+- With this one we will make two linear models and then an interaction plot? 
+
+
+## Kinds of R^2^
+
+> What difference does it typically make to use the adjusted R-squared value instead of just the R-squared value in a multiple regression case?
+
+- R^2^: Proportion of variance explained
+- Adjusted R^2^: Proportion of variance explained, adjusted for the number of predictors ($\leq$ R^2^)
+
+<center>
+*What is R^2^ used for?*
+</center>
+
+
+## Logistic regression output (PS 12)
+
+- I would like to go over how to interpret the summary outputs for linear models again, just to make sure I understand what they're doing. In particular, how to interpret intercepts, standard errors, F-statistics, and z-values (for GLMs), and what those values are saying about the dataset or the model.
+- I would also like to go over it. I struggled to interpret the summary table of logistic regression.
+- I also had a hard time getting conclusions from the PCA in PS12, I thought gravel was the preferred sediment, but the plot at the end only shows mud and sand.
+
+
+## Loops & Simulation
+
+- I am having trouble with the guppies question from PC3. I am trying to set up a loop to run the linear model and extract the p-values, but I'm unsure where to start.
+- I would also really like to discuss this part of the Progress Check. I assume that we are building from what we did with PS11, but I am still having trouble modifying the code to adhere to a simulation that creates both lm and lme data.
+
+
+## And finally...
+
+- Could you explain the code chunk that produced slide 27 of lecture 12-2?
