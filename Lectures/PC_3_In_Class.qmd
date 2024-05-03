@@ -23,7 +23,21 @@ theme_set(theme_cowplot())
 
 ```
 
+## Course Evaluations
 
+- Instructor specific (so there are 2 - sorry!)
+- Already have an email
+- Open until May 4 (today is the last day!)
+- Can't find email? 
+    - Go to [evaluations.missouri.edu](https://evaluation.missouri.edu/)
+    
+## Wrapping up the semester
+
+- Grades are due Tuesday, May 14th
+- Please look to see if you have incomplete assignments and submit them
+  - Including posting questions or replies
+- If you are unable to complete your missing assignments, set up a time to talk to us about an incomplete
+    
 ## Course Materials
 
 - [Github](https://github.com/QM-Life-Sci/QMLS_1)
