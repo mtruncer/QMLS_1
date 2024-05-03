@@ -129,6 +129,11 @@ theme_set(theme_cowplot())
 - I would also really like to discuss this part of the Progress Check. I assume that we are building from what we did with PS11, but I am still having trouble modifying the code to adhere to a simulation that creates both lm and lme data.
 
 
+## Timing
+
+- In PS_12, when I try the first randomization activity, it takes much longer on my PC than it indicates in the problem set.  Further, when I try randomization on the heart transplant data it also takes forever (428.61 seconds).  Is this a computer memory issue on my part or should I expect longer processing times the higher the reps are? 
+
+
 ## And finally...
 
 - Could you explain the code chunk that produced slide 27 of lecture 12-2?
