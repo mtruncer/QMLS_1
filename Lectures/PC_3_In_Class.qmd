@@ -125,6 +125,7 @@ theme_set(theme_cowplot())
 
 ## Loops & Simulation
 
+- What are the factors to be considered when choosing a test statistic that will be used to evaluate the hypothesis being tested?
 - I am having trouble with the guppies question from PC3. I am trying to set up a loop to run the linear model and extract the p-values, but I'm unsure where to start.
 - I would also really like to discuss this part of the Progress Check. I assume that we are building from what we did with PS11, but I am still having trouble modifying the code to adhere to a simulation that creates both lm and lme data.
 
