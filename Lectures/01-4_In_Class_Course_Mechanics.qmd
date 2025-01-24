@@ -37,10 +37,18 @@ csl: evolution.csl
 
 ## What you need
 
-- Laptop
+- Laptop (fully charged)
 - Can do attitude
 - Patience
 - Presence
+
+
+## Why is this class is structured this way
+
+- We have taught it in the traditional way, and it does not work as well.
+    - Working together is key
+- Yes it is more effort on your part to coordinate, etc.
+    - Teaching is how you know you have learned something
 
 
 ## Book, etc.
@@ -54,7 +62,7 @@ There is no one-size-fits-all statistics textbook.
 
 ## Online lectures
 
-- Available Mondays (or sooner)
+- Available Fridays
 - Watch, pause, take notes, re-watch, look up topics you don't understand, etc.
 
 
@@ -63,6 +71,7 @@ There is no one-size-fits-all statistics textbook.
 Participation: Your participation grade in the course will be a function of:
 
 - Quiz questions (completion)
+- Discussion board (completion)
 - Problem sets (completion)
 - Peer evaluations (both your own completion of and others' evaluations of you)
 - In class contributions
@@ -122,17 +131,22 @@ Progress Checks:
     - Many ways to the same outcome
 
 
-## Typical weekly schedule
+## Typical weekly schedule {.smaller}
 
-*Monday*: Lectures, "quizzes", readings (when applicable) posted online to Canvas
+**Friday**: Lectures, "quizzes", readings (when applicable) posted online to Canvas
 
-*Thursday*: Assignments due at midnight:
+**Tuesday** at midnight: 
 
 - Previous week's problem set submitted through Canvas
 - Peer evaluations
-- Weekly quizzes
 
-*Friday*: Class meeting, discuss any issues from that week (anonymous or not), work together on next problem set.
+**Thursday** at midnight: 
+
+- Watch lectures
+- Weekly quizzes
+- Discussion board (note problem set key is available)
+
+**Friday**: Class meeting, discuss any issues from that week (anonymous or not), work together on next problem set.
 
 
 ## Missing class
@@ -153,9 +167,96 @@ Progress Checks:
 
 ## Asking questions
 
-- The final weekly quiz question will ask you what topics were the most challenging to you.
+- Each week you will ask a question about what topics were the most challenging to you.
 - Start from what you know. Think about what you do not understand.
 - Try to be as specific as possible
 
 "I understand that ... I am trying to understand ..."
+
+
+## Artificial intelligence is not intelligence
+
+- We (unfortunately) use human terms to describe LLMs: "intelligence", "learn", "understand", "think", "know", "hallucinate"
+- LLMs generate responses based on probabilities (what character/word comes next?), which are derived from their training data.
+- [Large Language Models explained briefly (YouTube)](https://www.youtube.com/watch?v=LPZh9BOjkQs)
+
+
+## Predicting based on probability
+
+Predict $y$ if $x = 3$.
+
+$$y = 2x + 3$$
+
+
+## What are the next two numbers in the sequence?
+
+$$1, 3, 5, 7$$
+or
+
+$$1, 3, 5, 7, 17, 19, 21$$
+
+LLMs can answer the first but not the second.
+
+
+## Ways in which large language models can fail you {.smaller}
+
+- *Outdated and/or incorrect information*: LLMs are trained on historical data, which might have changed or be incorrect
+- *Inability to explain*: If you don't code it yourself, you will have greater challenges explaining it
+- *Debugging challenges*: If your code doesn't work, then figuring out why will be more challenging
+- *Short circuit* the development of problem-solving skills in our learn-by-doing approach
+    - Be willing to fail and keep trying.
+- *Limiting you creativity and innovation*: There are many ways to solve a coding challenge
+
+
+## Course AI guidelines: "AI Integration Allowed: Human-in-the-Loop"
+
+- Generative AI may be used in this course. The content you submit is your responsibility. Be sure your work accurately reflects your understanding and avoids these pitfalls.
+- You are responsible for understanding what you submit. Simply copying an AI-generated solution does not contribute to gaining understanding.
+
+
+## Course AI guidelines: "AI Integration Allowed: Human-in-the-Loop"
+
+If you use AI, please put this statement at the top of your problem set/progress check:
+
+> "I acknowledge the use of AI in completing this assignment and would like to provide a brief explanation of how I utilized AI, specifically [LLM], as a tool to support my work. For this assignment, I employed [LLM] to [describe the specific purpose or task]. To do so I crafted the following prompts: [List prompts used]"
+
+
+## Before you ask AI, ask yourself ...
+
+... how will this help me learn?
+
+
+## This Week's questions
+
+
+## Coming soon
+
+- Extracting from data frames and matrices
+- Data visualization
+- Importing data
+- Cleaning data
+- Functions
+
+Asking these questions helps us know how much time you want to spend on these topics
+
+
+## tibble vs. data.frame
+
+> Tibble is an upgraded version of data.frames. But  in what cases can you only use data.frames, not tibble and vice versa?
+
+- There are rare cases where it matters.
+- We will encounter a few and point them out.
+- Don't worry about it.
+
+
+## Learning R functions and Productivity
+
+> What is the best way to write and understand detailed codes, especially when there are too many functions/assignments in the code? What would be the best way to practice?
+
+> How have you found it easiest to learn/memorize functions in R? Do you recommend practice, notes, flashcards, etc?
+
+> What things should I consider to improve productivity in R studio?
+
+
+## Why would one make slides in R vs. Powerpoint, etc.?
 
