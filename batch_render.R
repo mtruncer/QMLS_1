@@ -1,4 +1,5 @@
 # Lecture slides
+options(warn=2)
 
 qmds <- list.files(pattern = "^[0-9]*-[1-6].*qmd$",
                    path = "Lectures/",
