@@ -21,12 +21,10 @@ csl: evolution.csl
 #| echo: false
 
 library(tidyverse)
+library(readxl)
 
 ```
 
-- back ticks & + 
-- Finding errors
-- Projects & workflow
 
 ## Today's Discussion
 
@@ -152,10 +150,36 @@ DD_long |>
 
 > Is there a way to combine the pipe with vectors? Is is possible to pipe to multiple steps (filtering or other) and then save the output as a vector in some way? In the past I've had trouble reconciling these two steps.
 
-FIXME
 
+## Pipes
 
+```{r}
+#| echo: true
+MM <- read_excel("../data/Mouse_Weaning_Data.xlsx",
+                 na = "NA") |>
+  filter(Sex == 0) |>
+  group_by(DamID) |>
+  summarise(MeanMass = mean(WnMass))
+  
+MM
+  
+```
 
+## Pipes
+
+```{r}
+#| echo: true
+
+MM.vec <- MM |>
+  select(MeanMass)|>
+  as.vector()
+
+str(MM.vec)
+
+MM.vec <- MM.vec$MeanMass
+str(MM.vec)
+  
+```
 
 
 ## Base R vs. tidyverse?
@@ -183,4 +207,3 @@ Which tool is the best for what situation does not have a single answer
 - Stray backticks `
 - R waiting for more input +
 
-FIXME
