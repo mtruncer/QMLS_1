@@ -24,20 +24,51 @@ library(tidyverse)
 
 ```
 
-## Miscellaneous questions
+- back ticks & + 
+- Finding errors
+- Projects & workflow
 
-- Customizing plots
-- Excel vs. csv vs. some other format
-- Writing files from R
-- What does the pipe do?
-- When to use native pipe (`|>`) vs. magrittr pipe (`%>%`)?
+## Today's Discussion
+
+- Data Organization
+- Plotting (not much discussion today - will plot all semester)
+- Pivoting
+- Pipes
+- Base R vs Tidyverse
+- Getting Help & Debugging
+
+## Data Organization
+
+> On the last lab I had some issues with data organization. How can you prevent the different datasets from overlapping?
+
+> Could you reiterate the purpose of creating projects and saving an environment in R? How do you recommend doing this in your workflow and organization?
+
+## Data Organization: NAs
+
+> I understand that I should use NA for missing data. But how would the graph be affected by missing date "NA" when plotting? And how to handle it? 
+
+> How can we remove NA data points without completely removing a row or column from our data set? Is it possible to only exclude one data point? What is the simplest way to remove outliers?
+
+## Data Organization: NAs {.smaller}
+
+> My question has to do with blank cells within Excel/CSV. In the lesson and article, we're instructed never to leave cells blank and add NA. Usually, I leave those cells blank and set up my code to interpret those blank cells as NA. Is that not enough?
+
+> I understand that -9 has been used in some past code projects to attempt to indicate "N/A" values and that modern coding practices no longer consider -9 a sufficient indicator for such "N/A" values, but I was wondering if there was any particular coding reason as to why R or other coding languages would read the numerical value "-9" specifically as representing the value "N/A." Moreover, if a particular data set being coded in R contains the value -9 in some form, how would we structure it in our code so it reads as the numerical value -9 instead of thinking we are attempting to write an "N/A" value?
+
+## Plotting
+
+> Do you normally switch between facet_wrap() and facet_grid()? is it typically dependent on the number of variables being considered?
+
+> Using ggplot, I have struggled before to set and alter scales on graphs, especially when trying to compare distributions of data. How can you change a scale, or even better center a plot at a specific location?
+
+> I am a little bit confuse about using ggplot layers to enhance my figures. I have struggled with compact labbling axes. How can I make the plots more informative and clear?
 
 
-## `tibble`s and `data.frame`s
+## Pivoting
 
-- When are they the same?
-- When are they different?
-- Which one should I use?
+> In comparing wide vs long format for data, why would it be better to analyze from long format in a practical sense? Is it easier for R to parse rows instead of columns?
+
+> I am a little confused about the differences between pivot_wider() and pivot_longer(). I understand the reason to use these on your data, but what benefit does one have over the other. Maybe I just need some more examples on how these could be used.
 
 
 ## Pivoting
@@ -106,8 +137,25 @@ DD_long |>
 2. Do some calculations
 3. Pivot to wide format
 
+## Pipes
 
-## Learning R commands
+> When needing to use a pipe, I have always written %>% in the past instead of |>. Is this a recent change or is there just a specific time to use one or the other? I interpreted the lecture video as one is used for base R and another for tidy, but I believe most of my experience has come from working with tidy.
+
+- `%>%` was developed first within tidyverse
+- `|>` can now be used in all of R 
+
+## Pipes
+
+> I didn't understand very well the function of pipe, why is it better to use that instead of just writing the functions?
+
+> Can you nest pipes or are you limited to just one?
+
+> Is there a way to combine the pipe with vectors? Is is possible to pipe to multiple steps (filtering or other) and then save the output as a vector in some way? In the past I've had trouble reconciling these two steps.
+
+FIXME
+
+
+
 
 
 ## Base R vs. tidyverse?
@@ -115,11 +163,24 @@ DD_long |>
 - What should I learn?
 - When should I use which?
 
+> Is there an advantage to using base R to visualize or is ggplot the best choice for all circumstances?
+
+> Can you use still use functions from BaseR once you have imported the tidyverse library? 
+
 
 ## Why do we learn multiple tools?
 
 Which tool is the best for what situation does not have a single answer
 
+## Getting Help & Debugging
 
-## When will we start learning statistics?
+> I have found it challenging on knowing how to search for help in R. I tried to use the “?” Function but sometimes I feel like it does not help me with my specific code or nothing shows up 
 
+> During the last problem set, I faced a lot of unknown errors, even though my code was exactly the same as my friend's. How can I fix these kinds of issues in R? 
+
+## Some common issues that cause frustration
+
+- Stray backticks `
+- R waiting for more input +
+
+FIXME
