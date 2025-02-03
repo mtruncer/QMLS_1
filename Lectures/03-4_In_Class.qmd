@@ -23,6 +23,14 @@ csl: evolution.csl
 library(tidyverse)
 ```
 
+
+## From anonnymous questions
+
+- Can you continuously edit/add to an excel sheet and have it load into a project with the newest version?
+
+- Can you explain how to write relative paths? I tried ./PS_02/filename.xls and it wouldn't render. I tried other equivalent versions and it also wouldn't render. The only thing that worked was the exact path. I fear I may be misunderstanding relative paths. 
+
+
 ## You should have a question.
 
 - You can't understand everything
