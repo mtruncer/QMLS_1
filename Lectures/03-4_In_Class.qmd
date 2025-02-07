@@ -24,112 +24,207 @@ library(tidyverse)
 ```
 
 
-## From anonnymous questions
-
-- Can you continuously edit/add to an excel sheet and have it load into a project with the newest version?
-
-- Can you explain how to write relative paths? I tried ./PS_02/filename.xls and it wouldn't render. I tried other equivalent versions and it also wouldn't render. The only thing that worked was the exact path. I fear I may be misunderstanding relative paths. 
-
-
-## You should have a question.
-
-- You can't understand everything
-- Something you are curious about
-
-Spend some time thinking before you answer with your question.
-
-- Take notes while you are watching
-- Review the slides / videos
-
-
 ## How to use the problem set keys
 
 Compare your answers and study alternate approaches
 
 
-## Cheatsheets
+## File organization
 
-- [Posit's tidyverse cheatsheets](https://posit.co/resources/cheatsheets/)
-- [RStudio's repository](https://github.com/rstudio/cheatsheets)
-    - [Base R](https://github.com/rstudio/cheatsheets/blob/main/base-r.pdf)
-
-
-## Miscellaneous questions
-
-- Fixing up plots, what goes where
-- When am I using base vs. tidyverse? Does it matter?
-- Understanding R's error messages
+- Updating data loaded from external files
+- `library()` vs. `install.packages()`
+- How often should you save processed files?
+    - Separate scripts for data cleaning and data analysis
+    - Most often: Raw Data $\rightarrow$ Output file with cleaned data
+- Working directory practice
+    - Relative paths
 
 
-## For the end of class
+## Joins
+
+- Joins create or combine rows; retain or create columns as
+- `left_join()` vs. `right_join()` vs. `full_join()` vs. `anti_join()`
+    - `left_join(A, B)` == `right_join(B, A)`
+- Quiz 3-2
 
 
-## Pasting text together
+## Joining
 
-- `paste()` and `paste0()`
-    - Use inside `mutate()`
-- `unite()`
-    - Use in a pipe
+```{r}
+set.seed(32742)
+
+b1 <- beaver1 %>%
+  mutate(time = as.integer(time)) %>%
+  select(-activ) %>% slice(1:10)
+
+air_temps <- tibble(
+  day = 346,
+  time = as.integer(c(830, 835, 840, 845, 850, 855,
+                      900, 905, 910, 915, 920, 930, 935, 940, 945, 950, 955,
+                      1000, 1005, 1010, 1015, 1020, 1025)),
+  air_temp = runif(length(time), 9, 10)
+)
+```
+
+
+:::: {.columns}
+
+::: {.column width="40%"}
+```{r}
+#| echo: true
+
+print(b1)
+```
+:::
+
+::: {.column width="60%"}
+```{r}
+#| echo: true
+
+print(air_temps, n = 23)
+```
+:::
+
+::::
+
+
+## Left join
 
 ```{r}
 #| echo: true
 
-(DD <- tibble(Col1 = letters[1:2],
-              Col2 = 1:2))
-
+left_join(b1, air_temps)
 ```
 
+- Joining with `by = join_by(day, time)`
 
-## `paste()` and `paste0()`
+
+## Full join
 
 ```{r}
 #| echo: true
 
-DD |> 
-  mutate(Paste = paste(Col1, Col2),
-         Paste2 = paste(Col1, Col2, sep = "-"),
-         Paste0 = paste0(Col1, Col2))
+full_join(b1, air_temps)
 ```
 
 
-## `unite()`
-
-By default the old columns are dropped (`remove = TRUE`)
+## Repeated column names
 
 ```{r}
 #| echo: true
-DD |> unite(col = "Unite", Col1, Col2)
-DD |> unite(col = "Unite", Col1, Col2, sep = "-")
+
+
+left_join(b1, air_temps, by = join_by(time))
 ```
 
+
+## Separate
+
+```{r}
+IDs <- structure(list(Sample = c("10339243_20240604_dbea51c1-46d7-41f7-9cc9-bb3eabc41326", 
+"10351235_20240620_b6571277-2cdf-4bba-8c66-63e79b4c56df", "10353170_20240607_78232c77-f77f-42ba-86a1-898485970ebb", 
+"10353307_20240612_97094286-e01d-4291-8624-d9eb5a5ae0ce", "10353940_20240613_a2471b7a-07b5-4e44-8e30-20485101147b", 
+"10361965_20240605_f33a532f-0286-478d-ad9d-3c8b2a88c1f1", "10370824_20240613_99dda9ae-d870-4029-956d-8f71d7c2dfc3", 
+"10371188_20240522_d0c56972-4354-4cd2-b55f-ec58ec2e6597", "10371698_20240610_eecbdc43-bf70-4f81-857f-ef85207fde43", 
+"10378521_20240725_09331911-0694-46f9-94fc-e650e075f415", "10379207_20240314_a20a47a7-7605-4726-a34d-06292597b94a", 
+"10379323_20240610_44fb64da-896e-4027-8041-90e901e98577", "10384854_20240619_1cc47e47-5cbc-478e-ab53-1073c10ae392", 
+"10385289_20240619_09e7b6f5-19d2-487e-9d49-bfa2d9cb3d54", "10386633_20240722_1bc766ab-bd55-49cd-8597-7c59a741fdf0", 
+"10397351_20240606_28793edf-d507-407e-ba38-0b81d204f4d3", "10403455_20240619_f65a4b72-3542-4c00-b058-a4d411d20b50", 
+"10404017_20240612_ba30b6d9-ea83-4ff9-88fd-819a8456c6c3", "10405726_20240626_eb28d39c-633e-430a-bf13-8b5df2164ca3", 
+"10408995_20240702_9be496f0-b677-4e08-b6a2-57fca34a16e9")), row.names = c(NA, 
+-20L), class = c("tbl_df", "tbl", "data.frame"))
+```
 
 ```{r}
 #| echo: true
-DD |> unite(col = "Unite", Col1, Col2, remove = FALSE)
+
+IDs
 ```
 
 
-## Boxplots: What do all the parts mean?
+## Separate
 
 ```{r}
 #| echo: true
-#| output-location: slide
 
-set.seed(3423644)
-DD <- tibble(y = c(rnorm(19, mean = 10, sd = 5), 25))
-
-ggplot(DD, aes(y)) +
-  geom_boxplot() +
-  coord_flip()
+IDs |> 
+  separate(Sample, into = c("Sample", "Date", "Random_String"),
+           sep = "_")
 ```
 
 
-## Boxplot recipe
+## Separate
 
-1. Median = center line
-1. Box = IQR (25th to 75th percentiles)
-1. Whiskers at 1.5 x 25th and 75th percentiles
-1. Dots for anything outside 1.5 x 25th and 75th percentiles
+```{r}
+#| echo: true
+
+IDs |> 
+  separate(Sample, into = c("ID", "Date", "Random_String"),
+           sep = "_") |> 
+  mutate(Date = ymd(Date))
+```
 
 
-## `separate()` vs. stringr functions
+## Separate by sub-strings
+
+```{r}
+#| echo: true
+
+IDs |> 
+  mutate(ID = str_sub(Sample, start = 1, end = 8),
+         Date = str_sub(Sample, start = 10, end = 17))
+```
+
+
+## Problematic splitting
+
+```{r}
+ids <- paste0("Sample", rep(1:10, each = 10), "-", 1:10)
+```
+
+```{r}
+#| echo: true
+
+ids
+```
+
+
+## Missing data and pivoting and joining {.smaller}
+
+- I understand how to go from explicit to implicit values and vice versa using pivoting. If we have pivot_wider(), what is the purpose of complete()? Aren't they both performing the same function?
+- How does dropping or completing the missing data values NA could affect further analysis?
+- In some of my own research data, I have a treatment and then different things I measured in that treatment. For example: looking at number of native plants, number of nonnative plants, tree, forbs etc. In this case, should I have broken up my data collection sheets or would I simply not need to pivot?
+
+
+## `%in%`
+
+```{r}
+#| echo: true
+
+1 == 1:10
+
+1 %in% 1:10
+
+"F" %in% (c("F", "f"))
+
+"F" %in% (c("M", "m"))
+```
+
+
+## Histogram bin size
+
+```{r}
+x <- rnorm(100)
+
+ggplot(tibble(x), aes(x)) + geom_histogram()
+```
+
+
+## Outliers vs. "Extreme values"
+
+- In the event that there are "real outliers", is it always safe to include it in the plot? I guess it depends on what the datapoint mean.
+
+
+## Working with large numbers of variables / observations
+
+- I am also wondering if there are further considerations when visualizing raw data when there are many different variables with 1,000s +  observations per variable. I recall in previous stats classes we use the basic plot() function on the data set and observe all the relations to look for anything "interesting" (such as potential relationships), but I never found it particularly helpful for making decisions on how to move forward with analysis.
