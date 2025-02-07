@@ -92,17 +92,17 @@ print(air_temps, n = 23)
 
 ```{r}
 #| echo: true
+#| message: true
 
 left_join(b1, air_temps)
 ```
-
-- Joining with `by = join_by(day, time)`
 
 
 ## Full join
 
 ```{r}
 #| echo: true
+#| message: true
 
 full_join(b1, air_temps)
 ```
@@ -112,7 +112,7 @@ full_join(b1, air_temps)
 
 ```{r}
 #| echo: true
-
+#| message: true
 
 left_join(b1, air_temps, by = join_by(time))
 ```
@@ -182,6 +182,10 @@ IDs |>
 ids <- paste0("Sample", rep(1:10, each = 10), "-", 1:10)
 ```
 
+Use: `_ - .`
+
+Characters to avoid: `/ \ # @ & > < ,`
+
 ```{r}
 #| echo: true
 
@@ -191,9 +195,9 @@ ids
 
 ## Missing data and pivoting and joining {.smaller}
 
-- I understand how to go from explicit to implicit values and vice versa using pivoting. If we have pivot_wider(), what is the purpose of complete()? Aren't they both performing the same function?
+- I understand how to go from explicit to implicit values and vice versa using pivoting. If we have `pivot_wider()`, what is the purpose of `complete()`? Aren't they both performing the same function?
 - How does dropping or completing the missing data values NA could affect further analysis?
-- In some of my own research data, I have a treatment and then different things I measured in that treatment. For example: looking at number of native plants, number of nonnative plants, tree, forbs etc. In this case, should I have broken up my data collection sheets or would I simply not need to pivot?
+- In some of my own research data, I have a treatment and then different things I measured in that treatment. For example: looking at number of native plants, number of nonnative plants, tree, forbs, etc. In this case, should I have broken up my data collection sheets or would I simply not need to pivot?
 
 
 ## `%in%`
@@ -201,20 +205,28 @@ ids
 ```{r}
 #| echo: true
 
-1 == 1:10
+4 == 1:10 # Vector of T/F
 
-1 %in% 1:10
+(x <- 20:30)
+(y <- c(21,25))
 
-"F" %in% (c("F", "f"))
+which(x %in% y) # Returns indices
+which(y %in% x)
 
-"F" %in% (c("M", "m"))
+1 %in% 1:10 # T/F
+
+"F" %in% (c("F", "f")) # T/F
+
+"F" %in% (c("M", "m")) # T/F
 ```
 
 
 ## Histogram bin size
 
 ```{r}
-x <- rnorm(100)
+#| echo: true
+
+x <- runif(100)
 
 ggplot(tibble(x), aes(x)) + geom_histogram()
 ```
