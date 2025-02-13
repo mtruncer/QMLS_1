@@ -337,7 +337,7 @@ Join your plot level data to your species richness data using `left_join()`. You
 ```{r}
 # FIXME
 richness <- richness |>
-  left_join(plot_ids, by = c("plot_no", "subplot"))
+  left_join(plot_ids, by = join_by(plot_no, subplot))
 richness
 
 # Alternately
