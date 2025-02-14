@@ -41,6 +41,11 @@ theme_set(theme_cowplot())
 - Ask us if you get stuck or have questions
 
 
+## Timeline
+
+![](../images/QM_PC.png)
+
+
 ## PS 3
 
 > During PS3, we were asked to join "plot_ID" and "richness." I was curious if it really matters what order you place objects within the join. If I wrote `left_join(ID, richness)` or `left_join(richness, ID)` it seems like I would get the same results but have a different column order. At the end of the day, does it really matter which object I state first, or should I spend more time understanding what might make one format better than the other in certain situations?
