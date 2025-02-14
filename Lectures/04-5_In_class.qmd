@@ -29,15 +29,56 @@ theme_set(theme_cowplot())
 
 ## Announcements
 
-- Submit both your qmd and the knitted HTML file. It helps us to review what you have done.
-- Progress Check 1 coming next week
+- Getting help with code
+- Keeping up with the course
 
 
-## PS 03 topics
+## Progress Check 1 next week
 
-- Boxplots?
-- Pivots?
-- Joins?
+- Available Monday 9 am
+- Work alone, but use all your resources
+- Question due Wednesday night (Units 1-4)
+- Ask us if you get stuck or have questions
+
+
+## PS 3
+
+> During PS3, we were asked to join "plot_ID" and "richness." I was curious if it really matters what order you place objects within the join. If I wrote `left_join(ID, richness)` or `left_join(richness, ID)` it seems like I would get the same results but have a different column order. At the end of the day, does it really matter which object I state first, or should I spend more time understanding what might make one format better than the other in certain situations?
+
+
+## Multiple joins
+
+```{r}
+set.seed(32742)
+
+b1 <- beaver1 |> 
+  mutate(time = as.integer(time)) |> 
+  select(-activ) |> slice(1:10)
+
+air_temps <- tibble(
+  day = 346,
+  time = as.integer(c(830, 835, 840, 845, 850, 855,
+                      900, 905, 910, 915, 920, 930, 935, 940, 945, 950, 955,
+                      1000, 1005, 1010, 1015, 1020, 1025)),
+  air_temp = runif(length(time), 9, 10)
+)
+```
+
+```{r}
+#| echo: true
+
+LJ <- left_join(b1, air_temps, by = join_by(time))
+left_join(LJ, air_temps, by = join_by(time))
+```
+
+
+## Distributions
+
+- Binomial -- more practice coming (`rbinom()` and `dbinom()`)
+
+> Is there a way to get the a distribution and determine if its correct based on preliminary data?
+
+> What would you do if data/value falls out of distribution range (a data point in a dataset is significantly higher or lower than the typical values within the rest of the data) like the question 3 in the quiz 4? 
 
 
 ## Thinking about probabilities
@@ -52,6 +93,11 @@ Why learn probability?
 Given the following probabilities for maize kernel germination, what is the probability of finding one kernel that is germinated and one that is not?
 
 ![](../images/Probability_Constant.drawio.png){fig-align="center"}
+
+
+## Germination probabilities
+
+- In lecture Video 2, when we are determining the number of corn we need to plant, do you have to keep trying different sample numbers until you reach a probability close enough to 1 to be considered probable? For example, if you were running sum(dbinom(30:#, #, prob = 0.75), would you try random numbers of sample size until you get a probability close to 1. Then, you know with that number of plants it is likely that you will have at least 30 plants germinate? 
 
 
 ## Binomial probabilities
@@ -222,6 +268,11 @@ What if the order had to be correct as well?
 ```
 
 Expected value is >$2 when the jackpot is >$584,402,676
+
+
+## Conditional probability
+
+- In terms of conditional probability equations, are there any particular situations where it would be more beneficial to solve with natural numbers over probabilities or vice versa? I'd imagine that the ease of which method to use might depend on the overall sizes of the numbers involved in the equation, but I'd be interested to know more about when it would be preferential to utilize one method of solving an equation over the other and vice versa.
 
 
 ## Breast cancer screening
