@@ -307,6 +307,7 @@ Sum of the log-likelihoods:
 sum(log(liks_Y))
 ```
 
+
 ## Maximizing the log-Likelihood
 
 Function to calculate the log-likelihood. Input the slope ($\theta_1$) and observed values of $X$ and $Y$. Return the log-likelihood.
