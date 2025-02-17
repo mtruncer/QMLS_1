@@ -218,20 +218,21 @@ tibble(AA, BB)
 
 > AA and BB are now equal.
 
-One key feature for simulating randomness in R is the `sample()` function. Imagine you had a list of potential participants for a study (e.g., the list of likely voters in the U.S.). You could use `sample()` to choose a random set. Let's try this with a set of letters representing people and we will randomly assign each to a group by sampling `c('Treatment','Control')` *with replacement*.
+One key feature for simulating randomness in R is the `sample()` function. Imagine you had a list of potential participants for a study (e.g., the list of likely voters in the U.S.). You could use `sample()` to choose a random set. Let's try this with a set of letters representing people and we will randomly assign each to a group by sampling `c('Treatment', 'Control')` *with replacement*.
 
 Look at the help file for `sample()` and see what the arguments below mean.
 
 ```{r}
 set.seed(592777)
 pp_all <- tibble(id = letters[1:26],
-                 sex = sample(c('Treatment', 'Control'), 26, replace = TRUE))
+                 tx = sample(c('Treatment', 'Control'), 26,
+                             replace = TRUE))
 ```
 
 Try the following:
 
 1. Generate a random sample of 5 elements from the `id` column without replacement
-2. Select a random sample of 5 ids with their associated sex (hint: sample the set of row indices [1 to 26] and take only those rows). Look at the help for the tidyverse function`slice_sample()` and see if you can figure out how to slice a random set of rows using a pipe.
+2. Select a random sample of 5 ids with their associated tx (hint: sample the set of row indices [1 to 26] and take only those rows). Look at the help for the tidyverse function`slice_sample()` and see if you can figure out how to slice a random set of rows using a pipe.
 
 ```{r}
 # FIXME
