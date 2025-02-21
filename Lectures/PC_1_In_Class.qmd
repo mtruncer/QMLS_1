@@ -34,192 +34,71 @@ island_data <- tibble(
 
 ## Topics for Today
 
-1. Best practices for coding & learning
-1. Miscellaneous questions
-1. Tidyverse functions
-1. Data visualization
-1. Progress Check 1 Questions
+1. PS 4
+1. Clarifying PC 1
+1. `sample()`
+1. Tidy
+1. Piping
+1. Pivots and joins
 1. Probability
 
 
-## Best practices for coding & learning
+## Clarifying PC 1
 
-> What's going to be the best option for reproducibility vs "reading the code" in the step-by-step way. 
+> Can you explain what is being asked in the paragraph below? "Using your long dataset that has the 40.04 value replaced with 4.04, merge the EVI dataset (`EVI.csv`) with the soil respiration data..."
 
-> Important points to consider when writing code in R in general and with respect to drawing bar charts, boxplots etc.
-
-
-## Best practices for coding & learning
-
-> I have the basics, but a lot of times the problem sets ask for more and it's a bit hard to understand even with outside help (internet, R help, etc.)
-
-> ... (and this is a bit more philosophical) is there a "right" answer? Although you said at the beginning of the semester that there are many ways to do the same operation in R, it does seem like there are particular ways you would prefer us to do things in opposition to that. Could you be explicit about where we can have freedom to experiment and where you want "your" answer?
+> I'm not sure if we can go over this on Friday, but I'd really like some clarification on one of the PC_01 questions - specifically the one about joining the EVI.csv data set with the modified soil respiration rates data set. The problem says that "that the EVI dataset does not currently have unique indicators (or key values) to merge with the soil respiration data", but both sets have Rs values. Why couldn't you modify the Rs outlier on the EVI set and then join them on Rs values? What would be the advantage to creating unique IDs?
 
 
-## Best practices for coding & learning
+## Clarifying PC 1
 
-- Many people have advice & resources
-    - Working on a resources page for Canvas
-- Let's look at some code
+> When the assignment asks us to stack graphs vertically, is it wanting the vertical axis aligned or is it wanting one graph on top of another positionally?
 
-
-## Strategies for Learning R {.smaller}
-
-1. Time. Practice. 
-2. Using help files
-    - ?unique
-3. Tips
-    - Make your own help folder
-        - https://github.com/kmiddleton/rexamples
-    - Develop a system for saving resources
-    - Write pseudocode & use comments
-    - Growth mindset
-3. Extra Resources
-    - For learning R & lots of other stuff (like Git)
+> I'm confused about the part of code asking "For the pairwise combinations of `host_race` and `plant_choice`, tally up the number of ovipositions for each. Assign this tibble to `gall_counts`."
 
 
-## Miscellaneous questions
-
-> How do we deal with numbers that are considered chr in R?  Like doing analysis/mathematical functions and stuff.
+## `sample()`
 
 ```{r}
 #| echo: true
 
-myVector <- c(4,5,2,1,"h",6, "3")
-str(myVector)
-str(as.numeric(myVector))
+set.seed(37466)
 
+x <- 1:10
+sample(x, replace = FALSE)
+sample(x, replace = TRUE)
+sample(x, size = 5)
 ```
 
 
-## Miscellaneous questions
-
-> How do we go about changing a column of data if there is an unwanted variable in them?
+## Tidy data -- when does it matter?
 
 
-## Miscellaneous questions
-
-> How would we determine the right number of samples for a study for it to be statistically significant? 
-
-- Stay tuned for power analysis (Unit 11)
-
-
-## Miscellaneous questions
-
-> What are the limitations associated with applying Bayesian approaches in the context of large-scale omics data analysis, including issues related to data sparsity, model complexity, and computational scalability?
-
-
-## Miscellaneous questions
-
-> Refresher on how to find and recategorize outliers.
-
-
-## Miscellaneous questions
-
-> Can you show an example of how to determine if your dataset follows a normal (or other) distribution?
-
-
-## Tests of normality
+## Piping
 
 ```{r}
 #| echo: true
 
-set.seed(93847)
-x <- rnorm(5000)
-ggplot(tibble(x), aes(x)) +
-  geom_histogram(bins = 30)
+(x <- rnorm(10))
+mean(x)
+x |> mean()
 ```
 
 
-## Tests of normality
-
-```{r}
-#| echo: true
-shapiro.test(x)
-```
-
-
-## Tests of normality
+## Piping
 
 ```{r}
 #| echo: true
 
-set.seed(423479)
-x <- runif(500)
-ggplot(tibble(x), aes(x)) +
-  geom_histogram(bins = 30)
+D <- tibble(x1 = rnorm(10),
+            x2 = runif(10))
+
+D |> pull(x1) |> mean()
+D |> pull(x2) |> mean()
+
+D |> summarize(x1 = mean(x1),
+               x2 = mean(x2))
 ```
-
-
-## Tests of normality
-
-```{r}
-#| echo: true
-
-shapiro.test(x)
-```
-
-
-## Tests of normality
-
-```{r}
-#| echo: true
-
-set.seed(347)
-x <- runif(15)
-ggplot(tibble(x), aes(x)) +
-  geom_histogram(bins = 30)
-```
-
-
-## Tests of normality
-
-```{r}
-#| echo: true
-
-shapiro.test(x)
-```
-
-
-## Set seed
-
-> How does the set.seed() function work? I understand that setting a seed at the beginning of the chunk allows for the random numbers being generated to be consistent each time you run the code, but how does this actually work?
-
-`?set.seed()`
-
-
-## Set seed {.smaller}
-
-> I had trouble with the set.seed() in problem set 4, may you show a similar example in class review. 
-
-```{r}
-#| echo: true
-
-set.seed(34235)
-AA <- rnorm(3); BB <- rnorm(3)
-AA
-BB
-
-set.seed(34235)
-AA <- rnorm(3)
-
-set.seed(34235)
-BB <- rnorm(3)
-AA 
-BB
-```
-
-
-## Tidyverse functions
-
-> I would like to better understand when I should be pivoting my data. ...  I am still unsure of when data needs to be pivotted if I am given a dataset and left to my own devices. Is it good practice to immediately convert wide data into long and then convert it back again after final analyses or transformations? Or are there certain functions which require the long data format, and if so, how can I identify them?
-
-> I'm still a bit confused about joining tables. Specifically, when do I need to pivot my data frames before joining or is that something I always do?
-
-
-## Tidyverse functions
-
-> I don't understand the selection process for grouping compared to filtering. The 2nd activity in the PS-04 where we're meant to assign the variables in the 1st activity and then change only one value each time. I couldn't figure out how to change one variable without retyping the whole thing; and that makes the outputs different but I feel its inefficient. General question about what I should be thinking when I know I'm going to need this data later.
 
 
 ## Tidyverse: pivots
@@ -299,6 +178,25 @@ ggplot(penguins_long, aes(x = body_mass_g, y = length, color = species)) +
 - `bill_depth_mm`
 
 Turn `bill_length_mm` and `bill_depth_mm` into a new column "bill_measure" and values to a column called "length"
+
+
+## selecting
+
+```{r}
+#| echo: true
+
+penguins |>
+  select(species, sex, body_mass_g, bill_length_mm, bill_depth_mm)
+```
+
+or
+
+```{r}
+#| echo: true
+
+penguins[, c("species", "sex", "body_mass_g",
+             "bill_length_mm", "bill_depth_mm")]
+```
 
 
 ## `pivot_longer()`
@@ -461,6 +359,9 @@ str(penguins)
 ```
 
 
+## Paste
+
+
 ## `group_by()` and `summarize()`
 
 1. Split the data into some set of subgroups
@@ -503,25 +404,7 @@ penguins |>
 
 ## Data visualization
 
-> Although we have not gone in depth into graph making, how should we decide what graph best represents a data set?
-
-> I might've missed this, but does R automatically generate a graph based on the type of dataset? I know from previous statistics courses that the data set depends on the graph. Are we going to learn more graph types? 
-
-> Is this a specific order to ggplot arguments? I'm still a little confused on how to set "bins" for histograms
-
-
-## Data visualization
-
-> Not necessarily a question per se, but I would like to learn more about interpreting visualization of data in R.  We've learned about different types of plots and visualizations and the code to use, but I struggle sometimes in my own data to articulately describe what a plot is telling me.  This might be something we discuss further on in the course, but, as of right now, it's something that I've been struggling with. 
-
-> Are there other graphing tips that you can provide as we navigate the different types and how to set up each one?
-
-
-## Data visualization
-
-> I face issues with ggplot questions. Just a review on that will be very helpful
-
-> I always make very silly little mistakes when creating plots with ggplot. Could you guys give a few organized examples of what all needs to be included when making plots.  
+> 
 
 
 ## Working with aesthetics
@@ -588,6 +471,8 @@ ggplot(penguins, aes(x = body_mass_g, y = species, fill = species)) +
 
 ## Working with aesthetics
 
+> Is there any method to decide a "good number" of bins considering the number of observations we have?
+
 ```{r}
 #| echo: true
 
@@ -620,25 +505,11 @@ ggplot(penguins, aes(log_bill_length, log_bill_depth, color = species,
 All are context-specific
 
 
-## Progress check questions
-
-> Regarding the activity that merges EVI and Soil Respiration, I would like to know more about creating the unique identifier column since I'm not sure how to create it or how it is can be used to merge the data.
-
-> Also, is there an easier way to slice the NA values out of the Rattlesnake data. Is there a way to specify only odd or even rows in the data without numbering them one by one?
-
-
 ## Probability 
 
 > Can you go through conditional probability one more time, an example similar to the HIV one?
 
 > I'm still struggling a bit with probability. I have a tendency to overthink and overcomplicate probability which often times causes me to second guess myself and make mistakes.
-
-
-## Probability 
-
-> I  would like to know more about conditional probability and the equation related to it.
-
-> What makes up a sufficient interpretation of a probability? I feel like I struggle to find the words to answer questions related to the interpretation of probabilities. I think covering some more examples of this would be helpful for me, though I will also return to previous lectures for review. 
 
 
 ## Temperature dependent sex determination
