@@ -35,26 +35,12 @@ island_data <- tibble(
 ## Topics for Today
 
 1. PS 4
-1. Clarifying PC 1
 1. `sample()`
 1. Tidy
 1. Piping
 1. Pivots and joins
 1. Probability
-
-
-## Clarifying PC 1
-
-> Can you explain what is being asked in the paragraph below? "Using your long dataset that has the 40.04 value replaced with 4.04, merge the EVI dataset (`EVI.csv`) with the soil respiration data..."
-
-> I'm not sure if we can go over this on Friday, but I'd really like some clarification on one of the PC_01 questions - specifically the one about joining the EVI.csv data set with the modified soil respiration rates data set. The problem says that "that the EVI dataset does not currently have unique indicators (or key values) to merge with the soil respiration data", but both sets have Rs values. Why couldn't you modify the Rs outlier on the EVI set and then join them on Rs values? What would be the advantage to creating unique IDs?
-
-
-## Clarifying PC 1
-
-> When the assignment asks us to stack graphs vertically, is it wanting the vertical axis aligned or is it wanting one graph on top of another positionally?
-
-> I'm confused about the part of code asking "For the pairwise combinations of `host_race` and `plant_choice`, tally up the number of ovipositions for each. Assign this tibble to `gall_counts`."
+1. Clarifying PC 1
 
 
 ## `sample()`
@@ -71,7 +57,6 @@ sample(x, size = 5)
 ```
 
 
-## Tidy data -- when does it matter?
 
 
 ## Piping
@@ -100,12 +85,10 @@ D |> summarize(x1 = mean(x1),
                x2 = mean(x2))
 ```
 
+## Tidy data -- when does it matter?
 
-## Tidyverse: pivots
-
-> Why is it good data practice to keep my data in a bunch of smaller tables that I join together?
-
-> When making clean data, what is the best way to determine whether or not you need to make it longer or wider at a quick glance of the data.
+- The point is to be able to move seamlessly between wide & long format depending on your needs
+- Pay attention to organizing data in spreadsheets too!
 
 
 ## Pivots
@@ -285,6 +268,39 @@ penguins_long |>
   count(species, sex, body_mass_g)
 ```
 
+## Paste
+
+```{r}
+#| echo: true
+
+penguins <- penguins |> 
+  mutate(id_1 = paste(species, seq(1, n()), sep = "_"),
+         id_2 = paste0(species, "_", seq(1, n()))) |> 
+  relocate(id_1, id_2)
+penguins$id_1[1:10]
+penguins$id_2[1:10]
+```
+
+
+## Paste
+
+```{r}
+#| echo: true
+
+penguins_long <- penguins |>
+  select(id_1,species, sex, body_mass_g, bill_length_mm, bill_depth_mm) |> 
+  pivot_longer(cols = -c(id_1,species, sex, body_mass_g),
+               names_to = "bill_measure",
+               values_to = "length") |> 
+  drop_na()
+
+penguins_long |> 
+  pivot_wider(id_cols = c(id_1, species, sex, body_mass_g),
+              names_from = bill_measure, values_from = length)
+
+
+```
+
 
 ## Tidyverse: joins
 
@@ -357,9 +373,6 @@ penguins$log_body_mass <- log10(penguins$body_mass_g)
 
 str(penguins)
 ```
-
-
-## Paste
 
 
 ## `group_by()` and `summarize()`
@@ -506,8 +519,6 @@ All are context-specific
 
 
 ## Probability 
-
-> Can you go through conditional probability one more time, an example similar to the HIV one?
 
 > I'm still struggling a bit with probability. I have a tendency to overthink and overcomplicate probability which often times causes me to second guess myself and make mistakes.
 
@@ -713,4 +724,20 @@ ggflowchart(FC3,
             x_nudge = 0.25)
 ```
 $$\frac{40}{40 + 25} = \frac{40}{65} = 0.62$$
+
+
+
+## Clarifying PC 1
+
+> Can you explain what is being asked in the paragraph below? "Using your long dataset that has the 40.04 value replaced with 4.04, merge the EVI dataset (`EVI.csv`) with the soil respiration data..."
+
+> In the question joining the EVI.csv data set, the problem says that "that the EVI dataset does not currently have unique indicators (or key values) to merge with the soil respiration data", but both sets have Rs values. Why couldn't you modify the Rs outlier on the EVI set and then join them on Rs values? What would be the advantage to creating unique IDs?
+
+
+## Clarifying PC 1
+
+> When the assignment asks us to stack graphs vertically, is it wanting the vertical axis aligned or is it wanting one graph on top of another positionally?
+
+> I'm confused about the part of code asking "For the pairwise combinations of `host_race` and `plant_choice`, tally up the number of ovipositions for each. Assign this tibble to `gall_counts`."
+
 
