@@ -726,7 +726,6 @@ ggflowchart(FC3,
 $$\frac{40}{40 + 25} = \frac{40}{65} = 0.62$$
 
 
-
 ## Clarifying PC 1
 
 > Can you explain what is being asked in the paragraph below? "Using your long dataset that has the 40.04 value replaced with 4.04, merge the EVI dataset (`EVI.csv`) with the soil respiration data..."
