@@ -31,7 +31,7 @@ theme_set(theme_cowplot())
 
 ## Differences between group means
 
-Stalk-eyed flies are a clade of flies whose eyes are at the ends of long projections (stalks) on either side of their head. Shortly after emerging from a pupae, these flies ingest air through their mouth in order to pump it into these stalks to elongate them ([watch this amazing process here](https://www.youtube.com/watch?v=bGX7zZk0Eo4)). 
+Stalk-eyed flies are a clade of flies whose eyes are at the ends of long projections (stalks) on either side of their head. Shortly after emerging from a pupae, these flies ingest air through their mouth in order to pump it into these stalks to elongate them ([watch this amazing process here](https://www.youtube.com/watch?v=ZGdfIX5x8XM)). 
 
 Females prefer males with wider eye spans. See the photo below:
 

@@ -151,7 +151,7 @@ Our calculation is based on our expectation from sampling the true population di
 
 ## Example CI calculation
 
-Mean undulation rate for *n = 8* [gliding snakes](http://www.flyingsnake.org/):
+Mean undulation rate for *n = 8* [gliding snakes](https://www.youtube.com/watch?v=16aGSx9gFO4):
 
 ![](http://www.lazerhorse.org/wp-content/uploads/2015/01/Flying-Snake-Chrysopelea.jpg){fig-align="center" width="60%"}
 
