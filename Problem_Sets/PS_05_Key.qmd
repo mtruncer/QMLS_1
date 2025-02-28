@@ -129,7 +129,7 @@ M |>
   summarize(mean_n = mean(n))
 ```
 
-About how many seedlings are at the smallest replicate `block` level of the data?
+About how many seedlings are in each `block`?
 
 > 4 or 5 it seems. 4.54 to be exact
 

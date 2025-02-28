@@ -99,7 +99,7 @@ Group these data by `population`, `family`, and `block`, and then tally the numb
 
 ```
 
-About how many seedlings are at the smallest replicate `block` level of the data?
+About how many seedlings are in each `block`? Either estimate by looking at the data or calculate directly using `group_by()` and `summarize()`.
 
 > 
 

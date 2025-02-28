@@ -24,7 +24,7 @@ csl: evolution.csl
 library(tidyverse)
 library(cowplot)
 
-theme_set(theme_cowplot())
+theme_set(theme_cowplot(font_size = 20))
 
 ```
 
@@ -111,6 +111,87 @@ optim(par = 0.5,
 ```
 
 
+## Applications of likelihoods
+
+In addition to being a gateway to understanding likelihood in general...
+
+- Predicting inheritance of traits
+- Predicting pollination success
+- Predicting drug efficacy (antibiotics inhibiting bacterial colony growth)
+- Predator success
+- Survival (e.g., tagged animals)
 
 
+## Uses of binomial likelihoods
+
+- Model comparison
+    - New technique has 80% success compared to old technique with 60% success. Is it really better?
+- Quantifying uncertainty with confidence intervals (coming soon)
+- Generalized linear models and logistic regression (Unit 12)
+
+
+## Mark-Recapture Experiments
+
+1. Capture and mark a set of individuals
+2. Wait
+3. Capture a second set of individuals
+4. Count the number of recaptured individuals
+
+
+## Mark-Recapture Experiments
+
+```{r}
+#| echo: true
+
+M <- 50 # n 1st capture
+n <- 30 # n 2nd capture
+x <- 15 # n Recaptured
+```
+
+Log-likelihood function to find N
+
+```{r}
+#| echo: true
+
+NLL <- function(N) {
+  p <- M / N  # Probability of capturing a marked individual
+  return(-dbinom(x, n, p, log = TRUE))
+}
+
+```
+
+
+## ML Estimation
+
+```{r}
+#| echo: true
+
+N_ML_est <- optim(par = M + n,
+               fn = NLL,
+               method = "Brent",
+               lower = M + 1,
+               upper = 1000)
+(N_est <- N_ML_est$par)
+```
+
+
+## Visualization
+
+```{r}
+#| echo: true
+#| output-location: slide
+
+Pred <- tibble(N = seq(M + 1, 300, by = 1),
+               log_Lik = sapply(N, function(N) exp(-NLL(N))))
+
+ggplot(Pred,
+       aes(x = N, y = log_Lik)) +
+  geom_line(color = "darkblue", linewidth = 1) +
+  geom_vline(xintercept = N_est, color = "firebrick4", linetype = "dotted",
+             linewidth = 1) +
+  scale_x_continuous(breaks = seq(50, 300, by = 50)) +
+  labs(x = "Estimated Population Size (N)",
+       y = "Likelihood")
+
+```
 
