@@ -31,58 +31,19 @@ theme_set(theme_cowplot())
 
 ## Today's plan
 
-- Progress check
-- Big picture questions
-- Practice (which will answer some of your questions)
+- Progress check reminder
+- Big picture framework & questions
+- Practice with likelihood (which will answer some of your questions)
 - Return for likelihood examples and discussion
 
 
-## Progress check
+## Unit 5 Goals
 
-- Key posted soon
-- Study the key, compare to your answers
-- Questions next week
-
-
-## Types of predictors
-
-> ..how you would go about categorizing organisms into morphotypes based on continuous characters (such as with the long vs short-winged crickets).
-
+- How do we learn about the world as scientists? What are our conclusions based on?
 
 ## Models
 
-> What is the "cutoff" for having more than one model? Or more specifically, at what point should you move things into a different model even though they are on the same research topic? 
-
-
-## Measures of spread
-
-> How and when does measure of spread help in any data analysis? What would be some examples besides students' grading?
-
-## Measures of spread
-
-```{r}
-set.seed(7263)
-
-dd <- tibble(phenotype = c(rnorm(20,0,1),rnorm(20,2,1),rnorm(20,0,3), rnorm(20,2,3)),
-             treatment = rep(c("A","B"),each=20,times = 2),
-             experiment = rep(c("Exp1","Exp2"), each = 40))
-
-dd |>
-  ggplot(aes(treatment,phenotype, color = treatment)) +
-  geom_point(position = position_jitter(0.2)) +
-  facet_grid(. ~ experiment)
-
-```
-
-
-## Frameworks
-
-> Is there a right or wrong framework to choose based on your own data? 
-
-> I find it hard in understanding the difference between likelihood inference and Bayesian inference. Also, continuous maximum likelihood was challenging to understand.
-
-> Frequentist/Likelihood : Probability of the data, given the parameter estimate; Bayesian: Probability of the parameters given the data (and priors)
-
+> I still feel slightly foggy on what a "model" is. Is it the equation/calculation you do or is it a set of data you compare against?
 
 ## From data to inference via models
 
@@ -91,44 +52,11 @@ dd |>
 
 ![](../images/Models_schematic.png){fig-align="center"}
 
+## Hands-on Practice
 
-## Bayesian priors
-
-> It was unclear to me what a prior is, why its required and when its needed.
-
-> The lecture slides in 5-4 mention that a prior places less probability on lower values. Why is this? Does it do the same thing with values that are high? 
-
-
-## Grid approximation {.smaller}
-
-> I understand that the grid function makes a grid but I'm a little confused how in the lecture example you used a crossing function? Does that cross mu and sigma in the grid? 
-
-```{r}
-#| echo: true
-
-(lls <- letters[1:3])
-(nns <- 7:9)
-
-crossing(lls,nns)
-
-```
-
-
-## Likelihood
-
-> Is one of the baseline assumption for calculating model likelihood normally distributed data?
-
-> Is there a good way to reconcile the mathematics equations with the code we use in R to solve them?
-
-> I also am not clear on the difference between the log values being better than the normal values (unless it's just the computer constraint). The examples make it seem like comparing a bunch of negative numbers to other negative numbers and knowing which from normal vs log-like are better.
-
-
-## Optimizing 
-
-> I did not fully understand the slides in 5-4, where we defined a function and then did the optim() function. I think I am not quite understanding all the parts/variables that made the example work (e.g. the theta vector with the subsetting). 
-
-> When you were calculating likelihood and used mean of 98.6 and sd of 0.1, then changed the mean to 98.4, how do you come up with another mean?  In live data sampling, you wont usually get another mean right?  The data you measured is the data you measured.  
-
+- Use lecture slides (& captions) & your notes
+- Focus on understanding each step & specific things you do not understand
+- Work for 30 minutes, then regroup
 
 ## Maximizing through optimization
 
