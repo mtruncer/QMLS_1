@@ -41,9 +41,11 @@ theme_set(theme_cowplot())
 
 - How do we learn about the world as scientists? What are our conclusions based on?
 
+
 ## Models
 
 > I still feel slightly foggy on what a "model" is. Is it the equation/calculation you do or is it a set of data you compare against?
+
 
 ## From data to inference via models
 
@@ -52,11 +54,13 @@ theme_set(theme_cowplot())
 
 ![](../images/Models_schematic.png){fig-align="center"}
 
+
 ## Hands-on Practice
 
 - Use lecture slides (& captions) & your notes
 - Focus on understanding each step & specific things you do not understand
 - Work for 30 minutes, then regroup
+
 
 ## Maximizing through optimization
 
