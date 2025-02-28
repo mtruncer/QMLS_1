@@ -238,7 +238,7 @@ theta[which.max(log_lik)]
 log_liks |> 
   ggplot(aes(theta, log_lik)) +
   geom_line(size = 1.5) +
-  geom_point(aes(x = theta[which.max(log_lik)], y = max(log_lik)),
+  geom_point(x = theta[which.max(log_lik)], y = max(log_lik),
              color = "red", size = 3) +
   labs(x = TeX("$\\theta$"), y = "log-Likelihood")
 ```
@@ -295,7 +295,7 @@ theta[which.max(log_lik)]
 log_liks |> 
   ggplot(aes(theta, log_lik)) +
   geom_line(size = 1.5) +
-  geom_point(aes(x = theta[which.max(log_lik)], y = max(log_lik)),
+  geom_point(x = theta[which.max(log_lik)], y = max(log_lik),
              color = "red", size = 3) +
   labs(x = TeX("$\\theta$"), y = "log-Likelihood")
 ```
@@ -332,7 +332,7 @@ log_liks_comb$log_lik_60000 <- log_lik
 log_liks |> 
   ggplot(aes(theta, log_lik)) +
   geom_line(size = 1.5) +
-  geom_point(aes(x = theta[which.max(log_lik)], y = max(log_lik)),
+  geom_point(x = theta[which.max(log_lik)], y = max(log_lik),
              color = "red", size = 3) +
   labs(x = TeX("$\\theta$"), y = "log-Likelihood")
 ```
