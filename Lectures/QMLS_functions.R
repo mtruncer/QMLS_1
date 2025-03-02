@@ -47,18 +47,21 @@ ssPlot <- function(X, Y, b, do.plot = TRUE, do.labels = TRUE) {
 shade_normal <- function(p, tail = "both", mean = 0, sd = 1) {
   require(tidyverse, quietly = TRUE)
   require(cowplot)
-  crit <- qnorm(p, mean, sd)
+  crit_l <- qnorm(p, mean, sd, lower.tail = TRUE)
+  crit_u <- qnorm(p, mean, sd, lower.tail = FALSE)
   
-  M <- tibble(x = seq(-4, 4, length = 200),
-              y = dnorm(x))
-  PP <- ggplot(M, aes(x, y)) +
-    geom_line() +
+  M <- tibble(x = seq(mean - 4, mean + 4,
+                      length = 200),
+              y = dnorm(x, mean = mean, sd = sd))
+
+  PP <- ggplot() +
+    geom_line(data = M, aes(x, y)) +
     labs(x = "Value", y = "Relative Likelihood")
-  lower <- geom_ribbon(data = subset(M, x < crit),
-                       aes(ymax = y), ymin = 0,
+  lower <- geom_ribbon(data = subset(M, x < crit_l),
+                       aes(x = x, ymax = y), ymin = 0,
                        fill = "red", alpha = 0.5)
-  upper <- geom_ribbon(data = subset(M, x > abs(crit)),
-                       aes(ymax = y), ymin = 0,
+  upper <- geom_ribbon(data = subset(M, x > crit_u),
+                       aes(x = x, ymax = y), ymin = 0,
                        fill = "red", alpha = 0.5)
   if (tail == "both") PP <- PP + lower + upper
   if (tail == "lower") PP <- PP + lower
@@ -70,11 +73,13 @@ shade_t <- function(p, df, tail = "both") {
   require(tidyverse, quietly = TRUE)
   require(cowplot)
   theme_set(theme_cowplot())
+  
   if (!require(latex2exp, quietly = TRUE)) {
     stop("Please install the package 'latex2exp':\n\tinstall.packages('latex2exp')")
   }
   
   crit <- qt(p, df, lower.tail = FALSE)
+  
   M <- tibble(x = seq(crit * 3, -1 * crit * 3,
                       length = 200),
               y = dt(x, df))
