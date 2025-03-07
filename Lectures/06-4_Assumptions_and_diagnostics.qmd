@@ -106,7 +106,7 @@ ssPlot(M$X, M$Y, b = 0, do.labels = FALSE)
 
 ## Problematic residuals
 
-![](https://openintro-ims.netlify.app/24-inf-model-slr_files/figure-html/whatCanGoWrongWithLinearModel-1.png){fig-align="center" width=100%}
+![](https://openintro-ims.netlify.app/inf-model-slr_files/figure-html/fig-whatCanGoWrongWithLinearModel-1.png){fig-align="center" width=100%}
 
 From [Introduction to Modern Statistics](https://openintro-ims.netlify.app/) (Çetinkaya-Rundel and Hardin, 2021)
 
