@@ -58,6 +58,10 @@ theme_set(theme_cowplot(font_size = 20))
 
 > I'd really like if we could go over how unequal variance changes probability distributions and how probability is calculated (if it does at all - I don't really understand how they interact mathematically). 
 
+> When we talk about normality of residuals is that they distribute normally? And about the variance of the residuals  is it that the spread of probabilities for an observed value in y is similar for all data points? If it is that, does it mean that they are comparable or what are the implications? Is it valid to say that if a model fits part of the assumptions (let's say in the first half of the data), the model is predictable until that point?
+
+
+
 
 ## Quiz 06-4
 
@@ -89,22 +93,38 @@ From [Introduction to Modern Statistics](https://openintro-ims.netlify.app/) (Ç
 
 > I would like to know how to make decisions on when to include "outliers", for example, if I am sure they are not a mistake but they are probably influencing my results. 
 
+
+## Extreme Values 
+
 > Are there any conditions when we can include the outliers?
+
+> How do we decide if the outliers are distorting the model and they need to be excluded? Will it not affect the variability of the data and the overall result?
+
 
 
 ## Approaches to Extreme Values
 
-- Detecting
+- Figure out what is going on
+- Detecting (be wary of arbitrary decision thresholds)
     - Leverage
     - Cook's Distance
-- Determining the Effect on Results
+- Determine the impact on parameter estimates
     - Leave out and compare
-- What to do?
+
+
+## Alternate statistical approaches
+
+- Transformation
+- Randomization
+- Robust regression
+- Bayesian inference
+
+We do not recommend non-parametric statistics.
 
 
 ## What is "linear" in linear models?
 
-> Can you all expand more on why 'linear' does not necessarily always mean straight-line?
+> Can you all expand more on why 'linear' does not always mean straight-line?
 
 > I am wondering about when linearity does not necessarily mean straight-line. How would the diagnostics be interpreted in such cases?
 
