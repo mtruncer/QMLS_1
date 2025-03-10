@@ -114,10 +114,10 @@ From [Introduction to Modern Statistics](https://openintro-ims.netlify.app/) (Ç
 
 ## Alternate statistical approaches
 
-- Transformation
-- Randomization
+- Transformation (this class)
+- Randomization (QMLS 2)
+- Bayesian inference (QMLS 2)
 - Robust regression
-- Bayesian inference
 
 We do not recommend non-parametric statistics.
 
