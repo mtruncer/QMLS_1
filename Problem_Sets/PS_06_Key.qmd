@@ -309,7 +309,7 @@ M <- M |>
 pp <- list()
 ```
 
-No we can work on a loop to iterate through the columns, making a plot for each column. Here is the [pseudocode](https://blog.usejournal.com/how-to-write-pseudocode-a-beginners-guide-29956242698):
+No we can work on a loop to iterate through the columns, making a plot for each column. Here is the [pseudocode](https://builtin.com/data-science/pseudocode):
 
 1. Create the framework for a `for` loop.
     - We want to iterate from 1 to `length(cols_analyze)`
