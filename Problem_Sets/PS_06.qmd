@@ -15,6 +15,7 @@ format:
 #| message: false
 #| warning: false
 
+library(tidyverse)
 ```
 
 <!--
@@ -25,7 +26,7 @@ Datasets
 
 ## Differences between group means
 
-Stalk-eyed flies are a clade of flies whose eyes are at the ends of long projections (stalks) on either side of their head. Shortly after emerging from a pupae, these flies ingest air through their mouth in order to pump it into these stalks to elongate them ([watch this amazing process here](https://www.youtube.com/watch?v=bGX7zZk0Eo4)). 
+Stalk-eyed flies are a clade of flies whose eyes are at the ends of long projections (stalks) on either side of their head. Shortly after emerging from a pupae, these flies ingest air through their mouth in order to pump it into these stalks to elongate them ([watch this amazing process here](https://www.youtube.com/watch?v=ZGdfIX5x8XM)). 
 
 Females prefer males with wider eye spans. See the photo below:
 
@@ -39,6 +40,7 @@ The `Stalkies.csv` data file contains data for an experiment in which male stalk
 Load the `Stalkies.csv` file and examine the columns of data it contains.
 
 ```{r}
+
 
 ```
 
@@ -55,15 +57,19 @@ Describe the distributions within each group and between groups. What do these p
 
 > 
 
-We will first use a *t*-test to estimate the difference in means in the two treatments. By default, the `t.test` function will perform a test that *does not* assume equal variances (called "Welch's Correction"). You may specify equal variances with `var.equal = TRUE`, *if you decide that is appropriate here*. You maybe want to calculate the per-food source variance.
+We will first use a *t*-test to estimate the difference in means in the two treatments. By default, the `t.test` function will perform a test that *does not* assume equal variances (called "Welch's Correction"). You may specify equal variances with `var.equal = TRUE`, *if you decide that is appropriate here*. 
+
+Start by calculating the per-food source variance.
 
 ```{r}
+
 
 ```
 
 Perform a *t*-test using the formula method to specify the groups to test. Print the results.
 
 ```{r }
+
 
 ```
 
@@ -83,6 +89,7 @@ A *t*-test is just a special kind of linear model (1 categorical predictor with 
 2. Pass the object that you just created to the function `summary()`.
 
 ```{r}
+
 
 ```
 
