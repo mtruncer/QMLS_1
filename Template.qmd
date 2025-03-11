@@ -1,5 +1,5 @@
 ---
-title: "Template Title"
+title: "Title - Morgan"
 subtitle: "Subtitle"
 author:
   - Elizabeth King
